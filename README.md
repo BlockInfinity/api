@@ -22,7 +22,7 @@ This project leverages the mega-awesome [swagger-tools](https://github.com/apige
 
 
 
-### run server in a better way (by magnus)
+### run server 
 
 
 In current folder: 
