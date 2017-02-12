@@ -5,13 +5,15 @@ const eth = web3.eth;
 var etherex = web3.exchangeContract;
 
 
-//  establish rpc connection to test chain
 var options = {
     port: 8545,
     host: 'localhost'
+
 };
 var client = new rpc.Client(options);
 
+
+//  establish rpc connection to test chain
 
 /*
 Annahmen zur Vereinfachung:
@@ -22,8 +24,8 @@ Annahmen zur Vereinfachung:
 
 //  falls contract neu deployed, wird mit init der erste account als certificate authority registriert
 function init() {
-    web3.personal.unlockAccount(eth.accounts[0],"amalien",1000);
-    etherex.registerCertificateAuthority(eth.accounts[0],{from: eth.accounts[0]});
+    web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
+    etherex.registerCertificateAuthority(eth.accounts[0], { from: eth.accounts[0] });
 }
 
 
@@ -36,11 +38,11 @@ function register(_userAddr, _type) {
     switch (_type) {
         case "consumer":
             var tx = etherex.registerConsumer(_userAddr, { from: eth.accounts[0], gas: 400000 });
-            eth.awaitConsensus(tx,800000);
+            eth.awaitConsensus(tx, 800000);
             break;
         case "producer":
             var tx = etherex.registerProducer(_userAddr, { from: eth.accounts[0], gas: 400000 });
-            eth.awaitConsensus(tx,800000);
+            eth.awaitConsensus(tx, 800000);
             break;
         default:
             throw new IllegalArgumentException("Invalid user type: " + _type);
@@ -53,7 +55,7 @@ function buy(_volume, _price, _addr) {
     web3.personal.unlockAccount(_addr, "amalien", 1000);
 
     let tx = etherex.submitBid(_volume, _price, { from: _addr, gas: 8000000 });
-    eth.awaitConsensus(tx,800000);
+    eth.awaitConsensus(tx, 800000);
 }
 
 
@@ -62,8 +64,8 @@ function sell(_volume, _price, _addr) {
     //Unlocking the account
     web3.personal.unlockAccount(_addr, "amalien", 1000);
 
-    let tx = etherex.submitAsk(_volume, _price,  { from: _addr, gas: 8000000 });
-    eth.awaitConsensus(tx,800000);
+    let tx = etherex.submitAsk(_volume, _price, { from: _addr, gas: 8000000 });
+    eth.awaitConsensus(tx, 800000);
 }
 
 function settle(_type, _volume, _period, _user) {
@@ -88,10 +90,10 @@ function getMatchingPrice(_period) {
     return etherex.getMatchingPrice(_period);
 }
 
-function getState(){
+function getState() {
     let state = etherex.getCurrState();
     let period = etherex.getCurrPeriod();
-    return([state, period]);
+    return ([state, period]);
 }
 
 /////////////////////////////////////////////////////////////////////////// for debugging
@@ -185,13 +187,13 @@ module.exports = {
     buy: buy,
     sell: sell,
     register: register,
-    init:init,
-    autoMine:autoMine,
-    getBalance:getBalance,
-    getAskOrders:getAskOrders,
-    getBidOrders:getBidOrders,
-    getMatchingPrice:getMatchingPrice,
-    getState:getState
+    init: init,
+    autoMine: autoMine,
+    getBalance: getBalance,
+    getAskOrders: getAskOrders,
+    getBidOrders: getBidOrders,
+    getMatchingPrice: getMatchingPrice,
+    getState: getState
 
 }
 
