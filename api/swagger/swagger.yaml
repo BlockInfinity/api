@@ -1,0 +1,318 @@
+---
+swagger: "2.0"
+info:
+  version: "0.1.0"
+  title: "BlockEnergy API"
+schemes:
+- "http"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+paths:
+  /smartMeter/settle:
+    post:
+      tags: 
+        - smartMeter    
+      description: "The endpoint which is to be accessed by the smartmeter. It is supposed to be called regularly periodically.
+                    For produced energy use positive energy volume, for consumed use negative energy volume. Alongside the
+                    energy a period must be specified of the smartcontract for which the smartmeter is providing information."
+      operationId: "smartMeterSettle"
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "settleRequest"
+          in: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/settleRequest"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      x-swagger-router-controller: "Default"
+  /trade/buy:
+    post:
+      tags: 
+        - trade      
+      description: "Endpoint for placing bid for certain amount of electricity for a certain price."
+      operationId: "buy"
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "buyRequest"
+          in: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/tradeRequest"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SuccessResponse"          
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+
+      x-swagger-router-controller: "Default"
+  /trade/sell:
+    post:
+      tags: 
+        - trade  
+      description: "Endpoint for placing ask for certain amount of electricity for a certain price."
+      operationId: "sell"
+      parameters:
+        - name: "sellRequest"
+          in: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/tradeRequest"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SuccessResponse"          
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      x-swagger-router-controller: "Default"
+  /authority/register:
+    post:
+      tags: 
+        - authority    
+      description: "Register user."
+      operationId: "register"
+      parameters:
+        - name: "registerRequest"
+          in: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/registerRequest"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/registerResponse"          
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      x-swagger-router-controller: "Default"
+  /info/askOrders:
+    get:
+      tags: 
+        - info 
+      description: "Get all ask orders for specific period."
+      operationId: "getAskOrders"
+      parameters:
+      - name: "period"
+        in: "query"
+        description: "Period"
+        required: false
+        type: "number"
+      responses:
+        200:
+          description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
+          schema:
+            $ref: "#/definitions/askQuotes"
+        404:
+          description: "Operation not found"
+        500:
+          description: "Server error"
+      x-swagger-router-controller: "Default"
+  /info/bidOrders:
+    get:
+      tags: 
+        - info     
+      description: "Get all bid orders for specific period."
+      operationId: "getBidOrders"
+      parameters:
+      - name: "period"
+        in: "query"
+        description: "Period"
+        required: false
+        type: "number"
+      responses:
+        200:
+          description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
+          schema:
+            $ref: "#/definitions/bidQuotes"          
+        404:
+          description: "Operation not found"
+        500:
+          description: "Server error"
+      x-swagger-router-controller: "Default"
+  /info/askReserveOrders:
+    get:
+      tags: 
+        - info     
+      description: "Get all reserve ask orders for specific period."
+      operationId: "getAskReserveOrders"
+      parameters:
+      - name: "period"
+        in: "query"
+        description: "Period"
+        required: false
+        type: "number"
+      responses:
+        200:
+          description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
+          schema:
+            $ref: "#/definitions/askQuotes"              
+        404:
+          description: "Operation not found"
+        500:
+          description: "Server error"
+      x-swagger-router-controller: "Default"
+  /info/bidReserveOrders:
+    get:
+      tags: 
+        - info
+      description: "Get all reserve bid orders for specific period."
+      operationId: "getBidReserveOrders"
+      parameters:
+      - name: "period"
+        in: "query"
+        description: "Period"
+        required: false
+        type: "number"
+      responses:
+        200:
+          description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
+          schema:
+            $ref: "#/definitions/bidQuotes"            
+        404:
+          description: "Operation not found"
+        500:
+          description: "Server error"
+      x-swagger-router-controller: "Default"
+  /info/matchingPrice:
+    get:
+      tags: 
+        - info
+      description: "Get matching price for specific period."
+      operationId: "getMatchingPrice"
+      parameters:
+      - name: "period"
+        in: "query"
+        description: "Period"
+        required: false
+        type: "number"
+      responses:
+        200:
+          description: "Returns matching price."
+          schema:
+            type: number
+        404:
+          description: "Operation not found"
+        500:
+          description: "Server error"
+      x-swagger-router-controller: "Default"
+  /info/state:
+    get:
+      tags: 
+        - info
+      description: "Get the current state"
+      operationId: "getState"
+      responses:
+        200:
+          description: "Returns the current state and period."
+          schema:
+            $ref: "#/definitions/stateReponse"
+        404:
+          description: "Operation not found"
+        500:
+          description: "Server error"
+      x-swagger-router-controller: "Default"
+
+definitions:
+  tradeRequest:
+    required:
+      - address
+      - volume
+    properties:
+      address:
+        type: string
+      volume:
+        type: number
+      price:
+        type: number
+  registerRequest:
+    required:
+      - userAddress
+      - type
+    properties:
+      userAddress:
+        type: string
+      type:
+        type: string
+  settleRequest:
+    required:
+      - datetime
+      - volume
+      - type
+      - smartMeterAddress
+    properties:
+      volume:
+        type: number
+      datetime:
+        type: number
+      type:
+        type: string
+      smartMeterAddress:
+        type: number
+  ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+  SuccessResponse:
+    properties:
+      succeded:
+        type: boolean
+  registerResponse:
+    properties:
+      certificateId:
+        type: number
+  bidQuotes:
+      type: array
+      items: 
+        $ref: "#/definitions/quote"
+  askQuotes:
+    type: array
+    items: 
+      $ref: "#/definitions/quote"
+  quote:
+    properties:          
+      price:
+        type: number
+      volume:
+        type: number
+  stateReponse:
+    properties:
+      state:
+        type: string
+      period:
+        type: number
+        
+  
+        
+        
+   
+
