@@ -22,14 +22,18 @@ Annahmen zur Vereinfachung:
 - settle funktion wird auch einfach durch angaben der user address aufgerufen
 */
 
-//  falls contract neu deployed, wird mit init der erste account als certificate authority registriert
+// todo (mg) falls contract neu deployed, wird mit init der erste account als certificate authority registriert. 
+// Zukünftig muss das direkt im Konstruktor aufgerufen werden
+// todo (mg) auch enbw muss ich als entität registriert werden, der es einzigst gestattet ist die settle funktoin aufzurufen
 function init() {
     web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
     etherex.registerCertificateAuthority(eth.accounts[0], { from: eth.accounts[0] });
 }
 
-
-// for testing: smart meter address, seed and certId are not taken into consideration
+x// todo (mg): register funktion nimmt "_type" (enum: buyer,seller) entgegen und erstellt einen ethereum account.
+// zurückgegeben wird eine certID und die public address des erstellten ethereum accounts
+// CertID: wird benötigt für buy / sell
+// Public address: account dient als Prepaid Konto. 
 function register(_userAddr, _type) {
 
     //Unlocking the certAuth account
@@ -49,6 +53,7 @@ function register(_userAddr, _type) {
     }
 }
 
+// todo (mg) Statt _addr muss CertID mitgegeben werden. Vom CertID muss auf die Adresse geschlossen werden.
 function buy(_volume, _price, _addr) {
 
     //Unlocking the account
@@ -58,7 +63,7 @@ function buy(_volume, _price, _addr) {
     eth.awaitConsensus(tx, 800000);
 }
 
-
+// todo (mg) Statt _addr muss CertID mitgegeben werden. Vom CertID muss auf die Adresse geschlossen werden.
 function sell(_volume, _price, _addr) {
 
     //Unlocking the account
@@ -68,15 +73,16 @@ function sell(_volume, _price, _addr) {
     eth.awaitConsensus(tx, 800000);
 }
 
-function settle(_type, _volume, _period, _user) {
+// todo (mg) statt periode soll Zeit rein kommen und von zeit soll auf die periode geschlossen werden können
+// statt _addr muss es eine entsprechende certID geben, was nur die enbw als Daten-Einspeise-Entität bekommt
+function settle(_type, _volume, _period, _addr) {
 
     //Unlocking the account
-    // web3.personal.unlockAccount(_addr, "amalien", 1000);
+    web3.personal.unlockAccount(_addr, "amalien", 1000);
 
-    // let tx = etherex.settle(_type, _volume, _period, { from: _user, gas: 8000000 });
-    // eth.awaitConsensus(tx,800000);
+    let tx = etherex.settle(_type, _volume, _period, { from: _addr, gas: 8000000 });
+    eth.awaitConsensus(tx,800000);
 }
-
 
 function getBidOrders() {
     return etherex.getBidOrders()
@@ -196,7 +202,6 @@ module.exports = {
     getState: getState
 
 }
-
 
 
 
