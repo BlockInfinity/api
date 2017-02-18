@@ -12,6 +12,11 @@ var options = {
 };
 var client = new rpc.Client(options);
 
+if (!etherex) {
+    console.log("Exchange contract is not defined")
+} else {
+    console.log("Exchange contract with address",etherex.address,"loaded!");
+}
 
 //  establish rpc connection to test chain
 
@@ -30,7 +35,7 @@ function init() {
     etherex.registerCertificateAuthority(eth.accounts[0], { from: eth.accounts[0] });
 }
 
-x// todo (mg): register funktion nimmt "_type" (enum: buyer,seller) entgegen und erstellt einen ethereum account.
+// todo (mg): register funktion nimmt "_type" (enum: buyer,seller) entgegen und erstellt einen ethereum account.
 // zurückgegeben wird eine certID und die public address des erstellten ethereum accounts
 // CertID: wird benötigt für buy / sell
 // Public address: account dient als Prepaid Konto. 
@@ -81,7 +86,7 @@ function settle(_type, _volume, _period, _addr) {
     web3.personal.unlockAccount(_addr, "amalien", 1000);
 
     let tx = etherex.settle(_type, _volume, _period, { from: _addr, gas: 8000000 });
-    eth.awaitConsensus(tx,800000);
+    eth.awaitConsensus(tx, 800000);
 }
 
 function getBidOrders() {
@@ -202,34 +207,3 @@ module.exports = {
     getState: getState
 
 }
-
-
-
-
-// var fs = require('fs')
-// var compiled = null;
-
-// var contractAddress = '0x20366626351477455a192d6c802f760f9ef48e67';
-// var accountAddress = 'someaccountaddress';
-// var accountKey = 'someaccountkey'
-
-// fs.readFile('../contracts/Etherex.sol', 'utf8', function (err,data) {
-//     if (err) {
-//         return console.log(err);
-//     }
-
-//     //If there is no contract ABI, compile the contract
-//     if( fs.stat('./contract.abi') === undefined) {
-//         source = data.replace('\n', '');
-//         var compiled = web3.eth.compile.solidity(source);
-//         console.log(compiled);
-//         var abi = compiled.info.abiDefinition;
-//         fs.writeFile('./contract.abi', JSON.stringify(abi), function(error){console.log(error)});
-//     } else {
-//         var abi = fs.readFile('./dex_api/contract.abi');
-//     }
-//     console.log('Compiled contract, got abi definition!');
-
-//     contract = web3.eth.contract(abi).at(contractAddress);
-//     console.log('Contract');
-// });
