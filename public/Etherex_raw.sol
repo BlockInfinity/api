@@ -188,11 +188,10 @@ contract Etherex_raw {
             //3/3 of the currentPeriod
             determineReserveAskPrice();
             determineReserveBidPrice();
+            init();
             currState = 0;
-        } else if (currState == 0 && ((block.number - startBlock) >= 75)) {
-            init();    
         }
-        _;
+         _;
     }
 
     // test functions 
@@ -304,8 +303,9 @@ contract Etherex_raw {
         }
     }
 
-    // match bid and ask orders
-    function matching() internal returns(bool) {
+    // match bid and ask orders 
+    // todo (mg) needs to be internal
+    function matching() returns(bool) {
         // no orders submitted at all or at least one ask and bid missing
         // return if no orders or no match possible since minAsk greater than maxBid
         if (orders.length == 1) {

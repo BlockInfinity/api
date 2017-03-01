@@ -90,7 +90,7 @@ exports.getBidOrders = function(req, res) {
         var orders = api.getBidOrders();
 
         var prices = JSON.stringify(orders[0]);
-        var volumes = JSON.stringify(orders[0]);
+        var volumes = JSON.stringify(orders[1]);
 
         prices = prices.split("\"").join("");
         volumes = volumes.split("\"").join("");
@@ -116,7 +116,7 @@ exports.getAskOrders = function(req, res) {
         var orders = api.getAskOrders();
 
         var prices = JSON.stringify(orders[0]);
-        var volumes = JSON.stringify(orders[0]);
+        var volumes = JSON.stringify(orders[1]);
 
         prices = prices.split("\"").join("");
         volumes = volumes.split("\"").join("");
