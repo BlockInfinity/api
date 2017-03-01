@@ -46,11 +46,11 @@ function register(_userAddr, _type) {
 
     switch (_type) {
         case "consumer":
-            var tx = etherex.registerConsumer(_userAddr, { from: eth.accounts[0], gas: 400000 });
+            var tx = etherex.registerConsumer(_userAddr, { from: eth.accounts[0], gas: 20000000 });
             eth.awaitConsensus(tx, 800000);
             break;
         case "producer":
-            var tx = etherex.registerProducer(_userAddr, { from: eth.accounts[0], gas: 400000 });
+            var tx = etherex.registerProducer(_userAddr, { from: eth.accounts[0], gas: 20000000 });
             eth.awaitConsensus(tx, 800000);
             break;
         default:
@@ -64,8 +64,8 @@ function buy(_volume, _price, _addr) {
     //Unlocking the account
     web3.personal.unlockAccount(_addr, "amalien", 1000);
 
-    let tx = etherex.submitBid(_volume, _price, { from: _addr, gas: 8000000 });
-    eth.awaitConsensus(tx, 800000);
+    let tx = etherex.submitBid(_volume, _price, { from: _addr, gas: 20000000 });
+    eth.awaitConsensus(tx, 20000000);
 }
 
 // todo (mg) Statt _addr muss CertID mitgegeben werden. Vom CertID muss auf die Adresse geschlossen werden.
@@ -74,8 +74,8 @@ function sell(_volume, _price, _addr) {
     //Unlocking the account
     web3.personal.unlockAccount(_addr, "amalien", 1000);
 
-    let tx = etherex.submitAsk(_volume, _price, { from: _addr, gas: 8000000 });
-    eth.awaitConsensus(tx, 800000);
+    let tx = etherex.submitAsk(_volume, _price, { from: _addr, gas: 20000000 });
+    eth.awaitConsensus(tx, 20000000);
 }
 
 // todo (mg) statt periode soll Zeit rein kommen und von zeit soll auf die periode geschlossen werden können
@@ -85,7 +85,7 @@ function settle(_type, _volume, _period, _addr) {
     //Unlocking the account
     web3.personal.unlockAccount(_addr, "amalien", 1000);
 
-    let tx = etherex.settle(_type, _volume, _period, { from: _addr, gas: 8000000 });
+    let tx = etherex.settle(_type, _volume, _period, { from: _addr, gas: 20000000 });
     eth.awaitConsensus(tx, 800000);
 }
 
