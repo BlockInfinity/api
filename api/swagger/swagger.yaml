@@ -112,12 +112,12 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-      x-swagger-router-controller: "Default"
+      x-swagger-router-controller: "authority_controller"
   /info/askOrders:
     get:
       tags: 
         - info 
-      description: "Get all ask orders for specific period."
+      description: "Get all ask orders for specific period. If no period is specified will return for the last period."
       operationId: "getAskOrders"
       parameters:
       - name: "period"
@@ -134,12 +134,12 @@ paths:
           description: "Operation not found"
         500:
           description: "Server error"
-      x-swagger-router-controller: "Default"
+      x-swagger-router-controller: "info_controller"
   /info/bidOrders:
     get:
       tags: 
         - info     
-      description: "Get all bid orders for specific period."
+      description: "Get all bid orders for specific period. If no period is specified will return for the last period."
       operationId: "getBidOrders"
       parameters:
       - name: "period"
@@ -156,12 +156,12 @@ paths:
           description: "Operation not found"
         500:
           description: "Server error"
-      x-swagger-router-controller: "Default"
+      x-swagger-router-controller: "info_controller"
   /info/askReserveOrders:
     get:
       tags: 
         - info     
-      description: "Get all reserve ask orders for specific period."
+      description: "Get all reserve ask orders for specific period. If no period is specified will return for the last period."
       operationId: "getAskReserveOrders"
       parameters:
       - name: "period"
@@ -178,12 +178,12 @@ paths:
           description: "Operation not found"
         500:
           description: "Server error"
-      x-swagger-router-controller: "Default"
+      x-swagger-router-controller: "info_controller"
   /info/bidReserveOrders:
     get:
       tags: 
         - info
-      description: "Get all reserve bid orders for specific period."
+      description: "Get all reserve bid orders for specific period. If no period is specified will return for the last period."
       operationId: "getBidReserveOrders"
       parameters:
       - name: "period"
@@ -200,12 +200,12 @@ paths:
           description: "Operation not found"
         500:
           description: "Server error"
-      x-swagger-router-controller: "Default"
+      x-swagger-router-controller: "info_controller"
   /info/matchingPrice:
     get:
       tags: 
         - info
-      description: "Get matching price for specific period."
+      description: "Get matching price for specific period. If no period is specified will return for the last period."
       operationId: "getMatchingPrice"
       parameters:
       - name: "period"
@@ -222,7 +222,7 @@ paths:
           description: "Operation not found"
         500:
           description: "Server error"
-      x-swagger-router-controller: "Default"
+      x-swagger-router-controller: "info_controller"
   /info/state:
     get:
       tags: 
@@ -238,26 +238,26 @@ paths:
           description: "Operation not found"
         500:
           description: "Server error"
-      x-swagger-router-controller: "Default"
+      x-swagger-router-controller: "info_controller"
 
 definitions:
   tradeRequest:
     required:
-      - address
+      - certificateId
       - volume
     properties:
-      address:
-        type: string
+      certificateId:
+        type: number
       volume:
         type: number
       price:
         type: number
   registerRequest:
     required:
-      - userAddress
+      - password
       - type
     properties:
-      userAddress:
+      password:
         type: string
       type:
         type: string
@@ -288,8 +288,8 @@ definitions:
         type: boolean
   registerResponse:
     properties:
-      certificateId:
-        type: number
+      userAddress:
+        type: string
   bidQuotes:
       type: array
       items: 

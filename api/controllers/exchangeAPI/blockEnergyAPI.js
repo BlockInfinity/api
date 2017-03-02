@@ -39,23 +39,32 @@ function init() {
 // zurückgegeben wird eine certID und die public address des erstellten ethereum accounts
 // CertID: wird benötigt für buy / sell
 // Public address: account dient als Prepaid Konto. 
-function register(_userAddr, _type) {
+function register(_user_password, _type) {
 
-    //Unlocking the certAuth account
-    web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
 
-    switch (_type) {
-        case "consumer":
-            var tx = etherex.registerConsumer(_userAddr, { from: eth.accounts[0], gas: 20000000 });
-            eth.awaitConsensus(tx, 800000);
-            break;
-        case "producer":
-            var tx = etherex.registerProducer(_userAddr, { from: eth.accounts[0], gas: 20000000 });
-            eth.awaitConsensus(tx, 800000);
-            break;
-        default:
-            throw new IllegalArgumentException("Invalid user type: " + _type);
-    }
+ client.call({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [_user_password], "id": 74 }, function(err, jsonObj) {
+        if (err || !jsonObj.result) {
+            throw new IllegalArgumentException("Couldn't create an user account!");
+        } else {
+            var user_address = jsonObj.result;
+           
+            //Unlocking the certAuth account
+            web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
+
+            switch (_type) {
+                case "consumer":
+                    var tx = etherex.registerConsumer(_userAddr, { from: eth.accounts[0], gas: 20000000 });
+                    eth.awaitConsensus(tx, 800000);
+                    break;
+                case "producer":
+                    var tx = etherex.registerProducer(_userAddr, { from: eth.accounts[0], gas: 20000000 });
+                    eth.awaitConsensus(tx, 800000);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid user type: " + _type);
+            }
+        }
+    });
 }
 
 // todo (mg) Statt _addr muss CertID mitgegeben werden. Vom CertID muss auf die Adresse geschlossen werden.
