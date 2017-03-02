@@ -53,11 +53,11 @@ function register(_user_password, _type) {
 
             switch (_type) {
                 case "consumer":
-                    var tx = etherex.registerConsumer(_userAddr, { from: eth.accounts[0], gas: 20000000 });
+                    var tx = etherex.registerConsumer(user_address, { from: eth.accounts[0], gas: 20000000 });
                     eth.awaitConsensus(tx, 800000);
                     break;
                 case "producer":
-                    var tx = etherex.registerProducer(_userAddr, { from: eth.accounts[0], gas: 20000000 });
+                    var tx = etherex.registerProducer(user_address, { from: eth.accounts[0], gas: 20000000 });
                     eth.awaitConsensus(tx, 800000);
                     break;
                 default:
