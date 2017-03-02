@@ -15,7 +15,7 @@ module.exports = {
 
 function findPeriod(req) {
     
-     var period = req.period.value || blockchainInterface.getState()[1];
+     var period =  req.swagger.params.period.value || blockchainInterface.getState()[1];
      return period;
 }
 

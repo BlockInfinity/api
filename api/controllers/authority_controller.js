@@ -12,7 +12,7 @@ function register(req, res, next) {
 
     //  //The response object is a standard http response object
     try {
-        var user_address = blockchainInterface.register(req.registerRequest.value.password, req.registerRequest.value.type);
+        var user_address = blockchainInterface.register(req.swagger.params.password.value, req.swagger.params.type.value);
         if (user_address) {
             res.statusCode = 200;
             res.end(JSON.stringify({ "userAddress": user_address }));
