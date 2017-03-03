@@ -1,3 +1,4 @@
+const co = require ("co");
 const web3 = require("./chainConnector.js");
 const rpc = require('node-json-rpc');
 
@@ -13,7 +14,7 @@ var options = {
 var client = new rpc.Client(options);
 
 if (!etherex) {
-    console.log("Exchange contract is not defined")
+    console.log("Exchange contract is not defined");
 } else {
     console.log("Exchange contract with address",etherex.address,"loaded!");
 }
@@ -31,40 +32,52 @@ Annahmen zur Vereinfachung:
 // Zukünftig muss das direkt im Konstruktor aufgerufen werden
 // todo (mg) auch enbw muss ich als entität registriert werden, der es einzigst gestattet ist die settle funktoin aufzurufen
 function init() {
+  try {
     web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
     etherex.registerCertificateAuthority(eth.accounts[0], { from: eth.accounts[0] });
+  } catch (err) {
+    console.log("something happaned");
+  }
 }
 
 // todo (mg): register funktion nimmt "_type" (enum: buyer,seller) entgegen und erstellt einen ethereum account.
 // zurückgegeben wird eine certID und die public address des erstellten ethereum accounts
 // CertID: wird benötigt für buy / sell
 // Public address: account dient als Prepaid Konto. 
-function register(_user_password, _type) {
 
-
- client.call({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [_user_password], "id": 74 }, function(err, jsonObj) {
+function init_account(_user_password) {
+  return co(function*() {
+  var address =  client.call({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [_user_password], "id": 74 }, function(err, jsonObj) {
         if (err || !jsonObj.result) {
             throw new IllegalArgumentException("Couldn't create an user account!");
         } else {
-            var user_address = jsonObj.result;
-           
-            //Unlocking the certAuth account
-            web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
-
-            switch (_type) {
-                case "consumer":
-                    var tx = etherex.registerConsumer(user_address, { from: eth.accounts[0], gas: 20000000 });
-                    eth.awaitConsensus(tx, 800000);
-                    break;
-                case "producer":
-                    var tx = etherex.registerProducer(user_address, { from: eth.accounts[0], gas: 20000000 });
-                    eth.awaitConsensus(tx, 800000);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid user type: " + _type);
-            }
+           return jsonObj.result;
         }
-    });
+  }); 
+
+  yield address;
+}).catch(function(error) {
+  throw new IllegalArgumentException("Couldn't  return the account address" );
+});
+}
+
+function register(_user_password, _type) {
+  var user_address = init_account(_user_password);
+  //Unlocking the certAuth account
+  web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
+
+ switch (_type) {
+   case "consumer":
+     var tx = etherex.registerConsumer(user_address, { from: eth.accounts[0], gas: 20000000 });
+     eth.awaitConsensus(tx, 800000);
+     break;
+   case "producer":
+     var tx = etherex.registerProducer(user_address, { from: eth.accounts[0], gas: 20000000 });
+     eth.awaitConsensus(tx, 800000);
+     break;
+   default:
+     throw new IllegalArgumentException("Invalid user type: " + _type);
+   }
 }
 
 // todo (mg) Statt _addr muss CertID mitgegeben werden. Vom CertID muss auf die Adresse geschlossen werden.
