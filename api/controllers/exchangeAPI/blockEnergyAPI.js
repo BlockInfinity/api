@@ -51,6 +51,7 @@ function init_account(_user_password) {
         if (err || !jsonObj.result) {
             throw new IllegalArgumentException("Couldn't create an user account!");
         } else {
+	   console.log(jsonObj.result);
            return jsonObj.result;
         }
   }); 
