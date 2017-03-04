@@ -72,7 +72,7 @@ function getBidOrders (req, res, next) {
 
 function getAskOrders (req, res, next) {
     try {
-        var orders = blockchainInterface.getBidOrders();
+        var orders = blockchainInterface.getAskOrders();
 
         var prices = JSON.stringify(orders[0]);
         var volumes = JSON.stringify(orders[1]);

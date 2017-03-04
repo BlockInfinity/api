@@ -176,7 +176,7 @@ contract Etherex_raw {
             Update state based on current block, no need for 1/3 currentPeriod condition because
             it is covered with the other 3
         */
-        if(currState == 0 && ((block.number - startBlock) >= 25 && (block.number - startBlock) < 50)) {
+        if(currState == 0 && ((block.number - startBlock) >= 10 && (block.number - startBlock) < 25)) {
             //Matching should start
             matching();
             minAsk = 0;
@@ -184,7 +184,7 @@ contract Etherex_raw {
             // move on to state 1
             currState = 1;
           
-        } else if (currState == 1 && ((block.number - startBlock) >= 50)){
+        } else if (currState == 1 && ((block.number - startBlock) >= 25)){
             //3/3 of the currentPeriod
             determineReserveAskPrice();
             determineReserveBidPrice();
