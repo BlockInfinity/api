@@ -62,25 +62,38 @@ function init() {
 // Public address: account dient als Prepaid Konto. 
 
 function init_account(_user_password) {
-    return co(function*() {   
-    var address = yield client.call({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [_user_password], "id": 74 }, function(err, jsonObj) {
+
+    var call_function = function(_user_password) {
+	return  client.call({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [_user_password], "id": 74 }, function(err, jsonObj) {
             if (err || !jsonObj.result) {
                 throw new Error("Couldn't create an user account!");
             } else {
-                console.log(jsonObj.result);
-                return jsonObj.result;
+                console.log("in one", jsonObj.result);
+                return String(jsonObj.result);
             }
-    }); 
+        }); 
+    }
+    
+    var adr =  co(function*() {
+       var address =  call_function(_user_password);
+       var tad = typeof address;
+       console.log(" type of addr", tad);
+      });
 
-    var check_address = eth.accounts[eth.accounts.length - 1];
+       var check_address = eth.accounts[eth.accounts.length - 1];
 
-    console.log( "returned address - " + address);  
-    console.log( "returned check_address - " + check_address);
+//    console.log( "returned address - " + address);  
+       console.log( "returned check_address - " + check_address);
 
-    yield check_address;
-    }).catch(function(error) {
-    throw new Error("Couldn't  return the account address" );
-    });
+       return check_address;
+       //}).catch(function(error) {
+        //   throw error;
+       //});
+
+   var fff = typeof adr;
+   console.log( " type of adr ", fff);
+
+  return adr;
 }
 
 function register(_user_password, _type) {

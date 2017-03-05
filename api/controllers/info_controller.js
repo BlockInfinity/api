@@ -64,7 +64,7 @@ function getBidOrders (req, res, next) {
     
         var bidOrders = [];
         for (var i = 0; i < orders[0].length; i++) {
-            bidOrders.push(JSON.stringify({"price": orders[0][i], "volume" : orders[1][i]}));
+            bidOrders.push({"price": orders[0][i], "volume" : orders[1][i]});
         }
          
         res.statusCode = 200;
@@ -89,7 +89,7 @@ function getAskOrders (req, res, next) {
 
         var askOrders = [];
         for (var i = 0; i < orders[0].length; i++) {
-            askOrders.push(JSON.stringify({"price": orders[0][i], "volume" : orders[1][i]}));
+            askOrders.push({"price": orders[0][i], "volume" : orders[1][i]});
         }
 
         res.statusCode = 200;
