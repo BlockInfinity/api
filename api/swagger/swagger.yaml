@@ -43,7 +43,9 @@ paths:
     post:
       tags: 
         - trade      
-      description: "Endpoint for placing bid for certain amount of electricity for a certain price."
+      description: "Endpoint for placing bid for certain amount of electricity for a certain price. Requires an account's address and password alongside a volume estimate. Price could be optionally provided.
+                    If the price argument is omited, the order will get matched at the lowest price after all the priced bids. Otherwise, if a price is given, the order will get matched only if an appropriate
+                    match is found."
       operationId: "buy"
       consumes:
         - application/json
@@ -54,7 +56,7 @@ paths:
           in: "body"
           required: true
           schema:
-            $ref: "#/definitions/tradeRequest"
+            $ref: "#/definitions/buyRequest"
       responses:
         "200":
           description: Success
@@ -71,14 +73,14 @@ paths:
     post:
       tags: 
         - trade  
-      description: "Endpoint for placing ask for certain amount of electricity for a certain price."
+      description: "Endpoint for placing ask orders for certain amount of electricity at a certain price. Account adress and password are required."
       operationId: "sell"
       parameters:
         - name: "sellRequest"
           in: "body"
           required: true
           schema:
-            $ref: "#/definitions/tradeRequest"
+            $ref: "#/definitions/sellRequest"
       responses:
         "200":
           description: Success
@@ -94,7 +96,7 @@ paths:
     post:
       tags: 
         - authority    
-      description: "Register user."
+      description: "Registers a new user account, given a password and an user type. Returns the address of the newly created account. May only be invoked by users of 'Authority' status. "
       operationId: "register"
       parameters:
         - name: "registerRequest"
@@ -117,7 +119,7 @@ paths:
     get:
       tags: 
         - info 
-      description: "Get all ask orders for specific period. If no period is specified will return for the last period."
+      description: "Get all ask orders for specific period. If no period is specified the call will return results for the last period."
       operationId: "getAskOrders"
       parameters:
       - name: "period"
@@ -241,13 +243,31 @@ paths:
       x-swagger-router-controller: "info_controller"
 
 definitions:
-  tradeRequest:
+  buyRequest:
     required:
-      - certificateId
+      - accountAddress
+      - password
       - volume
     properties:
-      certificateId:
+      accountAddress:
         type: number
+      password:
+        type: string
+      volume:
+        type: number
+      price:
+        type: number
+  sellRequest:
+    required:
+      - accountAddress
+      - password
+      - volume
+      - price
+    properties:
+      accountAddress:
+        type: number
+      password:
+        type: string
       volume:
         type: number
       price:
@@ -291,13 +311,21 @@ definitions:
       userAddress:
         type: string
   bidQuotes:
-      type: array
-      items: 
-        $ref: "#/definitions/quote"
+    properties:
+      period:
+        type: number
+      bidOrders:
+        type: array
+          items: 
+            $ref: "#/definitions/quote"
   askQuotes:
-    type: array
-    items: 
-      $ref: "#/definitions/quote"
+   properties:
+      period:
+        type: number
+      askOrders:
+        type: array
+          items: 
+            $ref: "#/definitions/quote"
   quote:
     properties:          
       price:

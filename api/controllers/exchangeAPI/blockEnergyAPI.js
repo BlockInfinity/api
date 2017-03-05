@@ -49,7 +49,7 @@ function init_account(_user_password) {
   return co(function*() {
   var address =  client.call({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [_user_password], "id": 74 }, function(err, jsonObj) {
         if (err || !jsonObj.result) {
-            throw new IllegalArgumentException("Couldn't create an user account!");
+            throw new Error("Couldn't create an user account!");
         } else {
 	   console.log(jsonObj.result);
            return jsonObj.result;
@@ -58,7 +58,7 @@ function init_account(_user_password) {
 
   yield address;
 }).catch(function(error) {
-  throw new IllegalArgumentException("Couldn't  return the account address" );
+  throw new Error("Couldn't  return the account address" );
 });
 }
 
@@ -77,7 +77,7 @@ function register(_user_password, _type) {
      eth.awaitConsensus(tx, 800000);
      break;
    default:
-     throw new IllegalArgumentException("Invalid user type: " + _type);
+     throw new Error("Invalid user type: " + _type);
    }
 }
 
@@ -113,11 +113,11 @@ function settle(_type, _volume, _period, _addr) {
 }
 
 function getBidOrders() {
-    return etherex.getBidOrders()
+    return etherex.getBidOrders();
 }
 
 function getAskOrders() {
-    return etherex.getAskOrders()
+    return etherex.getAskOrders();
 }
 
 function getMatchingPrice(_period) {
