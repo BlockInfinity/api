@@ -46,4 +46,8 @@ module.exports.getMatchingPrice = function getMatchingPrice (req, res, next) {
   Default.getMatchingPrice(req.swagger.params, res, next);
 };
 
+module.exports.getBalance = function getBalance (req, res, next) {
+  Default.getBalance(req.swagger.params, res, next);
+};
+
 

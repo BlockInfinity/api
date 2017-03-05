@@ -3,13 +3,14 @@ var util = require('util');
 
 
 module.exports = {
-    // getBalance:getBalance,
+    getBalance:getBalance,
     getAskOrders:getAskOrders,
     getBidOrders:getBidOrders,
    // getAskReserveOrders:getAskReserveOrders,
     //getBidReserveOrders:getBidReserveOrders,
     getMatchingPrice:getMatchingPrice,
-    getState:getState
+    getState:getState,
+    getBalance:getBalance
 
 }
 
@@ -98,6 +99,33 @@ function getAskOrders (req, res, next) {
     }
     res.end();
 }
+
+function getBalance(req, res, next) {
+    //The response object is a standard http response object
+    try {
+
+        console.log(req.address.value);
+        var balance = blockchainInterface.getBalance(req.address.value);
+        console.log(balance);
+        balance = balance.c[0];
+
+
+        console.log(balance);
+        res.statusCode = 200;
+
+        res.end(JSON.stringify({ "balance": balance }));
+
+
+    } catch (error) {
+
+        res.statusCode = 500;
+        res.end('Blockchain error ' + error.message);
+
+    }
+    res.end();
+};
+
+
 
 // function getAskReserveOrders (req, res, next) {
 //     try {

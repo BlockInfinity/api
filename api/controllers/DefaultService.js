@@ -8,13 +8,13 @@ exports.register = function(req, res, next) {
 
     //  //The response object is a standard http response object
     try {
-        api.register(req.registerRequest.value.userAddress,req.registerRequest.value.type);
+        api.register(req.registerRequest.value.userAddress, req.registerRequest.value.type);
         res.statusCode = 200
 
-        console.log(req.registerRequest.value.userAddress,req.registerRequest.value.type);
-      
-   
-        res.end("Registered user with address " + req.registerRequest.value.userAddress + " as "+req.registerRequest.value.type);
+        console.log(req.registerRequest.value.userAddress, req.registerRequest.value.type);
+
+
+        res.end("Registered user with address " + req.registerRequest.value.userAddress + " as " + req.registerRequest.value.type);
     } catch (error) {
 
         res.statusCode = 500;
@@ -25,12 +25,12 @@ exports.register = function(req, res, next) {
 };
 
 exports.settle = function(req, res, next) {
-       //The response object is a standard http response object
+    //The response object is a standard http response object
     // try {
 
     //     api.settle(req.settleRequest.value.type, req.settleRequest.value.volume, req.settleRequest.value.address);
     //     res.statusCode = 200
-  
+
     //     //console.log(req.price.value, req.volume.value);
     //     res.end();
     // } catch (error) {
@@ -50,7 +50,7 @@ exports.buy = function(req, res, next) {
         api.buy(req.buyRequest.value.price, req.buyRequest.value.volume, req.buyRequest.value.address);
         res.statusCode = 200
 
-  
+
         //console.log(req.price.value, req.volume.value);
         res.end('Made transaction succesfully with price:' + req.buyRequest.value.price + ', volume: ' + req.buyRequest.value.volume + ', address: ' + req.buyRequest.value.address);
     } catch (error) {
@@ -70,7 +70,7 @@ exports.sell = function(req, res, next) {
         api.sell(req.sellRequest.value.price, req.sellRequest.value.volume, req.sellRequest.value.address);
         res.statusCode = 200
 
-  
+
         //console.log(req.price.value, req.volume.value);
         res.end('Made transaction succesfully with price:' + req.sellRequest.value.price + ', volume: ' + req.sellRequest.value.volume + ', address: ' + req.sellRequest.value.address);
     } catch (error) {
@@ -161,7 +161,7 @@ exports.getState = function(req, res, next) {
         console.log(state);
         res.statusCode = 200;
 
-        res.end(JSON.stringify({ "state": state[0],"period":state[1] }));
+        res.end(JSON.stringify({ "state": state[0], "period": state[1] }));
 
 
     } catch (error) {
@@ -188,6 +188,31 @@ exports.getMatchingPrice = function(req, res, next) {
         res.statusCode = 200;
 
         res.end(JSON.stringify({ "matchingPrice": matchingPrice }));
+
+
+    } catch (error) {
+
+        res.statusCode = 500;
+        res.end('Blockchain error ' + error.message);
+
+    }
+    res.end();
+};
+
+exports.getBalance = function(req, res, next) {
+    //The response object is a standard http response object
+    try {
+
+        console.log("in getBalance")
+        var balance = api.getBalance(req.address.value);
+
+        balance = balance.c[0];
+
+
+        console.log(balance);
+        res.statusCode = 200;
+
+        res.end(JSON.stringify({ "balance": balance }));
 
 
     } catch (error) {

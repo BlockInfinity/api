@@ -1,4 +1,4 @@
-const co = require ("co");
+const co = require("co");
 const web3 = require("./chainConnector.js");
 const rpc = require('node-json-rpc');
 
@@ -32,7 +32,7 @@ module.exports = {
 if (!etherex) {
     console.log("Exchange contract is not defined");
 } else {
-    console.log("Exchange contract with address",etherex.address,"loaded!");
+    console.log("Exchange contract with address", etherex.address, "loaded!");
 }
 
 //  establish rpc connection to test chain
@@ -48,12 +48,12 @@ Annahmen zur Vereinfachung:
 // Zukünftig muss das direkt im Konstruktor aufgerufen werden
 // todo (mg) auch enbw muss ich als entität registriert werden, der es einzigst gestattet ist die settle funktoin aufzurufen
 function init() {
-  try {
-    web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
-    etherex.registerCertificateAuthority(eth.accounts[0], { from: eth.accounts[0] });
-  } catch (err) {
-    console.log("something happaned");
-  }
+    try {
+        web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
+        etherex.registerCertificateAuthority(eth.accounts[0], { from: eth.accounts[0] });
+    } catch (err) {
+        console.log("something happaned");
+    }
 }
 
 // todo (mg): register funktion nimmt "_type" (enum: buyer,seller) entgegen und erstellt einen ethereum account.
@@ -84,22 +84,22 @@ function init_account(_user_password) {
 }
 
 function register(_user_password, _type) {
-  var user_address = init_account(_user_password);
-  //Unlocking the certAuth account
-  web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
+    var user_address = init_account(_user_password);
+    //Unlocking the certAuth account
+    web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
 
- switch (_type) {
-   case "consumer":
-     var tx = etherex.registerConsumer(user_address, { from: eth.accounts[0], gas: 20000000 });
-     eth.awaitConsensus(tx, 800000);
-     break;
-   case "producer":
-     var tx = etherex.registerProducer(user_address, { from: eth.accounts[0], gas: 20000000 });
-     eth.awaitConsensus(tx, 800000);
-     break;
-   default:
-     throw new Error("Invalid user type: " + _type);
-   }
+    switch (_type) {
+        case "consumer":
+            var tx = etherex.registerConsumer(user_address, { from: eth.accounts[0], gas: 20000000 });
+            eth.awaitConsensus(tx, 800000);
+            break;
+        case "producer":
+            var tx = etherex.registerProducer(user_address, { from: eth.accounts[0], gas: 20000000 });
+            eth.awaitConsensus(tx, 800000);
+            break;
+        default:
+            throw new Error("Invalid user type: " + _type);
+    }
 }
 
 // todo (mg) Statt _addr muss CertID mitgegeben werden. Vom CertID muss auf die Adresse geschlossen werden.
@@ -229,12 +229,12 @@ function stopMining() {
 // ############################# Information Retrieval ##################
 // ######################################################################
 
-function getBalance() {
-    for (var i in eth.accounts) {
-        console.log("Balance of account ", i, ": ", web3.fromWei(eth.getBalance(eth.accounts[i]).toString()));
+function getBalance(_addr) {
+  console.log(_addr);
+    return web3.fromWei(eth.getBalance(_addr));
     }
-}
 
-/////////////////////////////////////////////////////////////////////////// end of debugging
+
+    /////////////////////////////////////////////////////////////////////////// end of debugging
 
 

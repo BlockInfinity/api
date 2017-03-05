@@ -121,12 +121,6 @@ paths:
         - info 
       description: "Get all ask orders for specific period. If no period is specified the call will return results for the last period."
       operationId: "getAskOrders"
-      parameters:
-      - name: "period"
-        in: "query"
-        description: "Period"
-        required: false
-        type: "number"
       responses:
         200:
           description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
@@ -143,12 +137,6 @@ paths:
         - info     
       description: "Get all bid orders for specific period. If no period is specified will return for the last period."
       operationId: "getBidOrders"
-      parameters:
-      - name: "period"
-        in: "query"
-        description: "Period"
-        required: false
-        type: "number"
       responses:
         200:
           description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
@@ -165,12 +153,6 @@ paths:
         - info     
       description: "Get all reserve ask orders for specific period. If no period is specified will return for the last period."
       operationId: "getAskReserveOrders"
-      parameters:
-      - name: "period"
-        in: "query"
-        description: "Period"
-        required: false
-        type: "number"
       responses:
         200:
           description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
@@ -187,12 +169,6 @@ paths:
         - info
       description: "Get all reserve bid orders for specific period. If no period is specified will return for the last period."
       operationId: "getBidReserveOrders"
-      parameters:
-      - name: "period"
-        in: "query"
-        description: "Period"
-        required: false
-        type: "number"
       responses:
         200:
           description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
@@ -241,6 +217,28 @@ paths:
         500:
           description: "Server error"
       x-swagger-router-controller: "info_controller"
+  /info/balance:
+    get:
+      tags: 
+        - info
+      description: "Get the current balance for specific account"
+      operationId: "getBalance"
+      parameters:
+      - name: "address"
+        in: "query"
+        description: "address"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Returns the current balance from specific account."
+          schema:
+            $ref: "#/definitions/balanceResponse"
+        404:
+          description: "Operation not found"
+        500:
+          description: "Server error"
+      x-swagger-router-controller: "Default"
 
 definitions:
   buyRequest:
@@ -338,7 +336,11 @@ definitions:
         type: string
       period:
         type: number
-        
+  balanceResponse:
+    properties:
+      balance:
+          type: number
+    
   
         
         
