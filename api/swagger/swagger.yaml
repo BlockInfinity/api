@@ -314,18 +314,18 @@ definitions:
         type: number
       bidOrders:
         type: array
-          items: 
-            $ref: "#/definitions/quote"
+	  items:
+	    $ref: "#/definitions/quote"
   askQuotes:
-   properties:
+    properties:
       period:
         type: number
       askOrders:
         type: array
-          items: 
+          items:
             $ref: "#/definitions/quote"
   quote:
-    properties:          
+    properties:
       price:
         type: number
       volume:
@@ -339,7 +339,7 @@ definitions:
   balanceResponse:
     properties:
       balance:
-          type: number
+        type: number
     
   
         
