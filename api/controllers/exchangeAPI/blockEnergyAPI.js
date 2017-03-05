@@ -11,7 +11,23 @@ var options = {
     host: 'localhost'
 
 };
+
 var client = new rpc.Client(options);
+
+module.exports = {
+    buy: buy,
+    sell: sell,
+    register: register,
+    init: init,
+    autoMine: autoMine,
+    getBalance: getBalance,
+    getAskOrders: getAskOrders,
+    getBidOrders: getBidOrders,
+    getMatchingPrice: getMatchingPrice,
+    getState: getState
+
+}
+
 
 if (!etherex) {
     console.log("Exchange contract is not defined");
@@ -46,20 +62,25 @@ function init() {
 // Public address: account dient als Prepaid Konto. 
 
 function init_account(_user_password) {
-  return co(function*() {
-  var address =  client.call({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [_user_password], "id": 74 }, function(err, jsonObj) {
-        if (err || !jsonObj.result) {
-            throw new Error("Couldn't create an user account!");
-        } else {
-	   console.log(jsonObj.result);
-           return jsonObj.result;
-        }
-  }); 
+    return co(function*() {   
+    var address = yield client.call({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [_user_password], "id": 74 }, function(err, jsonObj) {
+            if (err || !jsonObj.result) {
+                throw new Error("Couldn't create an user account!");
+            } else {
+                console.log(jsonObj.result);
+                return jsonObj.result;
+            }
+    }); 
 
-  yield address;
-}).catch(function(error) {
-  throw new Error("Couldn't  return the account address" );
-});
+    var check_address = eth.accounts[eth.accounts.length - 1];
+
+    console.log( "returned address - " + address);  
+    console.log( "returned check_address - " + check_address);
+
+    yield check_address;
+    }).catch(function(error) {
+    throw new Error("Couldn't  return the account address" );
+    });
 }
 
 function register(_user_password, _type) {
@@ -82,20 +103,20 @@ function register(_user_password, _type) {
 }
 
 // todo (mg) Statt _addr muss CertID mitgegeben werden. Vom CertID muss auf die Adresse geschlossen werden.
-function buy(_volume, _price, _addr) {
+function buy(_volume, _price, _addr, _password) {
 
     //Unlocking the account
-    web3.personal.unlockAccount(_addr, "amalien", 1000);
+    web3.personal.unlockAccount(_addr, _password, 1000);
 
     let tx = etherex.submitBid(_volume, _price, { from: _addr, gas: 20000000 });
     eth.awaitConsensus(tx, 20000000);
 }
 
 // todo (mg) Statt _addr muss CertID mitgegeben werden. Vom CertID muss auf die Adresse geschlossen werden.
-function sell(_volume, _price, _addr) {
+function sell(_volume, _price, _addr, _password) {
 
     //Unlocking the account
-    web3.personal.unlockAccount(_addr, "amalien", 1000);
+    web3.personal.unlockAccount(_addr, _password, 1000);
 
     let tx = etherex.submitAsk(_volume, _price, { from: _addr, gas: 20000000 });
     eth.awaitConsensus(tx, 20000000);
@@ -217,16 +238,3 @@ function getBalance() {
 /////////////////////////////////////////////////////////////////////////// end of debugging
 
 
-module.exports = {
-    buy: buy,
-    sell: sell,
-    register: register,
-    init: init,
-    autoMine: autoMine,
-    getBalance: getBalance,
-    getAskOrders: getAskOrders,
-    getBidOrders: getBidOrders,
-    getMatchingPrice: getMatchingPrice,
-    getState: getState
-
-}

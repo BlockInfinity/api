@@ -46,7 +46,7 @@ paths:
       description: "Endpoint for placing bid for certain amount of electricity for a certain price. Requires an account's address and password alongside a volume estimate. Price could be optionally provided.
                     If the price argument is omited, the order will get matched at the lowest price after all the priced bids. Otherwise, if a price is given, the order will get matched only if an appropriate
                     match is found."
-      operationId: "buy"
+      operationId: "submitBuyRequest"
       consumes:
         - application/json
       produces:
@@ -68,13 +68,13 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
 
-      x-swagger-router-controller: "Default"
+      x-swagger-router-controller: "trade_controller"
   /trade/sell:
     post:
       tags: 
         - trade  
       description: "Endpoint for placing ask orders for certain amount of electricity at a certain price. Account adress and password are required."
-      operationId: "sell"
+      operationId: "submitSellRequest"
       parameters:
         - name: "sellRequest"
           in: "body"
@@ -91,7 +91,7 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-      x-swagger-router-controller: "Default"
+      x-swagger-router-controller: "trade_controller"
   /authority/register:
     post:
       tags: 

@@ -53,15 +53,19 @@ function getBidOrders (req, res, next) {
         //var period = findPeriod(req);
         var orders = blockchainInterface.getBidOrders();
 
-        var prices = JSON.stringify(orders[0]);
-        var volumes = JSON.stringify(orders[1]);
+        // var prices = JSON.stringify(orders[0]);
+        // var volumes = JSON.stringify(orders[1]);
 
-        prices = prices.split("\"").join("");
-        volumes = volumes.split("\"").join("");
-
+        // prices = prices.split("\"").join("");
+        // volumes = volumes.split("\"").join("");
+    
+        var bidOrders = [];
+        for (var i = 0; i < orders[0].length; i++) {
+            bidOrders.push(JSON.stringify({"price": orders[0][i], "volume" : orders[1][i]}));
+        }
+         
         res.statusCode = 200;
-
-        res.end(JSON.stringify({ "prices": prices , "volumes": volumes }));
+        res.end(JSON.stringify({ "period" : "last", "bidOrders" : bidOrders }));
 
     } catch (error) {
         res.statusCode = 500;
@@ -74,17 +78,20 @@ function getAskOrders (req, res, next) {
     try {
         var orders = blockchainInterface.getAskOrders();
 
-        var prices = JSON.stringify(orders[0]);
-        var volumes = JSON.stringify(orders[1]);
+        // var prices = JSON.stringify(orders[0]);
+        // var volumes = JSON.stringify(orders[1]);
 
-        prices = prices.split("\"").join("");
-        volumes = volumes.split("\"").join("");
+        // prices = prices.split("\"").join("");
+        // volumes = volumes.split("\"").join("");
+
+        var askOrders = [];
+        for (var i = 0; i < orders[0].length; i++) {
+            askOrders.push(JSON.stringify({"price": orders[0][i], "volume" : orders[1][i]}));
+        }
 
         res.statusCode = 200;
-
-        res.end(JSON.stringify([{ "prices": prices }, { "volumes": volumes }]));
-
-
+        res.end(JSON.stringify({ "period" : "last", "askOrders" : askOrders }));
+        
     } catch (error) {
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
