@@ -27,6 +27,13 @@ app.use(function(req, res, next) {
 
 app.use(express.static('public'));
 
+
+app.all('/', function(req, resp) {
+
+  resp.redirect('/docs');
+
+});
+
 // Initialize the Swagger middleware
 swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
   // Interpret Swagger resources and attach metadata to request - must be first in swagger-tools middleware chain
@@ -47,3 +54,6 @@ swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
     console.log('Swagger-ui is available on http://localhost:%d/docs', serverPort);
   });
 });
+
+
+
