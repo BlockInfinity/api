@@ -119,7 +119,7 @@ paths:
     get:
       tags: 
         - info 
-      description: "Get all ask orders for specific period. If no period is specified the call will return results for the last period."
+      description: "Get all ask orders for the last period."
       operationId: "getAskOrders"
       responses:
         200:
@@ -135,7 +135,7 @@ paths:
     get:
       tags: 
         - info     
-      description: "Get all bid orders for specific period. If no period is specified will return for the last period."
+      description: "Get all bid orders for the last period."
       operationId: "getBidOrders"
       responses:
         200:
@@ -151,7 +151,7 @@ paths:
     get:
       tags: 
         - info     
-      description: "Get all reserve ask orders for specific period. If no period is specified will return for the last period."
+      description: "Get all reserve ask orders for the last period."
       operationId: "getAskReserveOrders"
       responses:
         200:
@@ -167,7 +167,7 @@ paths:
     get:
       tags: 
         - info
-      description: "Get all reserve bid orders for specific period. If no period is specified will return for the last period."
+      description: "Get all reserve bid orders for the last period."
       operationId: "getBidReserveOrders"
       responses:
         200:
@@ -238,7 +238,7 @@ paths:
           description: "Operation not found"
         500:
           description: "Server error"
-      x-swagger-router-controller: "Default"
+      x-swagger-router-controller: "info_controller"
 
 definitions:
   buyRequest:
@@ -248,7 +248,7 @@ definitions:
       - volume
     properties:
       accountAddress:
-        type: number
+        type: string
       password:
         type: string
       volume:
@@ -263,7 +263,7 @@ definitions:
       - price
     properties:
       accountAddress:
-        type: number
+        type: string
       password:
         type: string
       volume:
@@ -293,7 +293,7 @@ definitions:
       type:
         type: string
       smartMeterAddress:
-        type: number
+        type: string
   ErrorResponse:
     required:
       - message

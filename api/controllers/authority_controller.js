@@ -4,8 +4,6 @@ var util = require('util');
 
 module.exports = {
    register:register,
-
-
 }
 
 function register(req, res, next) {

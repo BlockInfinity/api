@@ -15,9 +15,11 @@ module.exports = {
 }
 
 function findPeriod(req) {
-    
-     var period = req.swagger.params.period.value || blockchainInterface.getState()[1];
-     return period;
+    if (typeof req.swagger.params.period.value === "undefined" || req.swagger.params.period.value == null || req.swagger.params.period.value < 0)  {
+        return blockchainInterface.getState()[1];
+    } else {
+        return req.swagger.params.period.value;
+    }
 }
 
 function getState(req, res, next ) {
@@ -101,29 +103,19 @@ function getAskOrders (req, res, next) {
 }
 
 function getBalance(req, res, next) {
-    //The response object is a standard http response object
+    
     try {
-
-        console.log(req.address.value);
-        var balance = blockchainInterface.getBalance(req.address.value);
-        console.log(balance);
+        var address = req.swagger.params.address.value;
+        var balance = blockchainInterface.getBalance(address);
         balance = balance.c[0];
-
-
-        console.log(balance);
         res.statusCode = 200;
-
         res.end(JSON.stringify({ "balance": balance }));
-
-
     } catch (error) {
-
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
-
     }
     res.end();
-};
+}
 
 
 
