@@ -23,7 +23,6 @@ function findPeriod(req) {
 }
 
 function getState(req, res, next ) {
-
     try {
         var state_period_pair = blockchainInterface.getState();
         res.statusCode = 200;
@@ -36,7 +35,6 @@ function getState(req, res, next ) {
 }
 
 function getMatchingPrice(req, res, next) {
-
     try {
         
         var period = findPeriod(req);
@@ -51,17 +49,10 @@ function getMatchingPrice(req, res, next) {
     res.end();
 }
 
-function getBidOrders (req, res, next) {
+function getBidOrders(req, res, next) {
     try {
-        //var period = findPeriod(req);
+        
         var orders = blockchainInterface.getBidOrders();
-
-        // var prices = JSON.stringify(orders[0]);
-        // var volumes = JSON.stringify(orders[1]);
-
-        // prices = prices.split("\"").join("");
-        // volumes = volumes.split("\"").join("");
-    
         var bidOrders = [];
         for (var i = 0; i < orders[0].length; i++) {
             bidOrders.push({"price": orders[0][i], "volume" : orders[1][i]});
@@ -77,16 +68,9 @@ function getBidOrders (req, res, next) {
     res.end();
 }
 
-function getAskOrders (req, res, next) {
+function getAskOrders(req, res, next) {
     try {
         var orders = blockchainInterface.getAskOrders();
-
-        // var prices = JSON.stringify(orders[0]);
-        // var volumes = JSON.stringify(orders[1]);
-
-        // prices = prices.split("\"").join("");
-        // volumes = volumes.split("\"").join("");
-
         var askOrders = [];
         for (var i = 0; i < orders[0].length; i++) {
             askOrders.push({"price": orders[0][i], "volume" : orders[1][i]});
@@ -103,7 +87,6 @@ function getAskOrders (req, res, next) {
 }
 
 function getBalance(req, res, next) {
-    
     try {
         var address = req.swagger.params.address.value;
         var balance = blockchainInterface.getBalance(address);
@@ -116,8 +99,6 @@ function getBalance(req, res, next) {
     }
     res.end();
 }
-
-
 
 // function getAskReserveOrders (req, res, next) {
 //     try {

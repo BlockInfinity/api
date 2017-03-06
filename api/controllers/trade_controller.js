@@ -1,12 +1,10 @@
 const blockchainInterface = require("./exchangeAPI/blockEnergyAPI.js");
 var util = require('util');
 
-
 module.exports = {
     submitSellRequest: submitSellRequest,
     submitBuyRequest: submitSellRequest
 }
-
 
 function submitSellRequest(req, res, next ) {
     try {
@@ -46,5 +44,4 @@ function submitBuyRequest(req, res, next) {
         res.end('Blockchain error ' + error.message);
     }
     res.end();
-   
 }
