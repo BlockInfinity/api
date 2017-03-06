@@ -53,15 +53,8 @@ function getMatchingPrice(req, res, next) {
 
 function getBidOrders (req, res, next) {
     try {
-        //var period = findPeriod(req);
+        
         var orders = blockchainInterface.getBidOrders();
-
-        // var prices = JSON.stringify(orders[0]);
-        // var volumes = JSON.stringify(orders[1]);
-
-        // prices = prices.split("\"").join("");
-        // volumes = volumes.split("\"").join("");
-    
         var bidOrders = [];
         for (var i = 0; i < orders[0].length; i++) {
             bidOrders.push({"price": orders[0][i], "volume" : orders[1][i]});
@@ -80,13 +73,6 @@ function getBidOrders (req, res, next) {
 function getAskOrders (req, res, next) {
     try {
         var orders = blockchainInterface.getAskOrders();
-
-        // var prices = JSON.stringify(orders[0]);
-        // var volumes = JSON.stringify(orders[1]);
-
-        // prices = prices.split("\"").join("");
-        // volumes = volumes.split("\"").join("");
-
         var askOrders = [];
         for (var i = 0; i < orders[0].length; i++) {
             askOrders.push({"price": orders[0][i], "volume" : orders[1][i]});
