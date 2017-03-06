@@ -77,6 +77,7 @@ contract Etherex_raw {
         uint256 sumConsumed;
         uint256 excess;
         uint256 lack;
+        bool isSettled;
         SettleUserData[] askSmData;
         SettleUserData[] bidSmData;
     }
@@ -215,6 +216,10 @@ contract Etherex_raw {
         return currentPeriod;
     }
 
+    function isPeriodSettled(uint256 _period) constant returns(bool) {
+        return settleMapping[_period].isSettled;
+    }
+
     function getMatchingPrice(uint256 _period) constant returns(int256) {
         return matchingPrices[_period];
     }
@@ -225,6 +230,22 @@ contract Etherex_raw {
 
     function getAskReservePrice(uint256 _period) constant returns(int256) {
         return askReservePrices[_period];   
+    }
+
+    // function getMatchedAskOrders(uint256 _period) constant returns(uint256) {
+    //     return matchedAskOrders[_period];
+    // }
+
+    // function getMatchedBidOrders(uint256 _period) constant returns(uint256) {
+    //     return matchedBidOrders[_period];
+    // }
+
+    function getMatchedAskOrdersForUser(uint256 _period, address _owner) constant returns(uint256) {
+        return matchedAskOrders[_period][_owner];
+    }
+
+    function getMatchedBidOrdersForUser(uint256 _period, address _owner) constant returns(uint256) {
+        return matchedBidOrders[_period][_owner];
     }
 
     function haveAllUsersSettled(uint256 _period) constant returns (bool) onlyCertificateAuthorities() {
@@ -679,6 +700,8 @@ contract Etherex_raw {
         for (uint256 l=0; l<numUsers; l++) {  
             colleteral[l] += shareOfEachUser;     
         }
+
+        settleMapping[_period].isSettled = true;
     }
 
 

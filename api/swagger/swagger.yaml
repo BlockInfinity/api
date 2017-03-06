@@ -172,12 +172,18 @@ paths:
         500:
           description: "Server error"
       x-swagger-router-controller: "info_controller"
-  /info/askReserveOrders:
+  /info/matchedAskOrders:
     get:
       tags: 
         - info     
-      description: "Get all reserve ask orders for the last period."
-      operationId: "getAskReserveOrders"
+      description: "Get all matched ask orders for the last period."
+      operationId: "getMatchedAskOrders"
+      parameters:
+        - name: "period"
+          in: "query"
+          description: "Period"
+          required: false
+          type: "number"
       responses:
         200:
           description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
@@ -188,17 +194,121 @@ paths:
         500:
           description: "Server error"
       x-swagger-router-controller: "info_controller"
-  /info/bidReserveOrders:
+  /info/matchedBidOrders:
     get:
       tags: 
-        - info
-      description: "Get all reserve bid orders for the last period."
-      operationId: "getBidReserveOrders"
+        - info     
+      description: "Get all matched bid orders for the last period."
+      operationId: "getMatchedBidOrders"
+      parameters:
+        - name: "period"
+          in: "query"
+          description: "Period"
+          required: false
+          type: "number"
       responses:
         200:
           description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
           schema:
-            $ref: "#/definitions/bidQuotes"            
+            $ref: "#/definitions/askQuotes"              
+        404:
+          description: "Operation not found"
+        500:
+          description: "Server error"
+      x-swagger-router-controller: "info_controller"
+  /info/matchedAskOrdersForUser:
+    get:
+      tags: 
+        - info     
+      description: "Get all matched ask orders for the last period for given user."
+      operationId: "getMatchedAskOrdersForUser"
+      parameters:
+        - name: "period"
+          in: "query"
+          description: "Period"
+          required: false
+          type: "number"
+        - name: "userAddress"
+          in: "query"
+          description: "The address of the account, whose balance will be returned."
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
+          schema:
+            $ref: "#/definitions/askQuotes"              
+        404:
+          description: "Operation not found"
+        500:
+          description: "Server error"
+      x-swagger-router-controller: "info_controller"
+  /info/matchedBidOrdersForUser:
+    get:
+      tags: 
+        - info     
+      description: "Get all matched bid orders for the last period for given user."
+      operationId: "getMatchedBidOrdersForUser"
+      parameters:
+        - name: "period"
+          in: "query"
+          description: "Period"
+          required: false
+          type: "number"
+        - name: "userAddress"
+          in: "query"
+          description: "The address of the account, whose balance will be returned."
+          type: "string"
+          required: true
+      responses:
+        200:
+          description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
+          schema:
+            $ref: "#/definitions/askQuotes"              
+        404:
+          description: "Operation not found"
+        500:
+          description: "Server error"
+      x-swagger-router-controller: "info_controller"
+  /info/askReservePrice:
+    get:
+      tags: 
+        - info
+      description: "Get ask reserve price for specific period. If no period is specified will return for the last period."
+      operationId: "getAskReservePrice"
+      parameters:
+      - name: "period"
+        in: "query"
+        description: "Period"
+        required: false
+        type: "number"
+      responses:
+        200:
+          description: "Returns ask reserve price."
+          schema:
+            type: number
+        404:
+          description: "Operation not found"
+        500:
+          description: "Server error"
+      x-swagger-router-controller: "info_controller"
+  /info/bidkReservePrice:
+    get:
+      tags: 
+        - info
+      description: "Get bid reserve price for specific period. If no period is specified will return for the last period."
+      operationId: "getBidReservePrice"
+      parameters:
+      - name: "period"
+        in: "query"
+        description: "Period"
+        required: false
+        type: "number"
+      responses:
+        200:
+          description: "Returns bid reserve price."
+          schema:
+            type: number
         404:
           description: "Operation not found"
         500:
@@ -291,17 +401,14 @@ definitions:
         type: string
       type:
         type: string
-<<<<<<< HEAD
   registerResponse:
     properties:
       userAddress:
-=======
   balanceRequest:
     required:
       - address
     properties:
       address:
->>>>>>> af285f195141867e57e93bf48cec4d5cab775a77
         type: string
   settleRequest:
     required:
