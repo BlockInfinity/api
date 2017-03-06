@@ -76,15 +76,25 @@ function register(_user_password, _type) {
                     case "consumer":
                         var tx = etherex.registerConsumer(user_address, { from: eth.accounts[0], gas: 20000000 });
                         eth.awaitConsensus(tx, 800000);
-                        return resolve(user_adress);
                         break;
                     case "producer":
                         var tx = etherex.registerProducer(user_address, { from: eth.accounts[0], gas: 20000000 });
                         eth.awaitConsensus(tx, 800000);
-                        return resolve(user_adress);
                         break;
                     default:
                         return reject(new Error("Invalid user type: " + _type));
+
+                    try {
+                         web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
+                         if (getBalance(eth.accounts[0]) < 11 ) {
+                             throw new Error();
+                         }
+                         eth.sendTransaction({from: eth.accounts[0], to: user_address, value: "10000000000000000000", gas:21000});
+                         return resolve(user_address);
+                    } catch (err) {
+                        return reject(new Error("Not enough money in master account! Couldn't transfer eth!"));
+                    }
+                   
                 }
             }
         }); 
@@ -139,6 +149,12 @@ function getState() {
     let period = etherex.getCurrPeriod();
     return ([state, period]);
 }
+
+function getBalance(_addr) {
+    console.log(_addr);
+    return web3.fromWei(eth.getBalance(_addr));
+}
+
 
 /////////////////////////////////////////////////////////////////////////// for debugging
 
@@ -213,17 +229,4 @@ function stopMining() {
         console.log(res);
     });
 }
-
-// ######################################################################
-// ############################# Information Retrieval ##################
-// ######################################################################
-
-function getBalance(_addr) {
-  console.log(_addr);
-    return web3.fromWei(eth.getBalance(_addr));
-    }
-
-
-    /////////////////////////////////////////////////////////////////////////// end of debugging
-
 

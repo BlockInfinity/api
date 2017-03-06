@@ -186,7 +186,7 @@ contract Etherex_raw {
         if(currState == 0 && ((block.number - startBlock) >= 10 && (block.number - startBlock) < 25)) {
             //Matching should start
             matching();
-            minAsk = 0;
+            min Ask = 0;
             maxBid = 0;
             // move on to state 1
             currState = 1;
@@ -706,6 +706,23 @@ contract Etherex_raw {
         }
         return (askQuotes, askAmounts);
     }
+
+    function getAskOrdersFromUser(address _owner, uint256 _period) constant returns (int256 rv1, uint256 rv2){
+        uint256 id_iter_ask = minAsk;
+        while (orders[id_iter_ask].owner != _owner){
+            id_iter_ask = orders[id_iter_ask].next;
+        }
+        return(orders[id_iter_ask].price, orders[id_iter_ask].volume);
+    }
+
+    function getBidOrdersFromUser(address _owner, uint256 _period) constant returns (int256 rv1, uint256 rv2){
+        uint256 id_iter_bid = maxBid;
+        while (orders[id_iter_bid].owner != _owner){
+            id_iter_bid = orders[id_iter_bid].next;
+        }
+        return(orders[id_iter_bid].price, orders[id_iter_bid].volume);
+    }
+
 
 }
     

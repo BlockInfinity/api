@@ -115,6 +115,28 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
       x-swagger-router-controller: "authority_controller"
+  /info/balance:
+    get:
+      tags: 
+        - info 
+      description: "Get the balance of the user's account."
+      operationId: "getBalance"
+      parameters:
+        name: address
+        in: querry
+        description: "The address of the account, which balance will be returned."
+        required: true
+        type: string
+      responses:
+        200:
+          description: "Returns the current balance from specific account."
+          schema:
+            $ref: "#/definitions/balanceResponse"
+        404:
+          description: "Operation not found"
+        500:
+          description: "Server error"
+      x-swagger-router-controller: "info_controller"
   /info/askOrders:
     get:
       tags: 
