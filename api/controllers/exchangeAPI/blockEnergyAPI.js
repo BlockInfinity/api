@@ -63,7 +63,7 @@ function init() {
 
 function register(_user_password, _type) {
     return new Promise(function (resolve, reject) {
-        if (!_type || !(_type === 'consumer' || _type === 'procuder')) {
+        if (!_type || !(_type === 'consumer' || _type === 'producer')) {
             return reject('invalid arguments');
         }
 
