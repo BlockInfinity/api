@@ -15,20 +15,22 @@ function register(req, res, next) {
             if (user_type != "consumer" && user_type != "producer") {
                 throw new Error("Unsuported account type! Please choose one of 'consumer' or 'producer'.");
             }
-            var user_address = blockchainInterface.register(req.swagger.params.registerRequest.value.password, user_type);
-            if (user_address) {
+            console.log("before");
+            blockchainInterface.register(req.swagger.params.registerRequest.value.password, user_type).then(function(user_address) {
+                console.log("success");
                 res.statusCode = 200;
                 res.end(JSON.stringify({ "userAddress": user_address }));
-            } else {
+            }, function(reason) {
+                console.log("fehler");
                 res.statusCode = 500;
                 res.end('Blockchain error: No address received from register function!');
-            }
-        
+            });        
         }
        
     } catch (error) {
+        console.log("im catch");
         res.statusCode = 500;
         res.end('Blockchain error: ' + error.message);
     }
-    res.end();
+    
 }

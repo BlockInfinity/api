@@ -61,58 +61,38 @@ function init() {
 // CertID: wird benötigt für buy / sell
 // Public address: account dient als Prepaid Konto. 
 
-function init_account(_user_password) {
+function register(_user_password, _type) {
+    return new Promise(function (resolve, reject) {
+        if (!_type || !(_type === 'consumer' || _type === 'producer')) {
+            return reject('invalid arguments');
+        }
 
-    var call_function = function(_user_password) {
-	return  client.call({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [_user_password], "id": 74 }, function(err, jsonObj) {
+        client.call({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [_user_password], "id": 74 }, function(err, jsonObj) {
             if (err || !jsonObj.result) {
-                throw new Error("Couldn't create an user account!");
+                console.log("Couldn't create an user account!");
+                reject(err);
             } else {
                 console.log("in one", jsonObj.result);
-                return String(jsonObj.result);
+
+                var user_address = String(jsonObj.result);
+
+                switch (_type) {
+                    case "consumer":
+                        var tx = etherex.registerConsumer(user_address, { from: eth.accounts[0], gas: 20000000 });
+                        eth.awaitConsensus(tx, 800000);
+                        return resolve(user_address);
+                        break;
+                    case "producer":
+                        var tx = etherex.registerProducer(user_address, { from: eth.accounts[0], gas: 20000000 });
+                        eth.awaitConsensus(tx, 800000);
+                        return resolve(user_address);
+                        break;
+                    default:
+                        return reject(new Error("Invalid user type: " + _type));
+                }
             }
         }); 
-    }
-    
-    var adr =  co(function*() {
-       var address =  call_function(_user_password);
-       var tad = typeof address;
-       console.log(" type of addr", tad);
-      });
-
-       var check_address = eth.accounts[eth.accounts.length - 1];
-
-//    console.log( "returned address - " + address);  
-       console.log( "returned check_address - " + check_address);
-
-       return check_address;
-       //}).catch(function(error) {
-        //   throw error;
-       //});
-
-   var fff = typeof adr;
-   console.log( " type of adr ", fff);
-
-  return adr;
-}
-
-function register(_user_password, _type) {
-    var user_address = init_account(_user_password);
-    //Unlocking the certAuth account
-    web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
-
-    switch (_type) {
-        case "consumer":
-            var tx = etherex.registerConsumer(user_address, { from: eth.accounts[0], gas: 20000000 });
-            eth.awaitConsensus(tx, 800000);
-            break;
-        case "producer":
-            var tx = etherex.registerProducer(user_address, { from: eth.accounts[0], gas: 20000000 });
-            eth.awaitConsensus(tx, 800000);
-            break;
-        default:
-            throw new Error("Invalid user type: " + _type);
-    }
+    })
 }
 
 // todo (mg) Statt _addr muss CertID mitgegeben werden. Vom CertID muss auf die Adresse geschlossen werden.
