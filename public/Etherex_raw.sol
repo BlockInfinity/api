@@ -710,26 +710,30 @@ contract Etherex_raw {
         return (askQuotes, askAmounts);
     }
 
-    function isAskOrdersInPeriodFromUser(address _owner, uint256 _period) constant returns (int256 rv1, uint256 rv2){
+    function isAskOrdersInPeriodFromUser(address _owner) constant returns (bool rv1){
         uint256 id_iter_ask = minAsk;
+        bool order_exist = true;
         while (orders[id_iter_ask].owner != _owner){
             id_iter_ask = orders[id_iter_ask].next;
             if(id_iter_ask == 0){
+                order_exist = false;
                 break;
             }
         }
-        return(orders[id_iter_ask].price, orders[id_iter_ask].volume);
+        return(order_exist);
     }
 
-    function isBidOrdersInPeriodFromUser(address _owner, uint256 _period) constant returns (int256 rv1, uint256 rv2){
+    function isBidOrdersInPeriodFromUser(address _owner) constant returns (bool rv1){
         uint256 id_iter_bid = maxBid;
+        bool order_exist = true;
         while (orders[id_iter_bid].owner != _owner){
             id_iter_bid = orders[id_iter_bid].next;
             if(id_iter_bid == 0){
+                order_exist = false;
                 break;
             }
         }
-        return(orders[id_iter_bid].price, orders[id_iter_bid].volume);
+        return(order_exist);
     }
 
 }
