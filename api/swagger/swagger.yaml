@@ -17,7 +17,7 @@ paths:
       description: "The endpoint which is to be accessed by the smartmeter. It is supposed to be called regularly periodically.
                     For produced energy use positive energy volume, for consumed use negative energy volume. Alongside the
                     energy a period must be specified of the smartcontract for which the smartmeter is providing information."
-      operationId: "smartMeterSettle"
+      operationId: "settle"
       consumes:
         - application/json
       produces:
@@ -38,7 +38,7 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-      x-swagger-router-controller: "Default"
+      x-swagger-router-controller: "settle_controller"
   /trade/buy:
     post:
       tags: 
@@ -67,7 +67,6 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/ErrorResponse"
-
       x-swagger-router-controller: "trade_controller"
   /trade/sell:
     post:
@@ -240,6 +239,16 @@ paths:
           description: "Server error"
       x-swagger-router-controller: "info_controller"
 definitions:
+  ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+  SuccessResponse:
+    properties:
+      succeded:
+        type: boolean
   buyRequest:
     required:
       - accountAddress
@@ -278,34 +287,27 @@ definitions:
         type: string
       type:
         type: string
-  settleRequest:
-    required:
-      - datetime
-      - volume
-      - type
-      - smartMeterAddress
-    properties:
-      volume:
-        type: number
-      datetime:
-        type: number
-      type:
-        type: string
-      smartMeterAddress:
-        type: string
-  ErrorResponse:
-    required:
-      - message
-    properties:
-      message:
-        type: string
-  SuccessResponse:
-    properties:
-      succeded:
-        type: boolean
   registerResponse:
     properties:
       userAddress:
+        type: string
+  settleRequest:
+    required:
+      - accountAddress
+      - password
+      - period
+      - volume
+      - type
+    properties:
+      accountAddress:
+        type: string
+      password:
+        type: string
+      volume:
+        type: number
+      period:
+        type: number
+      type:
         type: string
   bidQuotes:
     type: object
@@ -341,9 +343,4 @@ definitions:
     properties:
       balance:
         type: number
-    
   
-        
-        
-   
-

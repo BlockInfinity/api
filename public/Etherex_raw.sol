@@ -108,7 +108,7 @@ contract Etherex_raw {
         _;
     }
     modifier onlyOneOrderInPeriodPerUser() {
-        if (hasUserOrderInPeriod(msg.sender, currentPeriod)) throw;
+        if (hasUserAskOrderInPeriod(msg.sender) || hasUserBidOrderInPeriod(msg.sender)) throw;
         _;
     }
 
@@ -217,6 +217,14 @@ contract Etherex_raw {
 
     function getMatchingPrice(uint256 _period) constant returns(int256) {
         return matchingPrices[_period];
+    }
+
+    function getBidReservePrice(uint256 _period) constant returns(int256) {
+        return bidReservePrices[_period];
+    }
+
+    function getAskReservePrice(uint256 _period) constant returns(int256) {
+        return askReservePrices[_period];   
     }
 
     function haveAllUsersSettled(uint256 _period) constant returns (bool) onlyCertificateAuthorities() {
@@ -692,7 +700,6 @@ contract Etherex_raw {
         return (bidQuotes, bidAmounts);
     }
 
-
     int256[] askQuotes;
     uint256[] askAmounts;
     function getAskOrders() constant returns (int256[] rv1, uint256[] rv2) {
@@ -707,7 +714,7 @@ contract Etherex_raw {
         return (askQuotes, askAmounts);
     }
 
-    function isAskOrdersInPeriodFromUser(address _owner) constant returns (bool rv1){
+    function hasUserAskOrderInPeriod(address _owner) constant returns (bool rv1){
         uint256 id_iter_ask = minAsk;
         bool order_exist = true;
         while (orders[id_iter_ask].owner != _owner){
@@ -720,7 +727,7 @@ contract Etherex_raw {
         return(order_exist);
     }
 
-    function isBidOrdersInPeriodFromUser(address _owner) constant returns (bool rv1){
+    function hasUserBidOrderInPeriod(address _owner) constant returns (bool rv1){
         uint256 id_iter_bid = maxBid;
         bool order_exist = true;
         while (orders[id_iter_bid].owner != _owner){
@@ -733,5 +740,8 @@ contract Etherex_raw {
         return(order_exist);
     }
 
+    function hasUserAlreadySettledInPeriod(address _user, uint256 _period) constant returns (bool rv1){
+        return settleMapping[_period].alreadySettled[_user]);
+    }
 }
     

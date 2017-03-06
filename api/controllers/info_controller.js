@@ -36,10 +36,8 @@ function getState(req, res, next ) {
 
 function getMatchingPrice(req, res, next) {
     try {
-        
         var period = findPeriod(req);
         var matchingPrice = blockchainInterface.getMatchingPrice(period);
-        console.log(matchingPrice);
         res.statusCode = 200;
         res.end(JSON.stringify({ "period": period , "matchingPrice": matchingPrice }));
     } catch (error) {
@@ -51,13 +49,11 @@ function getMatchingPrice(req, res, next) {
 
 function getBidOrders(req, res, next) {
     try {
-        
         var orders = blockchainInterface.getBidOrders();
         var bidOrders = [];
         for (var i = 0; i < orders[0].length; i++) {
             bidOrders.push({"price": orders[0][i], "volume" : orders[1][i]});
         }
-         
         res.statusCode = 200;
         res.end(JSON.stringify({ "period" : "last", "bidOrders" : bidOrders }));
 
@@ -75,7 +71,6 @@ function getAskOrders(req, res, next) {
         for (var i = 0; i < orders[0].length; i++) {
             askOrders.push({"price": orders[0][i], "volume" : orders[1][i]});
         }
-
         res.statusCode = 200;
         res.end(JSON.stringify({ "period" : "last", "askOrders" : askOrders }));
         
@@ -100,30 +95,28 @@ function getBalance(req, res, next) {
     res.end();
 }
 
-// function getAskReserveOrders (req, res, next) {
-//     try {
-//         //not included in contract
+function getAskReserveOrders(req, res, next) {
+    try {
+        var period = findPeriod(req);
+        var askReserveOrders = blockchainInterface.getAskReservePrice(period);
+        res.statusCode = 200;
+        res.end(JSON.stringify({ "period": period , "askReserveOrders": askReserveOrders }));
+    } catch (error) {
+        res.statusCode = 500;
+        res.end('Blockchain error ' + error.message);
+    }
+    res.end();
+}
 
-//         res.statusCode = 200;
-
-//         res.end(JSON.stringify({"Reserve Ask Orders" : []}));
-
-//     } catch (error) {
-//         res.statusCode = 500;
-//         res.end('Blockchain error ' + error.message);
-//     }
-//     res.end();
-// }
-
-// function getBidReserveOrders (req, res, next) {
-//     try {
-//         res.statusCode = 200;
-
-//         res.end(JSON.stringify({"Reserve Bid Orders" : []}));
-
-//     } catch (error) {
-//         res.statusCode = 500;
-//         res.end('Blockchain error ' + error.message);
-//     }
-//     res.end();
-// }
+function getBidReserveOrders(req, res, next) {
+    try {
+        var period = findPeriod(req);
+        var bidReserveOrders = blockchainInterface.getBidReservePrice(period);
+        res.statusCode = 200;
+        res.end(JSON.stringify({ "period": period , "bidReserveOrders": bidReserveOrders }));
+    } catch (error) {
+        res.statusCode = 500;
+        res.end('Blockchain error ' + error.message);
+    }
+    res.end();
+}

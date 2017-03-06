@@ -1,9 +1,8 @@
 const blockchainInterface = require("./exchangeAPI/blockEnergyAPI.js");
 var util = require('util');
 
-
 module.exports = {
-   register:register,
+   register:register
 }
 
 function register(req, res, next) {
@@ -17,20 +16,16 @@ function register(req, res, next) {
             }
             console.log("before");
             blockchainInterface.register(req.swagger.params.registerRequest.value.password, user_type).then(function(user_address) {
-                console.log("success");
                 res.statusCode = 200;
                 res.end(JSON.stringify({ "userAddress": user_address }));
             }, function(reason) {
-                console.log("fehler");
                 res.statusCode = 500;
                 res.end('Blockchain error: No address received from register function!');
             });        
         }
        
     } catch (error) {
-        console.log("im catch");
         res.statusCode = 500;
         res.end('Blockchain error: ' + error.message);
-    }
-    
+    } 
 }

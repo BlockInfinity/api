@@ -50,6 +50,8 @@ function init() {
     } catch (err) {
         console.log("something happaned");
     }
+
+    // web3.personal.unlockAccount(_addr, "amalien", 1000);
 }
 
 // todo (mg): register funktion nimmt "_type" (enum: buyer,seller) entgegen und erstellt einen ethereum account.
@@ -103,6 +105,22 @@ function register(_user_password, _type) {
 
 // todo (mg) Statt _addr muss CertID mitgegeben werden. Vom CertID muss auf die Adresse geschlossen werden.
 function buy(_volume, _price, _addr, _password) {
+    // check user has no order in current period
+    if (etherex.hasUserBidOrderInPeriod(_addr)) {
+        throw new Error("User already submitted buy order in current period")
+    }
+    if (!_volume || volume <= 0) {
+        throw new Error("Volume must be provided and greater than 0")
+    }
+    if (_price === undefined) {
+        throw new Error("Price must be provided")
+    }
+    if (!_addr) {
+        throw new Error("User address must be provided")
+    }
+    if (!_password) {
+        throw new Error("Password must be provided")
+    }
 
     //Unlocking the account
     web3.personal.unlockAccount(_addr, _password, 1000);
@@ -113,6 +131,22 @@ function buy(_volume, _price, _addr, _password) {
 
 // todo (mg) Statt _addr muss CertID mitgegeben werden. Vom CertID muss auf die Adresse geschlossen werden.
 function sell(_volume, _price, _addr, _password) {
+    // check user has no order in current period
+    if (etherex.hasUserAskOrderInPeriod(_addr)) {
+        throw new Error("User already submitted sell order in current period")
+    }
+    if (!_volume || volume <= 0) {
+        throw new Error("Volume must be provided and greater than 0")
+    }
+    if (_price === undefined) {
+        throw new Error("Price must be provided")
+    }
+    if (!_addr) {
+        throw new Error("User address must be provided")
+    }
+    if (!_password) {
+        throw new Error("Password must be provided")
+    }
 
     //Unlocking the account
     web3.personal.unlockAccount(_addr, _password, 1000);
@@ -123,10 +157,29 @@ function sell(_volume, _price, _addr, _password) {
 
 // todo (mg) statt periode soll Zeit rein kommen und von zeit soll auf die periode geschlossen werden können
 // statt _addr muss es eine entsprechende certID geben, was nur die enbw als Daten-Einspeise-Entität bekommt
-function settle(_type, _volume, _period, _addr) {
+function settle(_type, _volume, _period, _addr, _password) {
+    // check user has not already settled in period
+    if (etherex.hasUserAlreadySettledInPeriod(_addr, _period)) {
+        throw new Error("User has already settled in period " + _period)
+    }
+    if (!_type || !(_type === 'consumer' || _type === 'producer')) {
+        throw new Error("Type must be either consumer or provider")
+    }
+    if (!_volume || volume <= 0) {
+        throw new Error("Volume must be provided and greater than 0")
+    }
+    if (_period < 0) {
+        throw new Error("Period must be greater or equal to 0")
+    }
+    if (!_addr) {
+        throw new Error("User address must be provided")
+    }
+    if (!_password) {
+        throw new Error("Password must be provided")
+    }
 
     //Unlocking the account
-    web3.personal.unlockAccount(_addr, "amalien", 1000);
+    web3.personal.unlockAccount(_addr, _password, 1000);
 
     let tx = etherex.settle(_type, _volume, _period, { from: _addr, gas: 20000000 });
     eth.awaitConsensus(tx, 800000);
@@ -141,6 +194,9 @@ function getAskOrders() {
 }
 
 function getMatchingPrice(_period) {
+    if (!_period) {
+        throw new Error("Period must be provided")
+    }
     return etherex.getMatchingPrice(_period);
 }
 
@@ -151,10 +207,25 @@ function getState() {
 }
 
 function getBalance(_addr) {
-    console.log(_addr);
-    return web3.fromWei(eth.getBalance(_addr));
+    if (_addr) {
+        throw new Error("User address must be provided")
+    }
+    return web3.fromWei(eth.getBalance(_addr), 'ether');
 }
 
+function getBidOrders() {
+    if (!_period) {
+        throw new Error("Period must be provided")
+    }
+    return etherex.getBidReservePrice(_period);
+}
+
+function getAskOrders() {
+    if (!_period) {
+        throw new Error("Period must be provided")
+    }
+    return etherex.getBidReservePrice(_period);
+}
 
 /////////////////////////////////////////////////////////////////////////// for debugging
 
@@ -163,14 +234,12 @@ function getBalance(_addr) {
 // ######################## tracking out of gas errors ##################
 // ######################################################################
 
-
 Object.getPrototypeOf(web3.eth).getTransactionReceiptAsync = function(txhash) {
     return new Promise(function(resolve, reject) {
         let receipt = eth.getTransactionReceipt(txhash);
         resolve(receipt);
     });
 }
-
 
 Object.getPrototypeOf(web3.eth).awaitConsensus = function(txhash, gasSent) {
 
@@ -212,7 +281,6 @@ function checkWork() {
 }
 
 function startMining() {
-
     client.call({ "jsonrpc": "2.0", "method": "miner_start", "params": [], "id": 74 }, function(err, res) {
         if (err) {
             console.log(err);
@@ -229,4 +297,3 @@ function stopMining() {
         console.log(res);
     });
 }
-
