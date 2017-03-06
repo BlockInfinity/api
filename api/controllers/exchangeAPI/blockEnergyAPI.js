@@ -80,12 +80,12 @@ function register(_user_password, _type) {
                     case "consumer":
                         var tx = etherex.registerConsumer(user_address, { from: eth.accounts[0], gas: 20000000 });
                         eth.awaitConsensus(tx, 800000);
-                        return resolve(user_adress);
+                        return resolve(user_address);
                         break;
                     case "producer":
                         var tx = etherex.registerProducer(user_address, { from: eth.accounts[0], gas: 20000000 });
                         eth.awaitConsensus(tx, 800000);
-                        return resolve(user_adress);
+                        return resolve(user_address);
                         break;
                     default:
                         return reject(new Error("Invalid user type: " + _type));
