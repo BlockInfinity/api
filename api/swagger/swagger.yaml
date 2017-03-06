@@ -120,12 +120,16 @@ paths:
         - info 
       description: "Get the balance of the user's account."
       operationId: "getBalance"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
       parameters:
-        name: address
-        in: querry
-        description: "The address of the account, which balance will be returned."
-        required: true
-        type: string
+        - name: "userAddress"
+          in: "query"
+          description: "The address of the account, whose balance will be returned."
+          type: "string"
+          required: true
       responses:
         200:
           description: "Returns the current balance from specific account."
@@ -287,9 +291,17 @@ definitions:
         type: string
       type:
         type: string
+<<<<<<< HEAD
   registerResponse:
     properties:
       userAddress:
+=======
+  balanceRequest:
+    required:
+      - address
+    properties:
+      address:
+>>>>>>> af285f195141867e57e93bf48cec4d5cab775a77
         type: string
   settleRequest:
     required:
