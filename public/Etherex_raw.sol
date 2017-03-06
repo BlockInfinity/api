@@ -316,7 +316,7 @@ contract Etherex_raw {
             matchingPrices[currentPeriod] = 2**128-1;
             return true;
         }
-
+        
         uint256 cumAskVol = 0;
         uint256 cumBidVol = 0;
 
@@ -326,9 +326,9 @@ contract Etherex_raw {
 
         uint256 currAsk = minAsk;
         uint256 currBid = maxBid;
-
+        
         uint256 next;
-
+        
         delete currMatchedAskOrderMapping;
         delete currmatchedBidOrders;
 
@@ -710,22 +710,27 @@ contract Etherex_raw {
         return (askQuotes, askAmounts);
     }
 
-    function getAskOrdersFromUser(address _owner, uint256 _period) constant returns (int256 rv1, uint256 rv2){
+    function isAskOrdersInPeriodFromUser(address _owner, uint256 _period) constant returns (int256 rv1, uint256 rv2){
         uint256 id_iter_ask = minAsk;
         while (orders[id_iter_ask].owner != _owner){
             id_iter_ask = orders[id_iter_ask].next;
+            if(id_iter_ask == 0){
+                break;
+            }
         }
         return(orders[id_iter_ask].price, orders[id_iter_ask].volume);
     }
 
-    function getBidOrdersFromUser(address _owner, uint256 _period) constant returns (int256 rv1, uint256 rv2){
+    function isBidOrdersInPeriodFromUser(address _owner, uint256 _period) constant returns (int256 rv1, uint256 rv2){
         uint256 id_iter_bid = maxBid;
         while (orders[id_iter_bid].owner != _owner){
             id_iter_bid = orders[id_iter_bid].next;
+            if(id_iter_bid == 0){
+                break;
+            }
         }
         return(orders[id_iter_bid].price, orders[id_iter_bid].volume);
     }
-
 
 }
     
