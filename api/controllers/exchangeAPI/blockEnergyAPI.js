@@ -5,11 +5,9 @@ const rpc = require('node-json-rpc');
 const eth = web3.eth;
 var etherex = web3.exchangeContract;
 
-
 var options = {
     port: 8545,
     host: 'localhost'
-
 };
 
 var client = new rpc.Client(options);
@@ -25,9 +23,7 @@ module.exports = {
     getBidOrders: getBidOrders,
     getMatchingPrice: getMatchingPrice,
     getState: getState
-
 }
-
 
 if (!etherex) {
     console.log("Exchange contract is not defined");

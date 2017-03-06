@@ -23,7 +23,6 @@ function findPeriod(req) {
 }
 
 function getState(req, res, next ) {
-
     try {
         var state_period_pair = blockchainInterface.getState();
         res.statusCode = 200;
@@ -36,7 +35,6 @@ function getState(req, res, next ) {
 }
 
 function getMatchingPrice(req, res, next) {
-
     try {
         
         var period = findPeriod(req);
@@ -51,7 +49,7 @@ function getMatchingPrice(req, res, next) {
     res.end();
 }
 
-function getBidOrders (req, res, next) {
+function getBidOrders(req, res, next) {
     try {
         //var period = findPeriod(req);
         var orders = blockchainInterface.getBidOrders();
@@ -77,7 +75,7 @@ function getBidOrders (req, res, next) {
     res.end();
 }
 
-function getAskOrders (req, res, next) {
+function getAskOrders(req, res, next) {
     try {
         var orders = blockchainInterface.getAskOrders();
 
@@ -103,7 +101,6 @@ function getAskOrders (req, res, next) {
 }
 
 function getBalance(req, res, next) {
-    
     try {
         var address = req.swagger.params.address.value;
         var balance = blockchainInterface.getBalance(address);
@@ -116,8 +113,6 @@ function getBalance(req, res, next) {
     }
     res.end();
 }
-
-
 
 // function getAskReserveOrders (req, res, next) {
 //     try {
