@@ -3,7 +3,7 @@ var util = require('util');
 
 module.exports = {
     submitSellRequest: submitSellRequest,
-    submitBuyRequest: submitSellRequest
+    submitBuyRequest: submitBuyRequest
 }
 
 function submitSellRequest(req, res, next) {
