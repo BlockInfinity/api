@@ -89,7 +89,7 @@ function register(_user_password, _type) {
                 var user_address = String(jsonObj.result);
 
                 web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
-
+                etherex.registerCertificateAuthority(eth.accounts[0], { from: eth.accounts[0], gas: 20000000 });
                 switch (_type) {
                     case "consumer":
                         var tx = etherex.registerConsumer(user_address, { from: eth.accounts[0], gas: 20000000 });
@@ -103,12 +103,12 @@ function register(_user_password, _type) {
                         return reject(new Error("Invalid user type: " + _type));
 
                     try {
-                         if (Number(getBalance(eth.accounts[0])) < 11 ) {
-                             console.log(" lol" );
-                             throw new Error();
-                         }
+                        //  if (Number(getBalance(eth.accounts[0])) < 11 ) {
+                        //      console.log(" lol" );
+                        //      throw new Error();
+                        //  }
                          console.log(" creating transaction" );
-                         eth.sendTransaction({from: eth.accounts[0], to: user_address, value: "10000000000000000000", gas:21000});
+                         eth.sendTransaction({from: eth.accounts[0], to: user_address, value: "10000000000000000000", gas:20000000});
                          return resolve(user_address);
                     } catch (err) {
                         return reject(new Error("Not enough money in master account! Couldn't transfer eth!"));
