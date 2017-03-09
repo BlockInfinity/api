@@ -77,6 +77,7 @@ contract Etherex_raw {
         uint256 sumConsumed;
         uint256 excess;
         uint256 lack;
+        bool isSettled;
         SettleUserData[] askSmData;
         SettleUserData[] bidSmData;
     }
@@ -103,12 +104,8 @@ contract Etherex_raw {
         if (userType[identities[msg.sender]] != 1 && userType[identities[msg.sender]] != 2 ) throw;
         _;
     }
-    modifier onlyAllUsersSettled() {
-        if (!haveAllUsersSettled()) throw;
-        _;
-    }
     modifier onlyOneOrderInPeriodPerUser() {
-        if (hasUserOrderInPeriod(msg.sender, currentPeriod)) throw;
+        if (hasUserAskOrderInPeriod(msg.sender) || hasUserBidOrderInPeriod(msg.sender)) throw;
         _;
     }
 
@@ -186,7 +183,7 @@ contract Etherex_raw {
         if(currState == 0 && ((block.number - startBlock) >= 10 && (block.number - startBlock) < 25)) {
             //Matching should start
             matching();
-            min Ask = 0;
+            minAsk = 0;
             maxBid = 0;
             // move on to state 1
             currState = 1;
@@ -215,11 +212,39 @@ contract Etherex_raw {
         return currentPeriod;
     }
 
+    function isPeriodSettled(uint256 _period) constant returns(bool) {
+        return settleMapping[_period].isSettled;
+    }
+
     function getMatchingPrice(uint256 _period) constant returns(int256) {
         return matchingPrices[_period];
     }
 
-    function haveAllUsersSettled(uint256 _period) constant returns (bool) onlyCertificateAuthorities() {
+    function getBidReservePrice(uint256 _period) constant returns(int256) {
+        return bidReservePrices[_period];
+    }
+
+    function getAskReservePrice(uint256 _period) constant returns(int256) {
+        return askReservePrices[_period];   
+    }
+
+    // function getMatchedAskOrders(uint256 _period) constant returns(uint256) {
+    //     return matchedAskOrders[_period];
+    // }
+
+    // function getMatchedBidOrders(uint256 _period) constant returns(uint256) {
+    //     return matchedBidOrders[_period];
+    // }
+
+    function getMatchedAskOrdersForUser(uint256 _period, address _owner) constant returns(uint256) {
+        return matchedAskOrders[_period][_owner];
+    }
+
+    function getMatchedBidOrdersForUser(uint256 _period, address _owner) constant returns(uint256) {
+        return matchedBidOrders[_period][_owner];
+    }
+
+    function haveAllUsersSettled(uint256 _period) onlyCertificateAuthorities() constant returns (bool) {
         return settleMapping[_period].settleCounter == numUniqueUserOrders[_period];
     }
       
@@ -616,7 +641,15 @@ contract Etherex_raw {
         settleMapping[_period].alreadySettled[_user] = true;
     }
 
-    function endSettle(uint256 _period) onlyAllUsersSettled() onlyCertificateAuthorities() {
+    event ShowDiff(string msg, int256 value);
+
+    int256 shareOfEachUser; 
+
+    function endSettle(uint256 _period) onlyCertificateAuthorities() {
+
+        if (settleMapping[_period].settleCounter != numUniqueUserOrders[_period]) {
+            return;
+        }
 
         int256 diff = int256(settleMapping[_period].excess) - int256(settleMapping[_period].lack);
         int256 smVolume = 0;
@@ -671,6 +704,8 @@ contract Etherex_raw {
         for (uint256 l=0; l<numUsers; l++) {  
             colleteral[l] += shareOfEachUser;     
         }
+
+        settleMapping[_period].isSettled = true;
     }
 
 
@@ -707,7 +742,7 @@ contract Etherex_raw {
         return (askQuotes, askAmounts);
     }
 
-    function isAskOrdersInPeriodFromUser(address _owner) constant returns (bool rv1){
+    function hasUserAskOrderInPeriod(address _owner) constant returns (bool rv1){
         uint256 id_iter_ask = minAsk;
         bool order_exist = true;
         while (orders[id_iter_ask].owner != _owner){
@@ -720,7 +755,7 @@ contract Etherex_raw {
         return(order_exist);
     }
 
-    function isBidOrdersInPeriodFromUser(address _owner) constant returns (bool rv1){
+    function hasUserBidOrderInPeriod(address _owner) constant returns (bool rv1){
         uint256 id_iter_bid = maxBid;
         bool order_exist = true;
         while (orders[id_iter_bid].owner != _owner){
@@ -731,6 +766,10 @@ contract Etherex_raw {
             }
         }
         return(order_exist);
+    }
+
+    function hasUserAlreadySettledInPeriod(address _user, uint256 _period) constant returns (bool rv1){
+        return settleMapping[_period].alreadySettled[_user];
     }
 
 }

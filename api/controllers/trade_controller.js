@@ -6,15 +6,16 @@ module.exports = {
     submitBuyRequest: submitSellRequest
 }
 
-function submitSellRequest(req, res, next ) {
+function submitSellRequest(req, res, next) {
     try {
         var accountAddress = req.swagger.params.sellRequest.value.accountAddress;
         var password =  req.swagger.params.sellRequest.value.password;
-        var volume = req.swagger.params.sellRequest.value.value;
-         if (typeof req.swagger.params.sellRequest.value.price !== "undefined" && req.swagger.params.sellRequest.value.price != null ) {
-            var price = req.swagger.params.sellRequest.value.price;
+        var volume = Number(req.swagger.params.sellRequest.value.value);
+        if (typeof req.swagger.params.sellRequest.value.price !== "undefined" && req.swagger.params.sellRequest.value.price != null ) {
+            var price = Number(req.swagger.params.sellRequest.value.price);
         } else {
-            throw new Error("A price is required to submit your selling order!")
+            res.statusCode = 500;
+            res.end("A price is required to submit your selling order!")
         }
        
         blockchainInterface.sell(volume, price, accountAddress, password);
@@ -28,11 +29,13 @@ function submitSellRequest(req, res, next ) {
 
 function submitBuyRequest(req, res, next) {
      try {
-        var accountAddress = req.swagger.params.sellRequest.value.accountAddress;
-        var password =  req.swagger.params.sellRequest.value.password;
-        var volume = req.swagger.params.sellRequest.value.value;
-        if (typeof req.swagger.params.sellRequest.value.price !== "undefined" && req.swagger.params.sellRequest.value.price != 0) {
-            var price = req.swagger.params.sellRequest.value.price;
+         console.log("in trade");
+        var accountAddress = req.swagger.params.buyRequest.accountAddress.value;
+        console.log("in trade" + accountAddress);
+        var password =  req.swagger.params.buyRequest.value.password.value;
+        var volume = Number(req.swagger.params.buyRequest.value.value);
+        if (typeof req.swagger.params.buyRequest.price.value !== "undefined" && req.swagger.params.buyRequest.price.value != 0) {
+            var price = Number(req.swagger.params.buyRequest.price.value);
         } else {
             var price = Number.MAX_VALUE;
         }

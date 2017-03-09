@@ -14,7 +14,6 @@ try {
 
     var source = fs.readFileSync('./public/Etherex_raw.sol').toString();
 
-
     source = source.replace('\n', '');
     compiled = web3.eth.compile.solidity(source);
     abi = compiled['<stdin>:Etherex_raw'].info.abiDefinition;
