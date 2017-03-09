@@ -404,6 +404,7 @@ definitions:
   registerResponse:
     properties:
       userAddress:
+        type: string
   matchingPriceResponse:
     properties:
       period:
