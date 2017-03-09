@@ -74,7 +74,7 @@ function init() {
 // CertID: wird benötigt für buy / sell
 // Public address: account dient als Prepaid Konto. 
 function register(_user_password, _type) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
         if (!_type || !(_type === 'consumer' || _type === 'producer')) {
             return reject('invalid arguments');
         }
@@ -87,9 +87,9 @@ function register(_user_password, _type) {
                 console.log("in one", jsonObj.result);
 
                 var user_address = String(jsonObj.result);
-
                 web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
                 etherex.registerCertificateAuthority(eth.accounts[0], { from: eth.accounts[0], gas: 20000000 });
+
                 switch (_type) {
                     case "consumer":
                         var tx = etherex.registerConsumer(user_address, { from: eth.accounts[0], gas: 20000000 });
@@ -101,24 +101,28 @@ function register(_user_password, _type) {
                         break;
                     default:
                         return reject(new Error("Invalid user type: " + _type));
-
-                    try {
-                        //  if (Number(getBalance(eth.accounts[0])) < 11 ) {
-                        //      console.log(" lol" );
-                        //      throw new Error();
-                        //  }
-                         console.log(" creating transaction" );
-                         eth.sendTransaction({from: eth.accounts[0], to: user_address, value: "10000000000000000000", gas:20000000});
-                         return resolve(user_address);
-                    } catch (err) {
-                        return reject(new Error("Not enough money in master account! Couldn't transfer eth!"));
-                    }
-                   
                 }
+
+                try {
+
+                    let balance = web3.fromWei(eth.getBalance(eth.accounts[0])).toNumber();
+
+                    if (balance < 11) {
+                        throw new Error();
+                    }
+
+                    eth.sendTransaction({ from: eth.accounts[0], to: user_address, value: "10000000000000000000", gas: 20000000 });
+                    return resolve(user_address);
+                } catch (err) {
+                    return reject(new Error("Not enough money in master account! Couldn't transfer eth!"));
+                }
+
             }
-        }); 
+
+        });
     })
 }
+
 
 // todo (mg) Statt _addr muss CertID mitgegeben werden. Vom CertID muss auf die Adresse geschlossen werden.
 function buy(_volume, _price, _addr, _password) {
