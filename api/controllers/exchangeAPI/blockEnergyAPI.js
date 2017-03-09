@@ -126,7 +126,7 @@ function buy(_volume, _price, _addr, _password) {
     if (etherex.hasUserBidOrderInPeriod(_addr)) {
         throw new Error("User already submitted buy order in current period")
     }
-    if (!_volume || volume <= 0) {
+    if (!_volume || _volume <= 0) {
         throw new Error("Volume must be provided and greater than 0")
     }
     if (_price === undefined) {
@@ -152,7 +152,7 @@ function sell(_volume, _price, _addr, _password) {
     if (etherex.hasUserAskOrderInPeriod(_addr)) {
         throw new Error("User already submitted sell order in current period")
     }
-    if (!_volume || volume <= 0) {
+    if (!_volume || _volume <= 0) {
         throw new Error("Volume must be provided and greater than 0")
     }
     if (_price === undefined) {

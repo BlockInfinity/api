@@ -8,11 +8,12 @@ module.exports = {
 
 function submitSellRequest(req, res, next) {
     try {
-        var accountAddress = req.swagger.params.sellRequest.value.accountAddress;
-        var password =  req.swagger.params.sellRequest.value.password;
-        var volume = Number(req.swagger.params.sellRequest.value.volume);
-        if (typeof req.swagger.params.sellRequest.value.price !== "undefined" && req.swagger.params.sellRequest.value.price != null ) {
-            var price = Number(req.swagger.params.sellRequest.value.price);
+        var values = req.swagger.params.sellRequest.value;
+        var accountAddress = values.accountAddress;
+        var password =  values.password;
+        var volume = Number(values.volume);
+        if (typeof values.price !== "undefined" && values.price != null ) {
+            var price = Number(values.price);
         } else {
             res.statusCode = 500;
             res.end("A price is required to submit your selling order!")
@@ -29,11 +30,12 @@ function submitSellRequest(req, res, next) {
 
 function submitBuyRequest(req, res, next) {
      try {
-        var accountAddress = req.swagger.params.buyRequest.value.accountAddress;
-        var password =  req.swagger.params.buyRequest.value.password;
-        var volume = Number(req.swagger.params.buyRequest.value.volume);
-        if (typeof req.swagger.params.buyRequest.value.price !== "undefined" && req.swagger.params.buyRequest.value.price != 0) {
-            var price = Number(req.swagger.params.buyRequst.value.price);
+        var values = req.swagger.params.buyRequest.value;
+        var accountAddress = values.accountAddress;
+        var password =  values.password;
+        var volume = Number(values.volume);
+        if (typeof values.price !== "undefined" && values.price != 0) {
+            var price = Number(values.price);
         } else {
             var price = Number.MAX_VALUE;
         }
