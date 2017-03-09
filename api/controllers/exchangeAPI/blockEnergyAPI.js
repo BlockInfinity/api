@@ -55,7 +55,7 @@ function init() {
         // have called the settle method
         setInterval(function() {
             var currentPeriod = etherex.getCurrPeriod();
-            for (int p=0; p<currentPeriod; p++) {
+            for (var p=0; p<currentPeriod; p++) {
                 if (etherex.haveAllUsersSettled(p) && !etherex.isPeriodSettled(p)) {
                     etherex.endSettle(p);
                 }
@@ -103,9 +103,11 @@ function register(_user_password, _type) {
                         return reject(new Error("Invalid user type: " + _type));
 
                     try {
-                         if (getBalance(eth.accounts[0]) < 11 ) {
+                         if (Number(getBalance(eth.accounts[0])) < 11 ) {
+                             console.log(" lol" );
                              throw new Error();
                          }
+                         console.log(" creating transaction" );
                          eth.sendTransaction({from: eth.accounts[0], to: user_address, value: "10000000000000000000", gas:21000});
                          return resolve(user_address);
                     } catch (err) {
@@ -222,7 +224,7 @@ function getState() {
 }
 
 function getBalance(_addr) {
-    if (_addr) {
+    if (!_addr) {
         throw new Error("User address must be provided")
     }
     return web3.fromWei(eth.getBalance(_addr), 'ether');

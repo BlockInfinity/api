@@ -167,7 +167,8 @@ function getMatchedBidOrdersForUser(req, res, next) {
 
 function getBalance(req, res, next) {
     try {
-        var address = req.swagger.params.address.value;
+	
+        var address = req.swagger.params.userAddress.value;
         var balance = blockchainInterface.getBalance(address);
         balance = balance.c[0];
         res.statusCode = 200;
