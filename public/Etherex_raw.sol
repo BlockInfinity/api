@@ -104,10 +104,6 @@ contract Etherex_raw {
         if (userType[identities[msg.sender]] != 1 && userType[identities[msg.sender]] != 2 ) throw;
         _;
     }
-    modifier onlyAllUsersSettled() {
-        if (!haveAllUsersSettled()) throw;
-        _;
-    }
     modifier onlyOneOrderInPeriodPerUser() {
         if (hasUserAskOrderInPeriod(msg.sender) || hasUserBidOrderInPeriod(msg.sender)) throw;
         _;
@@ -187,7 +183,7 @@ contract Etherex_raw {
         if(currState == 0 && ((block.number - startBlock) >= 10 && (block.number - startBlock) < 25)) {
             //Matching should start
             matching();
-            min Ask = 0;
+            minAsk = 0;
             maxBid = 0;
             // move on to state 1
             currState = 1;
@@ -248,7 +244,7 @@ contract Etherex_raw {
         return matchedBidOrders[_period][_owner];
     }
 
-    function haveAllUsersSettled(uint256 _period) constant returns (bool) onlyCertificateAuthorities() {
+    function haveAllUsersSettled(uint256 _period) onlyCertificateAuthorities() constant returns (bool) {
         return settleMapping[_period].settleCounter == numUniqueUserOrders[_period];
     }
       
@@ -645,7 +641,15 @@ contract Etherex_raw {
         settleMapping[_period].alreadySettled[_user] = true;
     }
 
-    function endSettle(uint256 _period) onlyAllUsersSettled() onlyCertificateAuthorities() {
+    event ShowDiff(string msg, int256 value);
+
+    int256 shareOfEachUser; 
+
+    function endSettle(uint256 _period) onlyCertificateAuthorities() {
+
+        if (settleMapping[_period].settleCounter != numUniqueUserOrders[_period]) {
+            return;
+        }
 
         int256 diff = int256(settleMapping[_period].excess) - int256(settleMapping[_period].lack);
         int256 smVolume = 0;
@@ -723,6 +727,7 @@ contract Etherex_raw {
         return (bidQuotes, bidAmounts);
     }
 
+
     int256[] askQuotes;
     uint256[] askAmounts;
     function getAskOrders() constant returns (int256[] rv1, uint256[] rv2) {
@@ -764,7 +769,8 @@ contract Etherex_raw {
     }
 
     function hasUserAlreadySettledInPeriod(address _user, uint256 _period) constant returns (bool rv1){
-        return settleMapping[_period].alreadySettled[_user]);
+        return settleMapping[_period].alreadySettled[_user];
     }
+
 }
     
