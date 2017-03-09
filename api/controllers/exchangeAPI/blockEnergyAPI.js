@@ -88,6 +88,8 @@ function register(_user_password, _type) {
 
                 var user_address = String(jsonObj.result);
 
+                web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
+
                 switch (_type) {
                     case "consumer":
                         var tx = etherex.registerConsumer(user_address, { from: eth.accounts[0], gas: 20000000 });
@@ -101,7 +103,6 @@ function register(_user_password, _type) {
                         return reject(new Error("Invalid user type: " + _type));
 
                     try {
-                         web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
                          if (getBalance(eth.accounts[0]) < 11 ) {
                              throw new Error();
                          }
