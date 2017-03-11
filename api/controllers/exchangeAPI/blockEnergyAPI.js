@@ -24,7 +24,8 @@ module.exports = {
     getAskOrders: getAskOrders,
     getBidOrders: getBidOrders,
     getMatchingPrice: getMatchingPrice,
-    getState: getState
+    getState: getState,
+    getAllMatchingPrices: getAllMatchingPrices
 }
 
 if (!etherex) {
@@ -33,18 +34,40 @@ if (!etherex) {
     console.log("Exchange contract with address", etherex.address, "loaded!");
 }
 
-//  establish rpc connection to test chain
+// ######################################################################
+// ######################## Caching functionality #######################
+// ######################################################################
 
-/*
-Annahmen zur Vereinfachung:
-- eth.accounts[0] ist certificate authority
-- certificateID ist einfach die Adresse der user
-- settle funktion wird auch einfach durch angaben der user address aufgerufen
-*/
+var mysql = require("mysql");
 
-// todo (mg) falls contract neu deployed, wird mit init der erste account als certificate authority registriert. 
-// Zukünftig muss das direkt im Konstruktor aufgerufen werden
-// todo (mg) auch enbw muss ich als entität registriert werden, der es einzigst gestattet ist die settle funktoin aufzurufen
+var connection = mysql.createConnection({
+    host: "localhost",
+    user: "dex",
+    password: "amalien",
+    database: "swaggerApiDB"
+});
+
+// todo (mg) error needs to be displayed. Right now i suppress any errors with ignore in sql statement
+function getAndSaveMatchingPriceHistory() {
+
+    let currPeriod = etherex.getCurrPeriod().toNumber();
+    for (let i = 0; i < currPeriod; i++) {
+        let res = etherex.getMatchingPrice(i).toNumber();
+        let post = { period: i, price: res };
+        let query = connection.query('insert ignore into matchingPrices set ?', post, function(err, res) {
+            if (err) {
+                console.log("MySql error:", err);
+            }
+        });
+    }
+}
+
+getAndSaveMatchingPriceHistory();
+
+// ######################################################################
+// ######################## functions that change the state #############
+// ######################################################################
+
 function init() {
     try {
         web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
@@ -55,7 +78,7 @@ function init() {
         // have called the settle method
         setInterval(function() {
             var currentPeriod = etherex.getCurrPeriod();
-            for (var p=0; p<currentPeriod; p++) {
+            for (var p = 0; p < currentPeriod; p++) {
                 if (etherex.haveAllUsersSettled(p) && !etherex.isPeriodSettled(p)) {
                     etherex.endSettle(p);
                 }
@@ -206,6 +229,25 @@ function settle(_type, _volume, _period, _addr, _password) {
     eth.awaitConsensus(tx, 800000);
 }
 
+// ######################################################################
+// ######################## Getters #####################################
+// ######################################################################
+
+
+function getAllMatchingPrices() {
+    return new Promise(function(resolve, reject) {
+        connection.query("select * from matchingPrices", function(err, rows, fields) {
+            if (err) {
+                reject(err);
+            } else {
+                console.log(JSON.stringify(rows));
+                resolve(JSON.stringify(rows));
+            }
+        });
+    });
+}
+
+
 function getBidOrders() {
     return etherex.getBidOrders();
 }
@@ -215,10 +257,12 @@ function getAskOrders() {
 }
 
 function getMatchingPrice(_period) {
-    if (!_period) {
+    if (typeof _period == "undefined") {
         throw new Error("Period must be provided")
     }
-    return etherex.getMatchingPrice(_period);
+    let res = etherex.getMatchingPrice(_period).toNumber();
+    console.log(res);
+    return res;
 }
 
 function getState() {
@@ -283,8 +327,6 @@ function getMatchedAskOrdersForUser(_period, _addr) {
     }
     return etherex.getMatchedAskOrdersForUser(_period, _addr);
 }
-
-/////////////////////////////////////////////////////////////////////////// for debugging
 
 
 // ######################################################################
@@ -354,3 +396,6 @@ function stopMining() {
         console.log(res);
     });
 }
+
+
+

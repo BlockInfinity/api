@@ -12,9 +12,10 @@
     "express": "^4.14.1",
     "swagger-connect": "^0.1.0",
     "web3": "^0.18.2",
-    "co" : "~4.6.0"
+    "co": "~4.6.0"
   },
   "devDependencies": {
+    "mysql": "^2.13.0",
     "node-json-rpc": "0.0.1",
     "should": "^7.1.0",
     "supertest": "^1.0.0"

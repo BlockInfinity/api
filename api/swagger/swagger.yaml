@@ -336,6 +336,23 @@ paths:
         500:
           description: "Server error"
       x-swagger-router-controller: "info_controller"
+  /info/allMatchingPrices:
+    get:
+      tags:
+        - info
+      description: "Get all matching prices"
+      operationId: "getAllMatchingPrices"
+      responses:
+        200:
+          description: "Returns matching prices as json array"
+          schema:
+            $ref: "#/definitions/getAllMatchingPricesResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      x-swagger-router-controller: "info_controller"
+
   /info/state:
     get:
       tags: 
@@ -352,7 +369,21 @@ paths:
         500:
           description: "Server error"
       x-swagger-router-controller: "info_controller"
+
 definitions:
+
+  getAllMatchingPricesResponse:
+      type: array
+      items:
+        $ref: "#/definitions/matchingInfo"
+
+  matchingInfo:
+    properties:
+      period:
+        type: number
+      price:
+        type: number
+
   ErrorResponse:
     required:
       - message

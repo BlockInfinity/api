@@ -8,7 +8,7 @@ try {
     web3.eth.defaulAccount = web3.eth.accounts[0];
 
 
-    var contractAddress = '0x6433f16d5ce3ed10bed97258bd934073c8570fa6';
+    var contractAddress = '0xd83fa77c38d47a3452089c968c4cc9f5afaca9c2';
     var compiled;
     var abi;
 

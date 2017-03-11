@@ -2,33 +2,34 @@ const blockchainInterface = require("./exchangeAPI/blockEnergyAPI.js");
 var util = require('util');
 
 module.exports = {
-    getBalance:getBalance,
-    getAskOrders:getAskOrders,
-    getBidOrders:getBidOrders,
-    getAskReservePrice:getAskReservePrice,
-    getBidReservePrice:getBidReservePrice,
-    getMatchedAskOrders:getMatchedAskOrders,
-    getMatchedBidOrders:getMatchedBidOrders,
-    getMatchedAskOrdersForUser:getMatchedAskOrdersForUser,
-    getMatchedBidOrdersForUser:getMatchedBidOrdersForUser,
-    getMatchingPrice:getMatchingPrice,
-    getState:getState,
-    getBalance:getBalance
+    getBalance: getBalance,
+    getAskOrders: getAskOrders,
+    getBidOrders: getBidOrders,
+    getAskReservePrice: getAskReservePrice,
+    getBidReservePrice: getBidReservePrice,
+    getMatchedAskOrders: getMatchedAskOrders,
+    getMatchedBidOrders: getMatchedBidOrders,
+    getMatchedAskOrdersForUser: getMatchedAskOrdersForUser,
+    getMatchedBidOrdersForUser: getMatchedBidOrdersForUser,
+    getMatchingPrice: getMatchingPrice,
+    getAllMatchingPrices: getAllMatchingPrices,
+    getState: getState,
+    getBalance: getBalance
 }
 
 function findPeriod(req) {
-    if (typeof req.swagger.params.period.value === "undefined" || req.swagger.params.period.value == null || req.swagger.params.period.value < 0)  {
+    if (typeof req.swagger.params.period.value === "undefined" || req.swagger.params.period.value == null || req.swagger.params.period.value < 0) {
         return blockchainInterface.getState()[1];
     } else {
         return req.swagger.params.period.value;
     }
 }
 
-function getState(req, res, next ) {
+function getState(req, res, next) {
     try {
         var state_period_pair = blockchainInterface.getState();
         res.statusCode = 200;
-        res.end(JSON.stringify({ "state": state_period_pair[0] , "period": state_period_pair[1] }));
+        res.end(JSON.stringify({ "state": state_period_pair[0], "period": state_period_pair[1] }));
     } catch (error) {
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
@@ -41,7 +42,7 @@ function getMatchingPrice(req, res, next) {
         var period = findPeriod(req);
         var matchingPrice = blockchainInterface.getMatchingPrice(period);
         res.statusCode = 200;
-        res.end(JSON.stringify({ "period": period , "matchingPrice": matchingPrice }));
+        res.end(JSON.stringify({ "period": period, "matchingPrice": matchingPrice }));
     } catch (error) {
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
@@ -55,10 +56,10 @@ function getBidOrders(req, res, next) {
         var orders = blockchainInterface.getBidOrders();
         var bidOrders = [];
         for (var i = 0; i < orders[0].length; i++) {
-            bidOrders.push({"price": orders[0][i], "volume" : orders[1][i]});
+            bidOrders.push({ "price": orders[0][i], "volume": orders[1][i] });
         }
         res.statusCode = 200;
-        res.end(JSON.stringify({ "period" : period, "bidOrders" : bidOrders }));
+        res.end(JSON.stringify({ "period": period, "bidOrders": bidOrders }));
 
     } catch (error) {
         res.statusCode = 500;
@@ -73,11 +74,11 @@ function getAskOrders(req, res, next) {
         var orders = blockchainInterface.getAskOrders();
         var askOrders = [];
         for (var i = 0; i < orders[0].length; i++) {
-            askOrders.push({"price": orders[0][i], "volume" : orders[1][i]});
+            askOrders.push({ "price": orders[0][i], "volume": orders[1][i] });
         }
         res.statusCode = 200;
-        res.end(JSON.stringify({ "period" : period, "askOrders" : askOrders }));
-        
+        res.end(JSON.stringify({ "period": period, "askOrders": askOrders }));
+
     } catch (error) {
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
@@ -143,7 +144,7 @@ function getMatchedAskOrdersForUser(req, res, next) {
         var address = req.swagger.params.address.value;
         var matchedAskOrders = blockchainInterface.getMatchedAskOrdersForUser(period, address);
         res.statusCode = 200;
-        res.end(JSON.stringify({ "period": period , "matchedAskOrders": matchedAskOrders }));
+        res.end(JSON.stringify({ "period": period, "matchedAskOrders": matchedAskOrders }));
     } catch (error) {
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
@@ -157,7 +158,7 @@ function getMatchedBidOrdersForUser(req, res, next) {
         var address = req.swagger.params.address.value;
         var matchedBidOrders = blockchainInterface.getMatchedBidOrdersForUser(period, address);
         res.statusCode = 200;
-        res.end(JSON.stringify({ "period": period , "matchedBidOrders": matchedBidOrders }));
+        res.end(JSON.stringify({ "period": period, "matchedBidOrders": matchedBidOrders }));
     } catch (error) {
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
@@ -167,7 +168,6 @@ function getMatchedBidOrdersForUser(req, res, next) {
 
 function getBalance(req, res, next) {
     try {
-	
         var address = req.swagger.params.userAddress.value;
         var balance = blockchainInterface.getBalance(address);
         balance = balance.c[0];
@@ -178,4 +178,18 @@ function getBalance(req, res, next) {
         res.end('Blockchain error ' + error.message);
     }
     res.end();
+}
+
+function getAllMatchingPrices(req, res, next) {
+    try {
+        blockchainInterface.getAllMatchingPrices().then(function(prices) {
+            res.end(prices);
+        }, function(reason) {
+            res.statusCode = 500;
+            res.end('Blockchain error: No address received from register function!');
+        });
+    } catch (error) {
+        res.statusCode = 500;
+        res.end('Blockchain error ' + error.message);
+    }
 }
