@@ -95,7 +95,7 @@ paths:
     post:
       tags: 
         - authority    
-      description: "Registers a new user account, given a password and an user type. Returns the address of the newly created account. May only be invoked by users of 'Authority' status. "
+      description: "Registers a new user account, given a password and an user type. Returns the address of the newly created account. May only be invoked by users of 'Authority' status. \"type\" must be \"consumer\" or \"producer\"."
       operationId: "register"
       parameters:
         - name: "registerRequest"

@@ -127,43 +127,43 @@ function register(_user_password, _type) {
 // todo (mg) Statt _addr muss CertID mitgegeben werden. Vom CertID muss auf die Adresse geschlossen werden.
 function buy(_volume, _price, _addr, _password) {
     // check user has no order in current period
-    if (etherex.hasUserBidOrderInPeriod(_addr)) {
-        throw new Error("User already submitted buy order in current period")
+
+    if (!_addr) {
+        throw new Error("User address must be provided")
     }
+    // if (etherex.hasUserBidOrderInPeriod(_addr)) {
+    //     throw new Error("User already submitted buy order in current period")
+    // }
     if (!_volume || _volume <= 0) {
         throw new Error("Volume must be provided and greater than 0")
     }
     if (_price === undefined) {
         throw new Error("Price must be provided")
     }
-    if (!_addr) {
-        throw new Error("User address must be provided")
-    }
     if (!_password) {
         throw new Error("Password must be provided")
     }
-
+    console.log("Buy: Adresse: ", _addr, ", Passwort: ", _password, ", Volume: ", _volume, ", Price: ", _price);
     //Unlocking the account
-    web3.personal.unlockAccount(_addr, _password, 1000);
-
-    let tx = etherex.submitBid(_volume, _price, { from: _addr, gas: 20000000 });
+    web3.personal.unlockAccount(_addr, _password,5);
+    let tx = etherex.submitBid(_price, _volume, { from: _addr, gas: 20000000 });
     eth.awaitConsensus(tx, 20000000);
 }
 
 // todo (mg) Statt _addr muss CertID mitgegeben werden. Vom CertID muss auf die Adresse geschlossen werden.
 function sell(_volume, _price, _addr, _password) {
     // check user has no order in current period
-    if (etherex.hasUserAskOrderInPeriod(_addr)) {
-        throw new Error("User already submitted sell order in current period")
+    if (!_addr) {
+        throw new Error("User address must be provided")
     }
+    // if (etherex.hasUserAskOrderInPeriod(_addr)) {
+    //     throw new Error("User already submitted sell order in current period")
+    // }
     if (!_volume || _volume <= 0) {
         throw new Error("Volume must be provided and greater than 0")
     }
     if (_price === undefined) {
         throw new Error("Price must be provided")
-    }
-    if (!_addr) {
-        throw new Error("User address must be provided")
     }
     if (!_password) {
         throw new Error("Password must be provided")
