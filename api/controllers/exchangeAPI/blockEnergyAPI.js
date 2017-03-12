@@ -62,7 +62,7 @@ function getAndSaveMatchingPriceHistory() {
     }
 }
 
-getAndSaveMatchingPriceHistory();
+setInterval(getAndSaveMatchingPriceHistory, 30000);
 
 // ######################################################################
 // ######################## functions that change the state #############
