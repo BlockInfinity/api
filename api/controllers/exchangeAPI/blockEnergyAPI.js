@@ -44,7 +44,7 @@ var connection = mysql.createConnection({
     host: "localhost",
     user: "dex",
     password: "amalien",
-    database: "swaggerApiDB"
+    database: "apidb"
 });
 
 // todo (mg) error needs to be displayed. Right now i suppress any errors with ignore in sql statement
