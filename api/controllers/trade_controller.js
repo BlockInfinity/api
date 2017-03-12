@@ -39,7 +39,7 @@ function submitBuyRequest(req, res, next) {
         } else {
             var price = Number.MAX_VALUE;
         }
-       
+
         blockchainInterface.buy(volume, price, accountAddress, password);
         res.statusCode = 200;
     } catch (error) {

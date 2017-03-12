@@ -52,7 +52,7 @@ function getMatchingPrice(req, res, next) {
 
 function getBidOrders(req, res, next) {
     try {
-        var period = findPeriod(req);
+        var period = blockchainInterface.getState()[1];
         var orders = blockchainInterface.getBidOrders();
         var bidOrders = [];
         for (var i = 0; i < orders[0].length; i++) {
@@ -70,7 +70,7 @@ function getBidOrders(req, res, next) {
 
 function getAskOrders(req, res, next) {
     try {
-        var period = findPeriod(req);
+        var period = blockchainInterface.getState()[1];
         var orders = blockchainInterface.getAskOrders();
         var askOrders = [];
         for (var i = 0; i < orders[0].length; i++) {
