@@ -1,4 +1,4 @@
-const blockchainInterface = require("./exchangeAPI/blockEnergyAPI.js");
+const blockchainInterface = require("./exchangeAPI/chainApi.js");
 var util = require('util');
 
 module.exports = {

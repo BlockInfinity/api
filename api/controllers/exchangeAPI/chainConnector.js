@@ -8,21 +8,21 @@ try {
     web3.eth.defaulAccount = web3.eth.accounts[0];
 
 
-    var contractAddress = '0x9755152bba403a3cab662305f12ae06d32ef43af';
+    var contractAddress = '0x8a5bce94a4f1da8105a6e53bd63f4c665f29a782';
     var compiled;
     var abi;
 
-    var source = fs.readFileSync('./public/Etherex_raw.sol').toString();
+    var source = fs.readFileSync('./public/etherexV0.sol').toString();
 
     source = source.replace('\n', '');
     compiled = web3.eth.compile.solidity(source);
-    abi = compiled['<stdin>:Etherex_raw'].info.abiDefinition;
+    abi = compiled['<stdin>:etherexV0'].info.abiDefinition;
     var contract = web3.eth.contract(abi).at(contractAddress);
     web3.exchangeContract = contract;
     Object.getPrototypeOf(web3).exchangeContract = contract;
 
 } catch (err) {
-    throw new Error("Geth command line not running. Not able to connect to http://localhost:8545")
+    throw new Error(err);
 }
 
 module.exports = web3;

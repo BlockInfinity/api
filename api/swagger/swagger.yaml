@@ -146,6 +146,12 @@ paths:
         - info 
       description: "Get all ask orders for the last period."
       operationId: "getAskOrders"
+      parameters:
+        - name: "period"
+          in: "query"
+          description: "Period"
+          required: false
+          type: "number"
       responses:
         200:
           description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
@@ -162,6 +168,12 @@ paths:
         - info     
       description: "Get all bid orders for the last period."
       operationId: "getBidOrders"
+      parameters:
+        - name: "period"
+          in: "query"
+          description: "Period"
+          required: false
+          type: "number"
       responses:
         200:
           description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
@@ -371,19 +383,6 @@ paths:
       x-swagger-router-controller: "info_controller"
 
 definitions:
-
-  getAllMatchingPricesResponse:
-      type: array
-      items:
-        $ref: "#/definitions/matchingInfo"
-
-  matchingInfo:
-    properties:
-      period:
-        type: number
-      price:
-        type: number
-
   ErrorResponse:
     required:
       - message
@@ -466,30 +465,6 @@ definitions:
         type: number
       type:
         type: string
-  bidQuotes:
-    type: object
-    properties:
-      period:
-        type: number
-      bidOrders:
-        type: array
-        items:
-          $ref: "#/definitions/quote"
-  askQuotes:
-    type: object
-    properties:
-      period:
-        type: number
-      askOrders:
-        type: array
-        items:
-          $ref: "#/definitions/quote"
-  quote:
-    properties:
-      price:
-        type: number
-      volume:
-        type: number
   stateReponse:
     properties:
       state:
@@ -500,4 +475,37 @@ definitions:
     properties:
       balance:
         type: number
-  
+  getAllMatchingPricesResponse:
+      type: array
+      items:
+        $ref: "#/definitions/matchingInfo"
+  matchingInfo:
+    properties:
+      period:
+        type: number
+      price:
+        type: number
+  bidQuotes:
+    type: array
+    items:
+      $ref: "#/definitions/bidQuoteTupel"
+  bidQuoteTupel:
+    properties:
+      period:
+        type: number
+      price:
+        type: number
+      volume:
+        type: number
+  askQuotes:
+    type: array
+    items:
+      $ref: "#/definitions/askQuoteTupel"
+  askQuoteTupel:
+    properties:
+      period:
+        type: number
+      price:
+        type: number
+      volume:
+        type: number

@@ -1,7 +1,7 @@
 pragma solidity ^0.4.2;
 
 // the contract version which is currently deployed
-contract Etherex_raw {
+contract etherexV0 {
 
     // ########################## Variables for user management  #########################################################
 
@@ -45,7 +45,6 @@ contract Etherex_raw {
     uint256 minAsk;
     uint256 maxBid;
     uint256 orderIdCounter;
-    mapping(uint256 => uint256) numUniqueUserOrders;
 
     // ########################## Variables for matching function  ########################################################  
 
@@ -70,18 +69,18 @@ contract Etherex_raw {
         address user;
         uint256 smVolume;
     }
-    struct settleData {
+    struct settleData{
         mapping(address => bool) alreadySettled;
         uint256 settleCounter;
         uint256 sumProduced;
         uint256 sumConsumed;
         uint256 excess;
         uint256 lack;
-        bool isSettled;
         SettleUserData[] askSmData;
         SettleUserData[] bidSmData;
     }
     mapping(uint256 => settleData) public settleMapping;
+
 
     // ###################################################################################################################
     // ########################## Access Modifiers #######################################################################
@@ -104,10 +103,7 @@ contract Etherex_raw {
         if (userType[identities[msg.sender]] != 1 && userType[identities[msg.sender]] != 2 ) throw;
         _;
     }
-    modifier onlyOneOrderInPeriodPerUser() {
-        if (hasUserAskOrderInPeriod(msg.sender) || hasUserBidOrderInPeriod(msg.sender)) throw;
-        _;
-    }
+
 
     // ###################################################################################################################
     // ########################## Constructor ############################################################################
@@ -169,7 +165,8 @@ contract Etherex_raw {
         startBlock = block.number;
     }
 
- 
+    
+    event StateChangedEvent(uint8 _state);
     /*
         Should be called in every block, called directly from modifier onlyInState.
         Every third of period lasts for 25 blocks. The period is updated at the 75. block.
@@ -180,84 +177,65 @@ contract Etherex_raw {
             Update state based on current block, no need for 1/3 currentPeriod condition because
             it is covered with the other 3
         */
-        if(currState == 0 && ((block.number - startBlock) >= 10 && (block.number - startBlock) < 25)) {
+        if(currState == 0 && ((block.number - startBlock) >= 5 && (block.number - startBlock) < 10)) {
             //Matching should start
             matching();
             minAsk = 0;
             maxBid = 0;
             // move on to state 1
             currState = 1;
+            StateChangedEvent(1);
           
-        } else if (currState == 1 && ((block.number - startBlock) >= 25)) {
+        } else if (currState == 1 && ((block.number - startBlock) >= 10)){
             //3/3 of the currentPeriod
             determineReserveAskPrice();
             determineReserveBidPrice();
             init();
             currState = 0;
+            StateChangedEvent(0);
         }
          _;
     }
 
     // test functions 
+ 
+    function testUpdateState() updateState() {
+        
+    }
+
     function getCollateral(address _owner) constant returns(int256) {
         uint256 userId = identities[_owner];
         return colleteral[userId];
     }
 
-    function getCurrState() constant returns(uint8) {
+
+    function getCurrState() constant returns(uint8){
         return currState;
     }
 
-    function getCurrPeriod() constant returns(uint256) {
+    function getCurrPeriod() constant returns(uint256){
         return currentPeriod;
-    }
-
-    function isPeriodSettled(uint256 _period) constant returns(bool) {
-        return settleMapping[_period].isSettled;
     }
 
     function getMatchingPrice(uint256 _period) constant returns(int256) {
         return matchingPrices[_period];
     }
 
-    function getBidReservePrice(uint256 _period) constant returns(int256) {
-        return bidReservePrices[_period];
-    }
-
-    function getAskReservePrice(uint256 _period) constant returns(int256) {
-        return askReservePrices[_period];   
-    }
-
-    // function getMatchedAskOrders(uint256 _period) constant returns(uint256) {
-    //     return matchedAskOrders[_period];
-    // }
-
-    // function getMatchedBidOrders(uint256 _period) constant returns(uint256) {
-    //     return matchedBidOrders[_period];
-    // }
-
-    function getMatchedAskOrdersForUser(uint256 _period, address _owner) constant returns(uint256) {
-        return matchedAskOrders[_period][_owner];
-    }
-
-    function getMatchedBidOrdersForUser(uint256 _period, address _owner) constant returns(uint256) {
-        return matchedBidOrders[_period][_owner];
-    }
-
-    function haveAllUsersSettled(uint256 _period) onlyCertificateAuthorities() constant returns (bool) {
-        return settleMapping[_period].settleCounter == numUniqueUserOrders[_period];
-    }
       
     // ###################################################################################################################
     // ########################## user interface  #########################################################################
     // ###################################################################################################################
 
-    function submitBid(int256 _price, uint256 _volume) updateState() onlyConsumers() onlyOneOrderInPeriodPerUser() {
+    event OrderEvent(bytes32 _type, int256 _price, uint256 _volume);
+
+    function submitBid(int256 _price, uint256 _volume) updateState() onlyConsumers() {
         saveOrder("BID", _price, _volume);
+        OrderEvent("BID", _price, _volume);
     }
 
-    function submitAsk(int256 _price, uint256 _volume) updateState() onlyProducers() onlyOneOrderInPeriodPerUser() {
+    function submitAsk(int256 _price, uint256 _volume) updateState() onlyProducers() {
         saveOrder("ASK", _price, _volume);
+        OrderEvent("ASK", _price, _volume);
     } 
 
 
@@ -313,9 +291,6 @@ contract Etherex_raw {
     
             // insert order
             orders.push(currOrder);
-
-            // increment order count for user in current period
-            numUniqueUserOrders[currentPeriod] += 1;
     
             // curr_order added at the end
             if (currOrder.next == bestOrder) {
@@ -348,7 +323,7 @@ contract Etherex_raw {
             matchingPrices[currentPeriod] = 2**128-1;
             return true;
         }
-        
+
         uint256 cumAskVol = 0;
         uint256 cumBidVol = 0;
 
@@ -358,9 +333,9 @@ contract Etherex_raw {
 
         uint256 currAsk = minAsk;
         uint256 currBid = maxBid;
-        
+
         uint256 next;
-        
+
         delete currMatchedAskOrderMapping;
         delete currmatchedBidOrders;
 
@@ -510,6 +485,7 @@ contract Etherex_raw {
         return true;     
     }
 
+    
     // todo (mg) function needs to be called by smart meters instead of users
     function settle( int8 _type, uint256 _volume, uint256 _period) updateState() onlyUsers() {
 
@@ -526,6 +502,8 @@ contract Etherex_raw {
 
         // increment settle counter
         settleMapping[_period].settleCounter += 1;
+
+
 
         // for debug purposes not defined here
         uint256 ordered = 0;
@@ -639,18 +617,17 @@ contract Etherex_raw {
     
         // set user as settled for currentPeriod
         settleMapping[_period].alreadySettled[_user] = true;
+
+        // todo: endSettle Funktion muss beim Eingang des letzten smart meter datensatzes automatisch ausgeführt werden
+        if (settleMapping[_period].settleCounter == numUsers) {
+            endSettle(_period);
+        }  
     }
 
-    event ShowDiff(string msg, int256 value);
+  
+   
 
-    int256 shareOfEachUser; 
-
-    function endSettle(uint256 _period) onlyCertificateAuthorities() {
-
-        if (settleMapping[_period].settleCounter != numUniqueUserOrders[_period]) {
-            return;
-        }
-
+    function endSettle(uint256 _period) internal {
         int256 diff = int256(settleMapping[_period].excess) - int256(settleMapping[_period].lack);
         int256 smVolume = 0;
         address user;
@@ -704,8 +681,6 @@ contract Etherex_raw {
         for (uint256 l=0; l<numUsers; l++) {  
             colleteral[l] += shareOfEachUser;     
         }
-
-        settleMapping[_period].isSettled = true;
     }
 
 
@@ -740,36 +715,6 @@ contract Etherex_raw {
             id_iter_ask = orders[id_iter_ask].next;
         }
         return (askQuotes, askAmounts);
-    }
-
-    function hasUserAskOrderInPeriod(address _owner) constant returns (bool rv1){
-        uint256 id_iter_ask = minAsk;
-        bool order_exist = true;
-        while (orders[id_iter_ask].owner != _owner){
-            id_iter_ask = orders[id_iter_ask].next;
-            if(id_iter_ask == 0){
-                order_exist = false;
-                break;
-            }
-        }
-        return(order_exist);
-    }
-
-    function hasUserBidOrderInPeriod(address _owner) constant returns (bool rv1){
-        uint256 id_iter_bid = maxBid;
-        bool order_exist = true;
-        while (orders[id_iter_bid].owner != _owner){
-            id_iter_bid = orders[id_iter_bid].next;
-            if(id_iter_bid == 0){
-                order_exist = false;
-                break;
-            }
-        }
-        return(order_exist);
-    }
-
-    function hasUserAlreadySettledInPeriod(address _user, uint256 _period) constant returns (bool rv1){
-        return settleMapping[_period].alreadySettled[_user];
     }
 
 }

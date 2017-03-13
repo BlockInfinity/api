@@ -1,5 +1,6 @@
-const blockchainInterface = require("./exchangeAPI/blockEnergyAPI.js");
+const blockchainInterface = require("./exchangeAPI/chainApi.js");
 var util = require('util');
+const eventWatcher = require("./exchangeAPI/eventWatcher.js");
 
 module.exports = {
     getBalance: getBalance,
@@ -50,41 +51,41 @@ function getMatchingPrice(req, res, next) {
     res.end();
 }
 
-function getBidOrders(req, res, next) {
-    try {
-        var period = blockchainInterface.getState()[1];
-        var orders = blockchainInterface.getBidOrders();
-        var bidOrders = [];
-        for (var i = 0; i < orders[0].length; i++) {
-            bidOrders.push({ "price": orders[0][i], "volume": orders[1][i] });
-        }
-        res.statusCode = 200;
-        res.end(JSON.stringify({ "period": period, "bidOrders": bidOrders }));
+// function getBidOrders(req, res, next) {
+//     try {
+//         var period = blockchainInterface.getState()[1];
+//         var orders = blockchainInterface.getBidOrders();
+//         var bidOrders = [];
+//         for (var i = 0; i < orders[0].length; i++) {
+//             bidOrders.push({ "price": orders[0][i], "volume": orders[1][i] });
+//         }
+//         res.statusCode = 200;
+//         res.end(JSON.stringify({ "period": period, "bidOrders": bidOrders }));
 
-    } catch (error) {
-        res.statusCode = 500;
-        res.end('Blockchain error ' + error.message);
-    }
-    res.end();
-}
+//     } catch (error) {
+//         res.statusCode = 500;
+//         res.end('Blockchain error ' + error.message);
+//     }
+//     res.end();
+// }
 
-function getAskOrders(req, res, next) {
-    try {
-        var period = blockchainInterface.getState()[1];
-        var orders = blockchainInterface.getAskOrders();
-        var askOrders = [];
-        for (var i = 0; i < orders[0].length; i++) {
-            askOrders.push({ "price": orders[0][i], "volume": orders[1][i] });
-        }
-        res.statusCode = 200;
-        res.end(JSON.stringify({ "period": period, "askOrders": askOrders }));
+// function getAskOrders(req, res, next) {
+//     try {
+//         var period = blockchainInterface.getState()[1];
+//         var orders = blockchainInterface.getAskOrders();
+//         var askOrders = [];
+//         for (var i = 0; i < orders[0].length; i++) {
+//             askOrders.push({ "price": orders[0][i], "volume": orders[1][i] });
+//         }
+//         res.statusCode = 200;
+//         res.end(JSON.stringify({ "period": period, "askOrders": askOrders }));
 
-    } catch (error) {
-        res.statusCode = 500;
-        res.end('Blockchain error ' + error.message);
-    }
-    res.end();
-}
+//     } catch (error) {
+//         res.statusCode = 500;
+//         res.end('Blockchain error ' + error.message);
+//     }
+//     res.end();
+// }
 
 function getAskReservePrice(req, res, next) {
     try {
@@ -184,6 +185,36 @@ function getAllMatchingPrices(req, res, next) {
     try {
         blockchainInterface.getAllMatchingPrices().then(function(prices) {
             res.end(prices);
+        }, function(reason) {
+            res.statusCode = 500;
+            res.end('Blockchain error: No address received from register function!');
+        });
+    } catch (error) {
+        res.statusCode = 500;
+        res.end('Blockchain error ' + error.message);
+    }
+}
+
+function getBidOrders(req, res, next) {
+    try {
+        var period = req.swagger.params.period.value;
+        blockchainInterface.getBidOrders(period).then(function(bids) {
+            res.end(bids);
+        }, function(reason) {
+            res.statusCode = 500;
+            res.end('Blockchain error: No address received from register function!');
+        });
+    } catch (error) {
+        res.statusCode = 500;
+        res.end('Blockchain error ' + error.message);
+    }
+}
+
+function getAskOrders(req, res, next) {
+    try {
+        var period = req.swagger.params.period.value;
+        blockchainInterface.getAskOrders(period).then(function(bids) {
+            res.end(bids);
         }, function(reason) {
             res.statusCode = 500;
             res.end('Blockchain error: No address received from register function!');

@@ -1,9 +1,11 @@
 const co = require("co");
 const web3 = require("./chainConnector.js");
 const rpc = require('node-json-rpc');
+const mysql = require("mysql");
+const eventWatcher = require("./eventWatcher.js");
 
 const eth = web3.eth;
-var etherex = web3.exchangeContract;
+const etherex = web3.exchangeContract;
 
 var options = {
     port: 8545,
@@ -14,31 +16,11 @@ const END_SETTLE_CHECK_IN_SECONDS = 10;
 
 var client = new rpc.Client(options);
 
-module.exports = {
-    buy: buy,
-    sell: sell,
-    register: register,
-    init: init,
-    autoMine: autoMine,
-    getBalance: getBalance,
-    getAskOrders: getAskOrders,
-    getBidOrders: getBidOrders,
-    getMatchingPrice: getMatchingPrice,
-    getState: getState,
-    getAllMatchingPrices: getAllMatchingPrices
-}
-
 if (!etherex) {
     console.log("Exchange contract is not defined");
 } else {
     console.log("Exchange contract with address", etherex.address, "loaded!");
 }
-
-// ######################################################################
-// ######################## Caching functionality #######################
-// ######################################################################
-
-var mysql = require("mysql");
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -47,22 +29,6 @@ var connection = mysql.createConnection({
     database: "apidb"
 });
 
-// todo (mg) error needs to be displayed. Right now i suppress any errors with ignore in sql statement
-function getAndSaveMatchingPriceHistory() {
-
-    let currPeriod = etherex.getCurrPeriod().toNumber();
-    for (let i = 0; i < currPeriod; i++) {
-        let res = etherex.getMatchingPrice(i).toNumber();
-        let post = { period: i, price: res };
-        let query = connection.query('insert ignore into matchingPrices set ?', post, function(err, res) {
-            if (err) {
-                console.log("MySql error:", err);
-            }
-        });
-    }
-}
-
-setInterval(getAndSaveMatchingPriceHistory, 30000);
 
 // ######################################################################
 // ######################## functions that change the state #############
@@ -168,7 +134,7 @@ function buy(_volume, _price, _addr, _password) {
     }
     console.log("Buy: Adresse: ", _addr, ", Passwort: ", _password, ", Volume: ", _volume, ", Price: ", _price);
     //Unlocking the account
-    web3.personal.unlockAccount(_addr, _password,5);
+    web3.personal.unlockAccount(_addr, _password, 5);
     let tx = etherex.submitBid(_price, _volume, { from: _addr, gas: 20000000 });
     eth.awaitConsensus(tx, 20000000);
 }
@@ -248,13 +214,41 @@ function getAllMatchingPrices() {
 }
 
 
-function getBidOrders() {
-    return etherex.getBidOrders();
+
+function getBidOrders(_period) {
+    if (typeof _period == "undefined") {
+        _period = eventWatcher.getPeriod();
+    }
+
+    return new Promise(function(resolve, reject) {
+        connection.query("select period,price,volume from orders where period = ? and type =  ?", [_period, "BID"], function(err, rows, fields) {
+            if (err) {
+                reject(err);
+            } else {
+                console.log(JSON.stringify(rows));
+                resolve(JSON.stringify(rows));
+            }
+        });
+    });
 }
 
-function getAskOrders() {
-    return etherex.getAskOrders();
+function getAskOrders(_period) {
+    if (typeof _period == "undefined") {
+        _period = eventWatcher.getPeriod();
+    }
+
+    return new Promise(function(resolve, reject) {
+        connection.query("select period,price,volume from orders where period = ? and type =  ?", [_period, "ASK"], function(err, rows, fields) {
+            if (err) {
+                reject(err);
+            } else {
+                console.log(JSON.stringify(rows));
+                resolve(JSON.stringify(rows));
+            }
+        });
+    });
 }
+
 
 function getMatchingPrice(_period) {
     if (typeof _period == "undefined") {
@@ -266,9 +260,7 @@ function getMatchingPrice(_period) {
 }
 
 function getState() {
-    let state = etherex.getCurrState();
-    let period = etherex.getCurrPeriod();
-    return ([state, period]);
+    return ([eventWatcher.getState(), eventWatcher.getPeriod()]);
 }
 
 function getBalance(_addr) {
@@ -398,4 +390,16 @@ function stopMining() {
 }
 
 
-
+module.exports = {                                                                                                                                      
+    buy: buy,
+    sell: sell,
+    register: register,
+    init: init,
+    autoMine: autoMine,
+    getBalance: getBalance,
+    getAskOrders: getAskOrders,
+    getBidOrders: getBidOrders,
+    getMatchingPrice: getMatchingPrice,
+    getState: getState,
+    getAllMatchingPrices: getAllMatchingPrices
+}
