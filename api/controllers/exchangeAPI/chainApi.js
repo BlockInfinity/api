@@ -22,12 +22,6 @@ if (!etherex) {
     console.log("Exchange contract with address", etherex.address, "loaded!");
 }
 
-var connection = mysql.createConnection({
-    host: "localhost",
-    user: "dex",
-    password: "amalien",
-    database: "apidb"
-});
 
 
 // ######################################################################
@@ -202,7 +196,7 @@ function settle(_type, _volume, _period, _addr, _password) {
 
 function getAllMatchingPrices() {
     return new Promise(function(resolve, reject) {
-        connection.query("select * from matchingPrices", function(err, rows, fields) {
+        eventWatcher.getConn().query("select * from matchingPrices", function(err, rows, fields) {
             if (err) {
                 reject(err);
             } else {
@@ -221,7 +215,7 @@ function getBidOrders(_period) {
     }
 
     return new Promise(function(resolve, reject) {
-        connection.query("select period,price,volume from orders where period = ? and type =  ?", [_period, "BID"], function(err, rows, fields) {
+        eventWatcher.getConn().query("select period,price,volume from orders where period = ? and type =  ?", [_period, "BID"], function(err, rows, fields) {
             if (err) {
                 reject(err);
             } else {
@@ -238,7 +232,7 @@ function getAskOrders(_period) {
     }
 
     return new Promise(function(resolve, reject) {
-        connection.query("select period,price,volume from orders where period = ? and type =  ?", [_period, "ASK"], function(err, rows, fields) {
+        eventWatcher.getConn().query("select period,price,volume from orders where period = ? and type =  ?", [_period, "ASK"], function(err, rows, fields) {
             if (err) {
                 reject(err);
             } else {

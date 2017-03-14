@@ -187,7 +187,7 @@ function getAllMatchingPrices(req, res, next) {
             res.end(prices);
         }, function(reason) {
             res.statusCode = 500;
-            res.end('Blockchain error: No address received from register function!');
+            res.end('Blockchain error: No address received from register function!', reason);
         });
     } catch (error) {
         res.statusCode = 500;
