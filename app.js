@@ -113,12 +113,14 @@ filter.watch(function(err, res) {
 // catch order  events and broadcast them to all clients
 var OrderEvent = etherex.OrderEvent();
 OrderEvent.watch(function(err, res) {
-    let _price = res.args._price.toNumber();
-    let _volume = res.args._volume.toNumber();
-    let _period = currPeriod;
-    let _type = hex2a(res.args._type);
-    let toSend = { "period": _period, "type": _type, "price": _price, "volume": _volume }
-    io.emit('orderEvent', JSON.stringify(toSend));
+    if (typeof res != "undefined") {
+        let _price = res.args._price.toNumber();
+        let _volume = res.args._volume.toNumber();
+        let _period = currPeriod;
+        let _type = hex2a(res.args._type);
+        let toSend = { "period": _period, "type": _type, "price": _price, "volume": _volume }
+        io.emit('orderEvent', JSON.stringify(toSend));
+    }
 });
 
 // catch matching events and new period events and broadcast them to all clients
