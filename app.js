@@ -61,54 +61,6 @@ swaggerTools.initializeMiddleware(swaggerDoc, function(middleware) {
     // Serve the Swagger documents and Swagger UI
     app.use(middleware.swaggerUi());
 
-    io.on('connection', function(socket) {
-        console.log('a user connected');
-        socket.on('disconnect', function() {
-            console.log('user disconnected');
-        });
-
-
-        // catch blockcreation events and broadcast them to all clients
-        let filter = eth.filter('latest');
-        filter.watch(function(err, res) {
-            let startBlock = etherex.getStartBlock().toNumber();
-            let minedBlocks = eth.blockNumber - startBlock;
-            let toSend = {MinedBlocksInCurrPeriod: minedBlocks}
-            io.emit('blockCreationEvent', JSON.stringify(toSend));
-        });
-
-        // catch order  events and broadcast them to all clients
-        var OrderEvent = etherex.OrderEvent();
-        OrderEvent.watch(function(err, res) {
-            let _price = res.args._price.toNumber();
-            let _volume = res.args._volume.toNumber();
-            let _period = currPeriod;
-            let _type = hex2a(res.args._type);
-            let toSend = { "period": _period, "type": _type, "price": _price, "volume": _volume }
-            io.emit('orderEvent', JSON.stringify(toSend));
-        });
-
-        // catch matching events and new period events and broadcast them to all clients
-        var StateChangeEvent = etherex.StateChangedEvent();
-        StateChangeEvent.watch(function(err, res) {
-            if (!err) {
-                state = res.args._state.toNumber();
-                if (state == 1) {
-
-                    let matchingPrice = etherex.getMatchingPrice(currPeriod).toNumber();
-
-                    let post = { period: currPeriod, price: matchingPrice };
-                    io.emit('matchingEvent', JSON.stringify(post));
-
-                } else {
-                    currPeriod = etherex.getCurrPeriod().toNumber();
-                    let post = { period: currPeriod };
-                    io.emit('newPeriodEvent', JSON.stringify(post));
-                }
-            }
-        });
-
-    });
 
     // Start the server
     http.listen(serverPort, function() {
@@ -130,3 +82,61 @@ function hex2a(hexx) {
     }
     return str;
 }
+
+
+
+
+
+
+
+
+
+io.on('connection', function(socket) {
+    console.log('a user connected');
+
+    socket.on('disconnect', function() {
+        console.log('user disconnected');
+        socket.disconnect(true);
+    });
+
+});
+
+// catch blockcreation events and broadcast them to all clients
+let filter = eth.filter('latest');
+filter.watch(function(err, res) {
+    let startBlock = etherex.getStartBlock().toNumber();
+    let minedBlocks = eth.blockNumber - startBlock;
+    let toSend = { MinedBlocksInCurrPeriod: minedBlocks }
+    io.emit('blockCreationEvent', JSON.stringify(toSend));
+});
+
+// catch order  events and broadcast them to all clients
+var OrderEvent = etherex.OrderEvent();
+OrderEvent.watch(function(err, res) {
+    let _price = res.args._price.toNumber();
+    let _volume = res.args._volume.toNumber();
+    let _period = currPeriod;
+    let _type = hex2a(res.args._type);
+    let toSend = { "period": _period, "type": _type, "price": _price, "volume": _volume }
+    io.emit('orderEvent', JSON.stringify(toSend));
+});
+
+// catch matching events and new period events and broadcast them to all clients
+var StateChangeEvent = etherex.StateChangedEvent();
+StateChangeEvent.watch(function(err, res) {
+    if (!err) {
+        state = res.args._state.toNumber();
+        if (state == 1) {
+
+            let matchingPrice = etherex.getMatchingPrice(currPeriod).toNumber();
+
+            let post = { period: currPeriod, price: matchingPrice };
+            io.emit('matchingEvent', JSON.stringify(post));
+
+        } else {
+            currPeriod = etherex.getCurrPeriod().toNumber();
+            let post = { period: currPeriod };
+            io.emit('newPeriodEvent', JSON.stringify(post));
+        }
+    }
+});
