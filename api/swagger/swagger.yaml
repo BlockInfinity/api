@@ -28,7 +28,7 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/settleRequest"
-      responses:
+      responses:  
         "200":
           description: Success
           schema:

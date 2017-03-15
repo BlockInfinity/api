@@ -200,7 +200,6 @@ function getAllMatchingPrices() {
             if (err) {
                 reject(err);
             } else {
-                console.log(JSON.stringify(rows));
                 resolve(JSON.stringify(rows));
             }
         });
@@ -219,7 +218,6 @@ function getBidOrders(_period) {
             if (err) {
                 reject(err);
             } else {
-                console.log(JSON.stringify(rows));
                 resolve(JSON.stringify(rows));
             }
         });
@@ -236,7 +234,6 @@ function getAskOrders(_period) {
             if (err) {
                 reject(err);
             } else {
-                console.log(JSON.stringify(rows));
                 resolve(JSON.stringify(rows));
             }
         });
@@ -249,7 +246,6 @@ function getMatchingPrice(_period) {
         throw new Error("Period must be provided")
     }
     let res = etherex.getMatchingPrice(_period).toNumber();
-    console.log(res);
     return res;
 }
 

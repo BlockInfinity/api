@@ -210,7 +210,11 @@ function getBidOrders(req, res, next) {
     }
 }
 
+
+
+
 function getAskOrders(req, res, next) {
+
     try {
         var period = req.swagger.params.period.value;
         blockchainInterface.getAskOrders(period).then(function(bids) {
@@ -223,4 +227,5 @@ function getAskOrders(req, res, next) {
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
     }
+
 }

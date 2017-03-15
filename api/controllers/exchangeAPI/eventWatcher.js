@@ -96,7 +96,7 @@ function hex2a(hexx) {
 }
 
 
-getAndSaveMatchingPriceHistory();
+//getAndSaveMatchingPriceHistory();
 
 function sleep(time, callback) {
     var stop = new Date().getTime();
@@ -138,6 +138,7 @@ function getState() {
 function getConn() {
     return connection;
 }
+
 
 module.exports = {
     getPeriod: getPeriod,
