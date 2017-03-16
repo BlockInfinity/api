@@ -197,8 +197,8 @@ contract etherexV0 {
         } else if (currState == 0 && ((block.number - startBlock) > 10)) {  // sometimes this situation happens and needs to be dealt with, dunno why
             init();    
             StateChangedEvent(0);
-         _;
         }
+        _;
     }
 
     // test functions 
