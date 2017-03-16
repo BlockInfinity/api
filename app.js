@@ -8,7 +8,6 @@ var jsyaml = require('js-yaml');
 var fs = require('fs');
 var serverPort = 8080;
 var express = require("express")
-var SSE = require('sse');
 
 
 
@@ -104,10 +103,13 @@ io.on('connection', function(socket) {
 // catch blockcreation events and broadcast them to all clients
 let filter = eth.filter('latest');
 filter.watch(function(err, res) {
-    let startBlock = etherex.getStartBlock().toNumber();
-    let minedBlocks = eth.blockNumber - startBlock;
-    let toSend = { MinedBlocksInCurrPeriod: minedBlocks }
-    io.emit('blockCreationEvent', JSON.stringify(toSend));
+    if (typeof res != "undefined") {
+
+        let startBlock = etherex.getStartBlock().toNumber();
+        let minedBlocks = eth.blockNumber - startBlock;
+        let toSend = { MinedBlocksInCurrPeriod: minedBlocks }
+        io.emit('blockCreationEvent', JSON.stringify(toSend));
+    }
 });
 
 // catch order  events and broadcast them to all clients
@@ -127,7 +129,10 @@ OrderEvent.watch(function(err, res) {
 var StateChangeEvent = etherex.StateChangedEvent();
 StateChangeEvent.watch(function(err, res) {
     if (!err) {
-        state = res.args._state.toNumber();
+        if (typeof res != "undefined") {
+
+            state = res.args._state.toNumber();
+        }
         if (state == 1) {
 
             let matchingPrice = etherex.getMatchingPrice(currPeriod).toNumber();
