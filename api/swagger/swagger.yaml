@@ -381,7 +381,58 @@ paths:
         500:
           description: "Server error"
       x-swagger-router-controller: "info_controller"
-
+      
+  /sockets/matchingEvent:
+    get:
+      tags:
+        - sockets
+      description: "socket.on('matchingEvent', callback) // see socket.io"
+      operationId: "getMatchingEvent"
+      responses: 
+        200:
+          description: "Rerturns the matching price and the associated period"
+          schema:
+            $ref: "#/definitions/matchingInfo"
+    x-swagger-router-controller: "info_controller"
+  
+  /sockets/newPeriodEvent:
+    get:
+      tags:
+        - sockets
+      description: "socket.on('newPeriodEvent', callback) // see socket.io"
+      operationId: "getPeriod"
+      responses: 
+        200:
+          description: "Rerturns number of new period"
+          schema:
+            $ref: "#/definitions/periodResponse"
+    x-swagger-router-controller: "info_controller"
+    
+  /sockets/orderEvent:
+    get:
+      tags:
+        - sockets
+      description: "socket.on('orderEvent', callback) // see socket.io"
+      operationId: "getLastOrder"
+      responses: 
+        200:
+          description: "Rerturns info about the last order"
+          schema:
+            $ref: "#/definitions/orderEvent"
+    x-swagger-router-controller: "info_controller"
+  /sockets/blockCreationEvent:
+    get:
+      tags:
+        - sockets
+      description: "socket.on('blockCreationEvent', callback) // see socket.io"
+      operationId: "getLastBlock"
+      responses: 
+        200:
+          description: "Rerturns the number of created blocks in current period"
+          schema:
+            $ref: "#/definitions/blockCreationEvent"
+    x-swagger-router-controller: "info_controller"
+    
 definitions:
   ErrorResponse:
     required:
@@ -441,12 +492,7 @@ definitions:
         type: number
       matchingPrice:
         type: number
-  balanceRequest:
-    required:
-      - address
-    properties:
-      address:
-        type: string
+
   settleRequest:
     required:
       - accountAddress
@@ -469,6 +515,10 @@ definitions:
     properties:
       state:
         type: string
+      period:
+        type: number
+  periodResponse:
+    properties:
       period:
         type: number
   balanceResponse:
@@ -509,3 +559,30 @@ definitions:
         type: number
       volume:
         type: number
+  orderEvent:
+    properties:
+      type:
+        type: string
+      period:
+        type: number
+      price:
+        type: number
+      volume:
+        type: number
+  blockCreationEvent:
+    properties:
+      MinedBlocksInCurrPeriod:
+        type: number
+      
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
