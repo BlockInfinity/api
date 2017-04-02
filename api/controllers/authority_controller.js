@@ -8,7 +8,7 @@ module.exports = {
 
 function register(req, res, next) {
     try {
-        if (_.isUndefned(req.swagger.params.registerRequest.value.type) || _.isNull(req.swagger.params.registerRequest.value.type)) {
+        if (_.isUndefined(req.swagger.params.registerRequest.value.type) || _.isNull(req.swagger.params.registerRequest.value.type)) {
             throw new Error("You need to specify the type of an account to be registered! Possible options are 'consumer' and 'producer'!")
         } else {
             var user_type = req.swagger.params.registerRequest.value.type.toLowerCase();

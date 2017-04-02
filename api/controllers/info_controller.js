@@ -8,16 +8,14 @@ module.exports = {
     getBalance: getBalance,
     getAskOrders: getAskOrders,
     getBidOrders: getBidOrders,
-    getAskReservePrice: getAskReservePrice,
-    getBidReservePrice: getBidReservePrice,
-    getMatchedAskOrders: getMatchedAskOrders,
-    getMatchedBidOrders: getMatchedBidOrders,
-    getMatchedAskOrdersForUser: getMatchedAskOrdersForUser,
-    getMatchedBidOrdersForUser: getMatchedBidOrdersForUser,
     getMatchingPrice: getMatchingPrice,
     getAllMatchingPrices: getAllMatchingPrices,
     getState: getState,
-    getBalance: getBalance
+    getBalance: getBalance,
+    getReserveAskOrders: getReserveAskOrders,
+    getReserveBidOrders: getReserveBidOrders,
+    getReserveAskPrice: getReserveAskPrice,
+    getReserveBidPrice: getReserveBidPrice
 }
 
 function findPeriod(req) {
@@ -44,9 +42,14 @@ function getState(req, res, next) {
 function getMatchingPrice(req, res, next) {
     try {
         var period = findPeriod(req);
-        var matchingPrice = chainApi.getMatchingPrice(period);
-        res.statusCode = 200;
-        res.end(JSON.stringify({ "period": period, "matchingPrice": matchingPrice }));
+
+        db.getMatchingPrice(period).then(function(prices) {
+            res.statusCode = 200;
+            res.end(JSON.stringify({ "period": period, "matchingPrice": matchingPrice }));
+        }, function(reason) {
+            res.statusCode = 500;
+            res.end('db error', reason);
+        });
     } catch (error) {
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
@@ -90,85 +93,85 @@ function getMatchingPrice(req, res, next) {
 //     res.end();
 // }
 
-function getAskReservePrice(req, res, next) {
-    try {
-        var period = findPeriod(req);
-        var askReservePrice = chainApi.getAskReservePrice(period);
-        res.statusCode = 200;
-        res.end(JSON.stringify({ "period": period, "askReservePrice": askReservePrice }));
-    } catch (error) {
-        res.statusCode = 500;
-        res.end('Blockchain error ' + error.message);
-    }
-    res.end();
-}
+// function getAskReservePrice(req, res, next) {
+//     try {
+//         var period = findPeriod(req);
+//         var askReservePrice = chainApi.getAskReservePrice(period);
+//         res.statusCode = 200;
+//         res.end(JSON.stringify({ "period": period, "askReservePrice": askReservePrice }));
+//     } catch (error) {
+//         res.statusCode = 500;
+//         res.end('Blockchain error ' + error.message);
+//     }
+//     res.end();
+// }
 
-function getBidReservePrice(req, res, next) {
-    try {
-        var period = findPeriod(req);
-        var bidReservePrice = chainApi.getBidReservePrice(period);
-        res.statusCode = 200;
-        res.end(JSON.stringify({ "period": period, "bidReservePrice": bidReservePrice }));
-    } catch (error) {
-        res.statusCode = 500;
-        res.end('Blockchain error ' + error.message);
-    }
-    res.end();
-}
+// function getBidReservePrice(req, res, next) {
+//     try {
+//         var period = findPeriod(req);
+//         var bidReservePrice = chainApi.getBidReservePrice(period);
+//         res.statusCode = 200;
+//         res.end(JSON.stringify({ "period": period, "bidReservePrice": bidReservePrice }));
+//     } catch (error) {
+//         res.statusCode = 500;
+//         res.end('Blockchain error ' + error.message);
+//     }
+//     res.end();
+// }
 
-function getMatchedAskOrders(req, res, next) {
-    try {
-        var period = findPeriod(req);
-        var askOrders = chainApi.getMatchedAskOrders(period);
-        res.statusCode = 200;
-        res.end(JSON.stringify({ "period": period, "matchedAskOrders": askOrders }));
-    } catch (error) {
-        res.statusCode = 500;
-        res.end('Blockchain error ' + error.message);
-    }
-    res.end();
-}
+// function getMatchedAskOrders(req, res, next) {
+//     try {
+//         var period = findPeriod(req);
+//         var askOrders = chainApi.getMatchedAskOrders(period);
+//         res.statusCode = 200;
+//         res.end(JSON.stringify({ "period": period, "matchedAskOrders": askOrders }));
+//     } catch (error) {
+//         res.statusCode = 500;
+//         res.end('Blockchain error ' + error.message);
+//     }
+//     res.end();
+// }
 
-function getMatchedBidOrders(req, res, next) {
-    try {
-        var period = findPeriod(req);
-        var bidOrders = chainApi.getMatchedBidOrders(period);
-        res.statusCode = 200;
-        res.end(JSON.stringify({ "period": period, "matchedBidOrders": bidOrders }));
-    } catch (error) {
-        res.statusCode = 500;
-        res.end('Blockchain error ' + error.message);
-    }
-    res.end();
-}
+// function getMatchedBidOrders(req, res, next) {
+//     try {
+//         var period = findPeriod(req);
+//         var bidOrders = chainApi.getMatchedBidOrders(period);
+//         res.statusCode = 200;
+//         res.end(JSON.stringify({ "period": period, "matchedBidOrders": bidOrders }));
+//     } catch (error) {
+//         res.statusCode = 500;
+//         res.end('Blockchain error ' + error.message);
+//     }
+//     res.end();
+// }
 
-function getMatchedAskOrdersForUser(req, res, next) {
-    try {
-        var period = findPeriod(req);
-        var address = req.swagger.params.address.value;
-        var matchedAskOrders = chainApi.getMatchedAskOrdersForUser(period, address);
-        res.statusCode = 200;
-        res.end(JSON.stringify({ "period": period, "matchedAskOrders": matchedAskOrders }));
-    } catch (error) {
-        res.statusCode = 500;
-        res.end('Blockchain error ' + error.message);
-    }
-    res.end();
-}
+// function getMatchedAskOrdersForUser(req, res, next) {
+//     try {
+//         var period = findPeriod(req);
+//         var address = req.swagger.params.address.value;
+//         var matchedAskOrders = chainApi.getMatchedAskOrdersForUser(period, address);
+//         res.statusCode = 200;
+//         res.end(JSON.stringify({ "period": period, "matchedAskOrders": matchedAskOrders }));
+//     } catch (error) {
+//         res.statusCode = 500;
+//         res.end('Blockchain error ' + error.message);
+//     }
+//     res.end();
+// }
 
-function getMatchedBidOrdersForUser(req, res, next) {
-    try {
-        var period = findPeriod(req);
-        var address = req.swagger.params.address.value;
-        var matchedBidOrders = chainApi.getMatchedBidOrdersForUser(period, address);
-        res.statusCode = 200;
-        res.end(JSON.stringify({ "period": period, "matchedBidOrders": matchedBidOrders }));
-    } catch (error) {
-        res.statusCode = 500;
-        res.end('Blockchain error ' + error.message);
-    }
-    res.end();
-}
+// function getMatchedBidOrdersForUser(req, res, next) {
+//     try {
+//         var period = findPeriod(req);
+//         var address = req.swagger.params.address.value;
+//         var matchedBidOrders = chainApi.getMatchedBidOrdersForUser(period, address);
+//         res.statusCode = 200;
+//         res.end(JSON.stringify({ "period": period, "matchedBidOrders": matchedBidOrders }));
+//     } catch (error) {
+//         res.statusCode = 500;
+//         res.end('Blockchain error ' + error.message);
+//     }
+//     res.end();
+// }
 
 function getBalance(req, res, next) {
     try {
@@ -200,9 +203,9 @@ function getAllMatchingPrices(req, res, next) {
 
 function getBidOrders(req, res, next) {
     try {
-        var period = req.swagger.params.period.value;
-        chainApi.getBidOrders(period).then(function(bids) {
-            res.end(bids);
+        var period = findPeriod(req);
+        db.getBidOrders(period).then(function(orders) {
+            res.end(orders);
         }, function(reason) {
             res.statusCode = 500;
             res.end('Blockchain error: No address received from register function!');
@@ -215,9 +218,9 @@ function getBidOrders(req, res, next) {
 
 function getAskOrders(req, res, next) {
     try {
-        var period = req.swagger.params.period.value;
-        chainApi.getAskOrders(period).then(function(bids) {
-            res.end(bids);
+        var period = findPeriod(req);
+        db.getAskOrders(period).then(function(orders) {
+            res.end(orders);
         }, function(reason) {
             res.statusCode = 500;
             res.end('Blockchain error: No address received from register function!');
@@ -225,5 +228,71 @@ function getAskOrders(req, res, next) {
     } catch (error) {
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
+    }
+}
+
+
+function getReserveAskOrders(req, res, next) {
+    try {
+        var period = findPeriod(req);
+        db.getReserveAskOrders(period).then(function(orders) {
+            res.end(orders);
+        }, function(reason) {
+            res.statusCode = 500;
+            res.end('Database error', reason);
+        });
+    } catch (error) {
+        res.statusCode = 500;
+        res.end('Database error' + error.message);
+    }
+}
+
+
+function getReserveBidOrders(req, res, next) {
+    try {
+        var period = findPeriod(req);
+        db.getReserveBidOrders(period).then(function(orders) {
+            res.end(orders);
+        }, function(reason) {
+            res.statusCode = 500;
+            res.end('Database error', reason);
+            console.log(reason);
+        });
+    } catch (error) {
+        res.statusCode = 500;
+        res.end('Database error ' + error.message);
+    }
+}
+
+
+function getReserveAskPrice(req, res, next) {
+    try {
+        var period = findPeriod(req);
+        db.getReserveAskPrice(period).then(function(result) {
+            res.end(result);
+        }, function(reason) {
+            res.statusCode = 500;
+            res.end('db error', reason);
+        });
+    } catch (error) {
+        res.statusCode = 500;
+        res.end('db error ' + error.message);
+    }
+}
+
+
+function getReserveBidPrice(req, res, next) {
+    try {
+        var period = findPeriod(req);
+        db.getReserveBidPrice(period).then(function(result) {
+            res.end(result);
+        }, function(reason) {
+            res.statusCode = 500;
+            res.end('db error', reason);
+            console.log(reason);
+        });
+    } catch (error) {
+        res.statusCode = 500;
+        res.end('db error ' + error.message);
     }
 }

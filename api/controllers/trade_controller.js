@@ -1,5 +1,5 @@
+
 const chainApi = require("./exchangeAPI/chainApi.js");
-const util = require('util');
 const chainUtil = require("./exchangeAPI/chainUtil.js");
 const _ = require("lodash");
 
@@ -52,13 +52,13 @@ function submitBidOrder(req, res, next) {
     } else {
         var price = Number.MAX_VALUE;
     }
-
+    console.log("before buy");
     chainApi.buy(volume, price, accountAddress, password, false).then(function() {
         res.statusCode = 200;
         res.end();
     }, function(err) {
         res.statusCode = 500;
-        res.end('Blockchain error ' + error.message);
+        res.end('Blockchain error ' + err.message);
     });
 }
 
@@ -84,7 +84,7 @@ function submitReserveAskOrder(req, res, next) {
         res.end();
     }, function(err) {
         res.statusCode = 500;
-        res.end('Blockchain error ' + error.message);
+        res.end('Blockchain error ' + err.message);
     });
 }
 
@@ -109,6 +109,6 @@ function submitReserveBidOrder(req, res, next) {
         res.end();
     }, function(err) {
         res.statusCode = 500;
-        res.end('Blockchain error ' + error.message);
+        res.end('Blockchain error ' + err.message);
     });
 }

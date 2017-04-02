@@ -4,7 +4,6 @@ const rpc = require('node-json-rpc');
 const chainUtil = require("./chainUtil.js");
 const db = require('../db');
 const _ = require("lodash");
-
 const eth = web3.eth;
 const etherex = web3.exchangeContract;
 
@@ -31,51 +30,61 @@ function register(_user_password, _type) {
             return reject('invalid arguments');
         }
 
-        client.call({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [_user_password], "id": 74 }, 
+        client.call({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [_user_password], "id": 74 },
             function(err, jsonObj) {
-            if (err || !jsonObj.result) {
-                console.log("Couldn't create an user account!");
-                reject(err);
-            } else {
-                console.log("in one", jsonObj.result);
+                if (err || !jsonObj.result) {
+                    console.log("Couldn't create an user account!");
+                    reject(err);
+                } else {
+                    console.log("in one", jsonObj.result);
 
-                var user_address = String(jsonObj.result);
-                web3.personal.unlockAccount(eth.accounts[0], "amalien", 2000000);
-                etherex.registerCertificateAuthority(eth.accounts[0], { from: eth.accounts[0], gas: 20000000 });
+                    var user_address = String(jsonObj.result);
 
-                switch (_type) {
-                    case "consumer":
-                        var tx = etherex.registerConsumer(user_address, { from: eth.accounts[0], gas: 20000000 });
-                        eth.awaitConsensus(tx, 800000);
-                        break;
-                    case "producer":
-                        var tx = etherex.registerProducer(user_address, { from: eth.accounts[0], gas: 20000000 });
-                        eth.awaitConsensus(tx, 800000);
-                        break;
-                    default:
-                        return reject(new Error("Invalid user type: " + _type));
-                }
-
-                // transfer some money to the newly created account
-                try {
-                    let balance = web3.fromWei(eth.getBalance(eth.accounts[0])).toNumber();
-
-                    if (balance < 11) {
-                        throw new Error();
+                    var again = true;
+                    while (again) {
+                        try {
+                            // insert order into bchain
+                            etherex.registerCertificateAuthority(eth.accounts[0], { from: eth.accounts[0], gas: 20000000 });
+                            again = false;
+                        } catch (err) {
+                            console.log(err);
+                            web3.personal.unlockAccount(eth.accounts[0], "amalien", 2000000);
+                        }
                     }
 
-                    eth.sendTransaction({ from: eth.accounts[0], to: user_address, value: "10000000000000000000", gas: 20000000 });
-                    return resolve(user_address);
-                } catch (err) {
-                    return reject(new Error("Not enough money in master account! Couldn't transfer eth!"));
+                    switch (_type) {
+                        case "consumer":
+                            var tx = etherex.registerConsumer(user_address, { from: eth.accounts[0], gas: 20000000 });
+                            eth.awaitConsensus(tx, 800000);
+                            break;
+                        case "producer":
+                            var tx = etherex.registerProducer(user_address, { from: eth.accounts[0], gas: 20000000 });
+                            eth.awaitConsensus(tx, 800000);
+                            break;
+                        default:
+                            return reject(new Error("Invalid user type: " + _type));
+                    }
+
+                    // transfer some money to the newly created account
+                    try {
+                        let balance = web3.fromWei(eth.getBalance(eth.accounts[0])).toNumber();
+
+                        if (balance < 11) {
+                            throw new Error();
+                        }
+
+                        eth.sendTransaction({ from: eth.accounts[0], to: user_address, value: "10000000000000000000", gas: 20000000 });
+                        return resolve(user_address);
+                    } catch (err) {
+                        return reject(new Error("Not enough money in master account! Couldn't transfer eth!"));
+                    }
                 }
-            }
-        });
+            });
     })
 }
 
 function buy(_volume, _price, _addr, _password, _reserve) {
-    return co(function*(){
+    return co(function*() {
         if (!_addr) {
             throw new Error("User address must be provided")
         }
@@ -95,28 +104,33 @@ function buy(_volume, _price, _addr, _password, _reserve) {
         // if (etherex.hasUserBidOrderInPeriod(_addr)) {
         //     throw new Error("User already submitted buy order in current period")
         // }
-
-        let hasUserBidOrderInPeriod = yield db.hasUserOrderInPeriod(_addr, chainUtil.getCurrPeriod(), _reserve, 'BID');
+        let hasUserBidOrderInPeriod = yield db.hasUserOrderInPeriod(_addr, chainUtil.getCurrentPeriod(), _reserve, 'BID');
         if (hasUserBidOrderInPeriod) {
             throw new Error("User already submitted bid order in current period")
         }
 
         console.log("Buy: Adresse: ", _addr, ", Passwort: ", _password, ", Volume: ", _volume, ", Price: ", _price);
-        
-        // unlocking the account
-        web3.personal.unlockAccount(_addr, _password, 2000000);
 
         // insert order into db
-        yield db.insertOrder(_reserve, { period: chainUtil.getCurrPeriod(), price: _price, volume: _volume, type: 'BID' });
-
-        // insert order into bchain
-        let tx = etherex.submitBid(_price, _volume, { from: _addr, gas: 2000000 });
+        yield db.insertOrder(_reserve, { period: chainUtil.getCurrentPeriod(), price: _price, volume: _volume, type: 'BID' });
+        var again = true;
+        let tx;
+        while (again) {
+            try {
+                // insert order into bchain
+                tx = etherex.submitBid(_price, _volume, { from: _addr, gas: 2000000 });
+                again = false;
+            } catch (err) {
+                console.log(err);
+                web3.personal.unlockAccount(_addr, _password, 2000000);
+            }
+        }
         eth.awaitConsensus(tx, 20000000);
-    });
+    })
 }
 
 function sell(_volume, _price, _addr, _password, _reserve) {
-    return co(function*(){
+    return co(function*() {
         if (!_addr) {
             throw new Error("User address must be provided")
         }
@@ -137,18 +151,26 @@ function sell(_volume, _price, _addr, _password, _reserve) {
         // if (etherex.hasUserAskOrderInPeriod(_addr)) {
         //     throw new Error("User already submitted sell order in current period")
         // }
-        let hasUserAskOrderInPeriod = yield db.hasUserOrderInPeriod(_addr, chainUtil.getCurrPeriod(), _reserve, 'ASK');
+        let hasUserAskOrderInPeriod = yield db.hasUserOrderInPeriod(_addr, chainUtil.getCurrentPeriod(), _reserve, 'ASK');
         if (hasUserAskOrderInPeriod) {
             throw new Error("User already submitted sell order in current period")
         }
 
-        // unlocking the account
-        web3.personal.unlockAccount(_addr, _password, 2000000);
-
         // insert order into db
-        yield db.insertOrder(_reserve, { period: chainUtil.getCurrPeriod(), price: _price, volume: _volume, type: 'ASK' });
+        yield db.insertOrder(_reserve, { period: chainUtil.getCurrentPeriod(), price: _price, volume: _volume, type: 'ASK' });
 
-        let tx = etherex.submitAsk(_volume, _price, { from: _addr, gas: 20000000 });
+        var again = true;
+        let tx;
+        while (again) {
+            try {
+                // insert order into bchain
+                tx = etherex.submitAsk(_price, _volume, { from: _addr, gas: 2000000 });
+                again = false;
+            } catch (err) {
+                console.log(err);
+                web3.personal.unlockAccount(_addr, _password, 2000000);
+            }
+        }
         eth.awaitConsensus(tx, 20000000);
     });
 }
@@ -175,10 +197,18 @@ function settle(_type, _volume, _period, _addr, _password) {
     if (etherex.hasUserAlreadySettledInPeriod(_addr, _period)) {
         throw new Error("User has already settled in period " + _period)
     }
-    //Unlocking the account
-    web3.personal.unlockAccount(_addr, _password, 2000000);
 
-    let tx = etherex.settle(_type, _volume, _period, { from: _addr, gas: 20000000 });
+    var again = true;
+    while (again) {
+        try {
+            // insert order into bchain
+            let tx = etherex.settle(_type, _volume, _period, { from: _addr, gas: 20000000 });
+            again = false;
+        } catch (err) {
+            console.log(err);
+            web3.personal.unlockAccount(_addr, "amalien", 2000000);
+        }
+    }
     eth.awaitConsensus(tx, 800000);
 }
 
@@ -313,7 +343,7 @@ function stopMining() {
     });
 }
 
-module.exports = {                                                                                                                                      
+module.exports = {
     register: register,
     buy: buy,
     sell: sell,

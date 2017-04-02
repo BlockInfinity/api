@@ -1,9 +1,11 @@
 const mysql = require("mysql");
+
 const _ = require("lodash");
+
 const chainUtil = require("./exchangeAPI/chainUtil.js");
 
 var db_config = {
-    host: "localhost",
+    host: "52.166.9.249",
     user: "dex",
     password: "amalien",
     database: "apidb",
@@ -12,32 +14,35 @@ var db_config = {
 
 global.db_connection = null;
 
+console.log("hello");
+
 function getConnection() {
-	return new Promise(function(resolve, reject) {
-		if (global.db_connection) {
-			return resolve(global.db_connection);
-		} else {
-		    global.db_connection = mysql.createConnection(db_config); // Recreate the connection, since
 
-		    global.db_connection.connect(function(err) {
-		        if (err) {
-		            console.log('error when connecting to db:', err);
-		            setTimeout(getConnection, 2000);
-		        } else {
-		        	return resolve(global.db_connection);
-		        }
-		    });
+    return new Promise(function(resolve, reject) {
+        if (global.db_connection) {
+            return resolve(global.db_connection);
+        } else {
+            global.db_connection = mysql.createConnection(db_config); // Recreate the connection, since
 
-		    global.db_connection.on('error', function(err) {
-		        console.log('db error', err);
-		        if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-		            getConnection();
-		        } else { 
-		            return reject(err);
-		        }
-		    });
-		}
-	});
+            global.db_connection.connect(function(err) {
+                if (err) {
+                    console.log('error when connecting to db:', err);
+                    setTimeout(getConnection, 2000);
+                } else {
+                    return resolve(global.db_connection);
+                }
+            });
+
+            global.db_connection.on('error', function(err) {
+                console.log('db error', err);
+                if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+                    getConnection();
+                } else {
+                    return reject(err);
+                }
+            });
+        }
+    });
 }
 
 function getAllMatchingPrices() {
@@ -56,7 +61,25 @@ function getAllMatchingPrices() {
     });
 }
 
+
+function getMatchingPrice(_period) {
+    return new Promise(function(resolve, reject) {
+        getConnection().then(function(connection) {
+            connection.query("select * from matchingPrices where period = ?", _period, function(err, rows, fields) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(rows && rows.length === 1 ? true : false);
+                }
+            });
+        }, function(err) {
+            reject(err);
+        });
+    });
+}
+
 function getBidOrders(_period) {
+
     if (_.isUndefined(_period)) {
         _period = chainUtil.getCurrentPeriod();
     }
@@ -77,6 +100,7 @@ function getBidOrders(_period) {
 }
 
 function getAskOrders(_period) {
+
     if (_.isUndefined(_period)) {
         _period = chainUtil.getCurrentPeriod();
     }
@@ -96,6 +120,26 @@ function getAskOrders(_period) {
     });
 }
 
+
+function getReserveBidOrders(_period) {
+    if (typeof _period === "undefined") {
+        _period = chainUtil.getCurrentPeriod();
+    }
+
+    return new Promise(function(resolve, reject) {
+        getConnection().then(function(connection) {
+            connection.query("select price,volume from reserveOrders where period = ? and type =  ?", [_period, "BID"], function(err, rows, fields) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(JSON.stringify(rows));
+                }
+            });
+        });
+    })
+}
+
+
 function insertMatchingPrices(_post) {
     return new Promise(function(resolve, reject) {
         if (!_post) {
@@ -112,9 +156,30 @@ function insertMatchingPrices(_post) {
             });
         }, function(err) {
             reject(err);
-        });
-    });
+        })
+    })
 }
+
+function getReserveAskOrders(_period) {
+    if (typeof _period === "undefined") {
+        _period = chainUtil.getCurrentPeriod();
+    }
+
+    return new Promise(function(resolve, reject) {
+        getConnection().then(function(connection) {
+            connection.query("select price,volume from reserveOrders where period = ? and type =  ?", [_period, "ASK"], function(err, rows, fields) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(JSON.stringify(rows));
+                }
+            });
+        });
+    })
+}
+
+
+
 
 function insertOrder(_reserve, _post) {
     return new Promise(function(resolve, reject) {
@@ -144,6 +209,44 @@ function insertOrder(_reserve, _post) {
     });
 }
 
+function getReserveAskPrice(_period) {
+    if (typeof _period === "undefined") {
+        _period = chainUtil.getCurrentPeriod();
+    }
+    return new Promise(function(resolve, reject) {
+        getConnection().then(function(connection) {
+            connection.query("select price from reservePrices where period = ? and type =  ?", [_period, "ASK"], function(err, rows, fields) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(JSON.stringify(rows));
+                }
+            })
+        })
+    })
+}
+
+
+function getReserveBidPrice(_period) {
+    if (typeof _period === "undefined") {
+        _period = chainUtil.getCurrentPeriod();
+    }
+
+    return new Promise(function(resolve, reject) {
+        getConnection().then(function(connection) {
+
+            connection.query("select price from reservePrices where period = ? and type =  ?", [_period, "BID"], function(err, rows, fields) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(JSON.stringify(rows));
+                }
+            });
+        });
+    })
+}
+
+
 function hasUserOrderInPeriod(_addr, _period, _reserve, _type) {
     return new Promise(function(resolve, reject) {
         if (!_addr) {
@@ -169,13 +272,13 @@ function hasUserOrderInPeriod(_addr, _period, _reserve, _type) {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(rows && rows.length === 1 ? true : false);              
+                    resolve(rows && rows.length === 1 ? true : false);
                 }
             });
         }, function(err) {
             reject(err);
         });
-    }); 
+    });
 }
 
 module.exports = {
@@ -184,5 +287,9 @@ module.exports = {
     getAskOrders: getAskOrders,
     insertMatchingPrices: insertMatchingPrices,
     insertOrder: insertOrder,
-    hasUserOrderInPeriod: hasUserOrderInPeriod
+    hasUserOrderInPeriod: hasUserOrderInPeriod,
+    getReserveBidPrice: getReserveBidPrice,
+    getReserveAskPrice: getReserveAskPrice,
+    getReserveBidOrders: getReserveBidOrders,
+    getReserveAskOrders: getReserveAskOrders
 }

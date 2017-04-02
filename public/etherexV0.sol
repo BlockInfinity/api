@@ -225,6 +225,7 @@ contract etherexV0 {
         return matchingPrices[_period];
     }
 
+
       
     // ###################################################################################################################
     // ########################## user interface  #########################################################################
@@ -412,6 +413,8 @@ contract etherexV0 {
         return true;
     }
     
+    event reservePriceEvent(bytes32 _type, int256 _price);
+
     // determines price till volume of MIN_RESERVE_ASK_VOLUME is accumulated  
     function determineReserveBidPrice() internal returns(bool) {
         if (maxBid == 0) {
@@ -448,6 +451,7 @@ contract etherexV0 {
             }
         }
         bidReservePrices[currentPeriod] = reserveBidPrice;
+        reservePriceEvent("Bid",reserveBidPrice);
         return true;
     }
 
@@ -458,12 +462,12 @@ contract etherexV0 {
             return false;
         }
         uint256 cumAskReserveVol = 0;
-        int256 reserve_price = orders[minAsk].price;
+        int256 reserveAskPrice = orders[minAsk].price;
         bool isFound = false;
         uint256 ask_id_iter = minAsk;
 
         while (!isFound) {
-            while (orders[ask_id_iter].price == reserve_price) {
+            while (orders[ask_id_iter].price == reserveAskPrice) {
                 uint256 volume = orders[ask_id_iter].volume;     // redundant, aber übersichtlicher
                 address owner = orders[ask_id_iter].owner;
 
@@ -482,10 +486,11 @@ contract etherexV0 {
             if (cumAskReserveVol >= MIN_RESERVE_ASK_VOLUME) {
               isFound = true;            
               }  else {
-              reserve_price = orders[ask_id_iter].price;
+              reserveAskPrice = orders[ask_id_iter].price;
             }        
         }
-        askReservePrices[currentPeriod] = reserve_price;  
+        askReservePrices[currentPeriod] = reserveAskPrice; 
+        reservePriceEvent("Ask",reserveAskPrice);
         return true;     
     }
 
