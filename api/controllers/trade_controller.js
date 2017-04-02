@@ -2,8 +2,7 @@ const blockchainInterface = require("./exchangeAPI/chainApi.js");
 var util = require('util');
 
 
-const eventWatcher = require("./exchangeAPI/eventWatcher.js");
-
+const eventWatcher = require("./exchangeAPI/chainEventListener.js");
 
 module.exports = {
     submiAskOrder: submiAskOrder,

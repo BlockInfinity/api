@@ -47,6 +47,26 @@ OrderEvent.watch(function(err, res) {
     }
 });
 
+var ReservePriceEvent = etherex.reservePriceEvent();
+
+ReservePriceEvent.watch(function(err, res) {
+    if (!err) {
+        let _price = res.args._price.toNumber();
+        let _type = hex2a(res.args._type);
+
+
+        let post = { period: chainUtil.getCurrPeriod(), price: _price, type: _type };
+
+
+        let query = connection.query('insert ignore into reservePrices set ?', post, function(err, res) {
+            if (err) {
+                console.log("MySql error:", err);
+            }
+        });
+    }
+});
+
+
 // helper function to convert solidity's bytes32 to string
 function hex2a(hexx) {
     var hex = hexx.toString(); //force conversion
