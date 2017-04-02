@@ -28,7 +28,6 @@ function submitSellRequest(req, res, next) {
     res.end();
 }
 
-
 function submitBuyRequest(req, res, next) {
      try {
         var values = req.swagger.params.buyRequest.value;

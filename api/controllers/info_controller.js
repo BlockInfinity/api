@@ -1,6 +1,7 @@
 const blockchainInterface = require("./exchangeAPI/chainApi.js");
-var util = require('util');
-const eventWatcher = require("./exchangeAPI/eventWatcher.js");
+const util = require('util');
+const chainUtil = require("./exchangeAPI/chainUtil.js");
+const db = require('./db');
 
 module.exports = {
     getBalance: getBalance,
@@ -20,7 +21,7 @@ module.exports = {
 
 function findPeriod(req) {
     if (typeof req.swagger.params.period.value === "undefined" || req.swagger.params.period.value == null || req.swagger.params.period.value < 0) {
-        return blockchainInterface.getState()[1];
+        return chainUtil.getCurrentPeriod();
     } else {
         return req.swagger.params.period.value;
     }
@@ -28,9 +29,10 @@ function findPeriod(req) {
 
 function getState(req, res, next) {
     try {
-        var state_period_pair = blockchainInterface.getState();
+        var currentState = chainUtil.getCurrentState();
+        var currentPeriod = chainUtil.getCurrentPeriod();
         res.statusCode = 200;
-        res.end(JSON.stringify({ "state": state_period_pair[0], "period": state_period_pair[1] }));
+        res.end(JSON.stringify({ "state": currentState, "period": currentPeriod }));
     } catch (error) {
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
@@ -170,7 +172,7 @@ function getMatchedBidOrdersForUser(req, res, next) {
 function getBalance(req, res, next) {
     try {
         var address = req.swagger.params.userAddress.value;
-        var balance = blockchainInterface.getBalance(address);
+        var balance = chainUtil.getBalance(address);
         balance = balance.c[0];
         res.statusCode = 200;
         res.end(JSON.stringify({ "balance": balance }));
@@ -183,7 +185,7 @@ function getBalance(req, res, next) {
 
 function getAllMatchingPrices(req, res, next) {
     try {
-        blockchainInterface.getAllMatchingPrices().then(function(prices) {
+        db.getAllMatchingPrices().then(function(prices) {
             res.end(prices);
         }, function(reason) {
             res.statusCode = 500;
