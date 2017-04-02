@@ -5,6 +5,7 @@ const co = require('co');
 const chainUtil = require("./chainUtil.js");
 const io = global.io;
 const _ = require("lodash");
+const db = require('../db');
 
 // catch blockcreation events and broadcast them to all clients
 let filter = eth.filter('latest');
@@ -26,8 +27,8 @@ StateChangeEvent.watch(function(err, res) {
                 state = res.args._state.toNumber();
             }
             if (state === 1) {
-                let matchingPrice = etherex.getMatchingPrice(chainUtil.getCurrPeriod()).toNumber();
-                let post = { period: chainUtil.getCurrPeriod(), price: matchingPrice };
+                let matchingPrice = etherex.getMatchingPrice(chainUtil.getCurrentPeriod()).toNumber();
+                let post = { period: chainUtil.getCurrentPeriod(), price: matchingPrice };
 
                 try {
                     yield db.insertMatchingPrices(post);
@@ -38,7 +39,7 @@ StateChangeEvent.watch(function(err, res) {
                 // socket io
                 io.emit('matchingEvent', JSON.stringify(post));
             } else {
-                let post = { period: chainUtil.getCurrPeriod() };
+                let post = { period: chainUtil.getCurrentPeriod() };
 
                 // socket io
                 io.emit('newPeriodEvent', JSON.stringify(post));
@@ -54,7 +55,7 @@ OrderEvent.watch(function(err, res) {
         if (!err) {
             let _price = res.args._price.toNumber();
             let _volume = res.args._volume.toNumber();
-            let _period = chainUtil.getCurrPeriod();
+            let _period = chainUtil.getCurrentPeriod();
             let _type = hex2a(res.args._type);
             let post = { period: _period, price: _price, volume: _volume, type: _type };
 
@@ -65,24 +66,24 @@ OrderEvent.watch(function(err, res) {
 });
 
 var ReservePriceEvent = etherex.reservePriceEvent();
-
 ReservePriceEvent.watch(function(err, res) {
-    if (!err) {
-        let _price = res.args._price.toNumber();
-        let _type = hex2a(res.args._type);
+    return co(function*() {
+        if (!err) {
+            let _price = res.args._price.toNumber();
+            let _type = hex2a(res.args._type);
+            let post = { period: chainUtil.getCurrentPeriod(), price: _price, type: _type };
 
-
-        let post = { period: chainUtil.getCurrPeriod(), price: _price, type: _type };
-
-
-        let query = connection.query('insert ignore into reservePrices set ?', post, function(err, res) {
-            if (err) {
-                console.log("MySql error:", err);
+            try {
+                yield db.insertReservePrice(post);
+            } catch(e) {
+                console.log(e);
             }
-        });
-    }
-});
 
+            // socket io
+            io.emit('reservePriceEvent', JSON.stringify(post));
+        }
+    });
+});
 
 // helper function to convert solidity's bytes32 to string
 function hex2a(hexx) {

@@ -226,7 +226,6 @@ function getReserveAskPrice(_period) {
     })
 }
 
-
 function getReserveBidPrice(_period) {
     if (typeof _period === "undefined") {
         _period = chainUtil.getCurrentPeriod();
@@ -246,6 +245,23 @@ function getReserveBidPrice(_period) {
     })
 }
 
+function insertReservePrice(_post) {
+    if (!_post) {
+        return reject(new Error('missing post data'));
+    }
+
+    return new Promise(function(resolve, reject) {
+        getConnection().then(function(connection) {
+            connection.query('insert ignore into reservePrices set ?', _post, function(err, rows, fields) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(JSON.stringify(rows));
+                }
+            });
+        });
+    })
+}
 
 function hasUserOrderInPeriod(_addr, _period, _reserve, _type) {
     return new Promise(function(resolve, reject) {
@@ -290,6 +306,7 @@ module.exports = {
     hasUserOrderInPeriod: hasUserOrderInPeriod,
     getReserveBidPrice: getReserveBidPrice,
     getReserveAskPrice: getReserveAskPrice,
+    insertReservePrice: insertReservePrice,
     getReserveBidOrders: getReserveBidOrders,
     getReserveAskOrders: getReserveAskOrders
 }
