@@ -3,7 +3,7 @@
 var app = require('express')();
 var http = require('http').Server(app);
 const io = require('socket.io')(http);
-GLOBAL.io = io;
+global.io = io;
 var swaggerTools = require('swagger-tools');
 var jsyaml = require('js-yaml');
 var fs = require('fs');
