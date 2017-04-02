@@ -14,7 +14,9 @@
     "socket.io": "^1.7.3",
     "sse": "0.0.6",
     "swagger-connect": "^0.1.0",
-    "web3": "^0.18.2"
+    "web3": "^0.18.2",
+    "co": "4.6.0",
+    "lodash": "4.17.4"
   },
   "devDependencies": {
     "mysql": "^2.13.0",

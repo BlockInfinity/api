@@ -1,50 +1,67 @@
 const web3 = require("./chainConnector.js");
 const eth = web3.eth;
 const etherex = web3.exchangeContract;
+const co = require('co');
 const chainUtil = require("./chainUtil.js");
-const io = GLOBAL.io;
+const io = global.io;
+const _ = require("lodash");
+
+// catch blockcreation events and broadcast them to all clients
+let filter = eth.filter('latest');
+filter.watch(function(err, res) {
+    if (!_.isUndefined(res)) {
+        let startBlock = etherex.getStartBlock().toNumber();
+        let minedBlocks = eth.blockNumber - startBlock;
+        let toSend = { MinedBlocksInCurrPeriod: minedBlocks }
+        io.emit('blockCreationEvent', JSON.stringify(toSend));
+    }
+});
 
 // inserts the matching price into the database when the state changes to 1
 var StateChangeEvent = etherex.StateChangedEvent();
 StateChangeEvent.watch(function(err, res) {
-    if (!err) {
-        state = res.args._state.toNumber();
-        if (state === 1) {
-            let matchingPrice = etherex.getMatchingPrice(chainUtil.getCurrPeriod()).toNumber();
-            let post = { period: chainUtil.getCurrPeriod(), price: matchingPrice };
-            let query = connection.query('insert ignore into matchingPrices set ?', post, function(err, res) {
-                if (err) {
-                    console.log("MySql error:", err);
+    return co(function() {
+        if (!err) {
+            if (!_.isUndefined(res)) {
+                state = res.args._state.toNumber();
+            }
+            if (state === 1) {
+                let matchingPrice = etherex.getMatchingPrice(chainUtil.getCurrPeriod()).toNumber();
+                let post = { period: chainUtil.getCurrPeriod(), price: matchingPrice };
+
+                try {
+                    yield db.insertMatchingPrices(post);
+                } catch(e) {
+                    console.log(e);
                 }
-            });
+
+                // socket io
+                io.emit('matchingEvent', JSON.stringify(post));
+            } else {
+                let post = { period: chainUtil.getCurrPeriod() };
+
+                // socket io
+                io.emit('newPeriodEvent', JSON.stringify(post));
+            }
         }
-    }
+    });
 });
 
 // as soon as order gets submitted, it is saved in the database
 var OrderEvent = etherex.OrderEvent();
 OrderEvent.watch(function(err, res) {
-    if (!err) {
-        let _price = res.args._price.toNumber();
-        let _volume = res.args._volume.toNumber();
-        let _period = chainUtil.getCurrPeriod();
-        let _type = hex2a(res.args._type);
+    return co(function() {
+        if (!err) {
+            let _price = res.args._price.toNumber();
+            let _volume = res.args._volume.toNumber();
+            let _period = chainUtil.getCurrPeriod();
+            let _type = hex2a(res.args._type);
+            let post = { period: _period, price: _price, volume: _volume, type: _type };
 
-        let post = { period: _period, price: _price, volume: _volume, type: _type };
-
-        let table;
-        if (state == 0) {
-            table = "orders";
-        } else {
-            table = "reserveOrders";
+            // socket io
+            io.emit('orderEvent', JSON.stringify(post));
         }
-
-        let query = connection.query('insert ignore into '+table+' set ?', post, function(err, res) {
-            if (err) {
-                console.log("MySql error:", err);
-            }
-        });
-    }
+    });
 });
 
 // helper function to convert solidity's bytes32 to string
@@ -77,54 +94,3 @@ function getAndSaveMatchingPriceHistory() {
         });
     }
 }
-
-
-
-
-
-// catch blockcreation events and broadcast them to all clients
-let filter = eth.filter('latest');
-filter.watch(function(err, res) {
-    if (typeof res != "undefined") {
-        let startBlock = etherex.getStartBlock().toNumber();
-        let minedBlocks = eth.blockNumber - startBlock;
-        let toSend = { MinedBlocksInCurrPeriod: minedBlocks }
-        io.emit('blockCreationEvent', JSON.stringify(toSend));
-    }
-});
-
-// catch order  events and broadcast them to all clients
-var OrderEvent = etherex.OrderEvent();
-OrderEvent.watch(function(err, res) {
-    if (typeof res != "undefined") {
-        let _price = res.args._price.toNumber();
-        let _volume = res.args._volume.toNumber();
-        let _period = currPeriod;
-        let _type = hex2a(res.args._type);
-        let toSend = { "period": _period, "type": _type, "price": _price, "volume": _volume }
-        io.emit('orderEvent', JSON.stringify(toSend));
-    }
-});
-
-// catch matching events and new period events and broadcast them to all clients
-var StateChangeEvent = etherex.StateChangedEvent();
-StateChangeEvent.watch(function(err, res) {
-    if (!err) {
-        if (typeof res != "undefined") {
-
-            state = res.args._state.toNumber();
-        }
-        if (state == 1) {
-
-            let matchingPrice = etherex.getMatchingPrice(currPeriod).toNumber();
-
-            let post = { period: currPeriod, price: matchingPrice };
-            io.emit('matchingEvent', JSON.stringify(post));
-
-        } else {
-            currPeriod = etherex.getCurrPeriod().toNumber();
-            let post = { period: currPeriod };
-            io.emit('newPeriodEvent', JSON.stringify(post));
-        }
-    }
-});

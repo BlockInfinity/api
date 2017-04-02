@@ -3,6 +3,7 @@ const web3 = require("./chainConnector.js");
 const rpc = require('node-json-rpc');
 const chainUtil = require("./chainUtil.js");
 const db = require("../db.js");
+const _ = require("lodash");
 
 const eth = web3.eth;
 const etherex = web3.exchangeContract;
@@ -11,8 +12,6 @@ var options = {
     port: 8545,
     host: 'localhost'
 };
-
-const END_SETTLE_CHECK_IN_SECONDS = 10;
 
 var client = new rpc.Client(options);
 
@@ -75,52 +74,80 @@ function register(_user_password, _type) {
     })
 }
 
-function buy(_volume, _price, _addr, _password) {
+function buy(_volume, _price, _addr, _password, _reserve) {
     if (!_addr) {
         throw new Error("User address must be provided")
     }
     if (!_volume || _volume <= 0) {
         throw new Error("Volume must be provided and greater than 0")
     }
-    if (_price === undefined) {
+    if (_.isUndefined(_price)) {
         throw new Error("Price must be provided")
     }
     if (!_password) {
         throw new Error("Password must be provided")
     }
-    // check user has no order in current period
-    if (etherex.hasUserBidOrderInPeriod(_addr)) {
-        throw new Error("User already submitted buy order in current period")
+    if (_.isUndefined(_reserve)) {
+        throw new Error("Reserve must be provided")
     }
+    // check user has no order in current period
+    // if (etherex.hasUserBidOrderInPeriod(_addr)) {
+    //     throw new Error("User already submitted buy order in current period")
+    // }
+    let hasUserBidOrderInPeriod = yield db.hasUserOrderInPeriod(_addr, chainUtil.getCurrPeriod(), _reserve, 'BID');
+    if (hasUserBidOrderInPeriod) {
+        throw new Error("User already submitted bid order in current period")
+    }
+
     console.log("Buy: Adresse: ", _addr, ", Passwort: ", _password, ", Volume: ", _volume, ", Price: ", _price);
-    //Unlocking the account
+    
+    // unlocking the account
     web3.personal.unlockAccount(_addr, _password, 2000000);
+
+    // insert order into db
+    yield db.insertOrder(_reserve, { period: chainUtil.getCurrPeriod(), price: _price, volume: _volume, type: 'BID' });
+
+    // insert order into bchain
     let tx = etherex.submitBid(_price, _volume, { from: _addr, gas: 2000000 });
     eth.awaitConsensus(tx, 20000000);
 }
 
-function sell(_volume, _price, _addr, _password) {
-    if (!_addr) {
-        throw new Error("User address must be provided")
-    }
-    if (!_volume || _volume <= 0) {
-        throw new Error("Volume must be provided and greater than 0")
-    }
-    if (_price === undefined) {
-        throw new Error("Price must be provided")
-    }
-    if (!_password) {
-        throw new Error("Password must be provided")
-    }
-    // check user has no order in current period
-    if (etherex.hasUserAskOrderInPeriod(_addr)) {
-        throw new Error("User already submitted sell order in current period")
-    }
-    //Unlocking the account
-    web3.personal.unlockAccount(_addr, _password, 2000000);
+function sell(_volume, _price, _addr, _password, _reserve) {
+    return co(function(){
+        if (!_addr) {
+            throw new Error("User address must be provided")
+        }
+        if (!_volume || _volume <= 0) {
+            throw new Error("Volume must be provided and greater than 0")
+        }
+        if (_.isUndefined(_price)) {
+            throw new Error("Price must be provided")
+        }
+        if (!_password) {
+            throw new Error("Password must be provided")
+        }
+        if (_.isUndefined(_reserve)) {
+            throw new Error("Reserve must be provided")
+        }
 
-    let tx = etherex.submitAsk(_volume, _price, { from: _addr, gas: 20000000 });
-    eth.awaitConsensus(tx, 20000000);
+        // check user has no order in current period
+        // if (etherex.hasUserAskOrderInPeriod(_addr)) {
+        //     throw new Error("User already submitted sell order in current period")
+        // }
+        let hasUserAskOrderInPeriod = yield db.hasUserOrderInPeriod(_addr, chainUtil.getCurrPeriod(), _reserve, 'ASK');
+        if (hasUserAskOrderInPeriod) {
+            throw new Error("User already submitted sell order in current period")
+        }
+
+        // unlocking the account
+        web3.personal.unlockAccount(_addr, _password, 2000000);
+
+        // insert order into db
+        yield db.insertOrder(_reserve, { period: chainUtil.getCurrPeriod(), price: _price, volume: _volume, type: 'ASK' });
+
+        let tx = etherex.submitAsk(_volume, _price, { from: _addr, gas: 20000000 });
+        eth.awaitConsensus(tx, 20000000);
+    });
 }
 
 // todo (mg) statt periode soll Zeit rein kommen und von zeit soll auf die periode geschlossen werden können
@@ -157,7 +184,7 @@ function settle(_type, _volume, _period, _addr, _password) {
 // ######################################################################
 
 function getMatchingPrice(_period) {
-    if (typeof _period == "undefined") {
+    if (_.isUndefined(_period)) {
         throw new Error("Period must be provided")
     }
     let res = etherex.getMatchingPrice(_period).toNumber();
@@ -232,7 +259,7 @@ Object.getPrototypeOf(web3.eth).awaitConsensus = function(txhash, gasSent) {
 
     filter.watch(function(err, res) {
         eth.getTransactionReceiptAsync(txhash).then(function(receipt) {
-            if (receipt && receipt.transactionHash == txhash) {
+            if (receipt && receipt.transactionHash === txhash) {
                 filter.stopWatching();
                 // note corner case of gasUsed == gasSent.  It could
                 // mean used EXACTLY that amount of gas and succeeded.

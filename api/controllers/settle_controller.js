@@ -1,4 +1,4 @@
-const blockchainInterface = require("./exchangeAPI/chainApi.js");
+const chainApi = require("./exchangeAPI/chainApi.js");
 var util = require('util');
 
 module.exports = {
@@ -13,7 +13,7 @@ function settle(req, res, next) {
         var type = req.swagger.params.settleRequest.value.type;
         var period = req.swagger.params.settleRequest.value.period;
        
-        blockchainInterface.settle(type, volume, period, accountAddress, password);
+        chainApi.settle(type, volume, period, accountAddress, password);
         res.statusCode = 200;
     } catch (error) {
         res.statusCode = 500;

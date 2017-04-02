@@ -1,5 +1,7 @@
 init();
 
+const END_SETTLE_CHECK_IN_SECONDS = 10;
+
 function init() {
     try {
         //web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);

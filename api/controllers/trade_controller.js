@@ -1,9 +1,7 @@
-const blockchainInterface = require("./exchangeAPI/chainApi.js");
-var util = require('util');
-
-
-const eventWatcher = require("./exchangeAPI/eventWatcher.js");
-
+const chainApi = require("./exchangeAPI/chainApi.js");
+const util = require('util');
+const chainUtil = require("./exchangeAPI/chainUtil.js");
+const _ = require("lodash");
 
 module.exports = {
     submiAskOrder: submiAskOrder,
@@ -13,97 +11,85 @@ module.exports = {
 }
 
 function submiAskOrder(req, res, next) {
-
-    if (eventWatcher.getState() == 1) {
+    if (chainUtil.getCurrentState() === 1) {
         res.statusCode = 400;
         res.end('Invalid state. Only reserve orders can be submitted.');
+        return;
     }
 
     var values = req.swagger.params.sellRequest.value;
     var accountAddress = values.accountAddress;
     var password = values.password;
     var volume = Number(values.volume);
-    if (typeof values.price !== "undefined" && values.price != null) {
+    if (!_.isUndefined(values.price) && _.isNull(values.price)) {
         var price = Number(values.price);
     } else {
         res.statusCode = 500;
         res.end("A price is required to submit your selling order!")
     }
 
-
-    try {
-
-        blockchainInterface.sell(volume, price, accountAddress, password);
+    chainApi.sell(volume, price, accountAddress, password, false).then(function() {
         res.statusCode = 200;
-    } catch (error) {
+        res.end();
+    }, function(err) {
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
-    }
-    res.end();
+    });
 }
 
-
 function submitBidOrder(req, res, next) {
-
-    if (eventWatcher.getState() == 1) {
+    if (chainUtil.getCurrentState() === 1) {
         res.statusCode = 400;
         res.end('Invalid state. Only reserve orders can be submitted.');
     }
-
-
 
     var values = req.swagger.params.buyRequest.value;
     var accountAddress = values.accountAddress;
     var password = values.password;
     var volume = Number(values.volume);
-    if (typeof values.price !== "undefined" && values.price != 0) {
+    if (!_.isUndefined(values.price) && values.price !== 0) {
         var price = Number(values.price);
     } else {
         var price = Number.MAX_VALUE;
     }
-    try {
 
-        blockchainInterface.buy(volume, price, accountAddress, password);
+    chainApi.buy(volume, price, accountAddress, password, false).then(function() {
         res.statusCode = 200;
-    } catch (error) {
+        res.end();
+    }, function(err) {
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
-    }
-    res.end();
+    });
 }
 
-
 function submitReserveAskOrder(req, res, next) {
-
-    if (eventWatcher.getState() == 0) {
+    if (chainUtil.getCurrentState() === 0) {
         res.statusCode = 400;
         res.end('Invalid state. Only normal orders can be submitted.');
     }
-
 
     var values = req.swagger.params.sellRequest.value;
     var accountAddress = values.accountAddress;
     var password = values.password;
     var volume = Number(values.volume);
-    if (typeof values.price !== "undefined" && values.price != null) {
+    if (!_.isUndefined(values.price) && _.isNull(values.price)) {
         var price = Number(values.price);
     } else {
         res.statusCode = 500;
         res.end("A price is required to submit your selling order!")
     }
-    try {
-        blockchainInterface.sell(volume, price, accountAddress, password);
+
+    chainApi.sell(volume, price, accountAddress, password, true).then(function() {
         res.statusCode = 200;
-    } catch (error) {
+        res.end();
+    }, function(err) {
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
-    }
-    res.end();
+    });
 }
 
 function submitReserveBidOrder(req, res, next) {
-
-    if (eventWatcher.getState() == 0) {
+    if (chainUtil.getCurrentState() === 0) {
         res.statusCode = 400;
         res.end('Invalid state. Only normal orders can be submitted.');
     }
@@ -112,17 +98,17 @@ function submitReserveBidOrder(req, res, next) {
     var accountAddress = values.accountAddress;
     var password = values.password;
     var volume = Number(values.volume);
-    if (typeof values.price !== "undefined" && values.price != 0) {
+    if (!_.isUndefined(values.price) && values.price !== 0) {
         var price = Number(values.price);
     } else {
         var price = Number.MAX_VALUE;
     }
-    try {
-        blockchainInterface.buy(volume, price, accountAddress, password);
+
+    chainApi.buy(volume, price, accountAddress, password, true).then(function() {
         res.statusCode = 200;
-    } catch (error) {
+        res.end();
+    }, function(err) {
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
-    }
-    res.end();
+    });
 }

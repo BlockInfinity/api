@@ -1,7 +1,8 @@
-const blockchainInterface = require("./exchangeAPI/chainApi.js");
-const util = require('util');
+const chainApi = require("./exchangeAPI/chainApi.js");
 const chainUtil = require("./exchangeAPI/chainUtil.js");
+const util = require('util');
 const db = require('./db');
+const _ = require("lodash");
 
 module.exports = {
     getBalance: getBalance,
@@ -20,7 +21,7 @@ module.exports = {
 }
 
 function findPeriod(req) {
-    if (typeof req.swagger.params.period.value === "undefined" || req.swagger.params.period.value == null || req.swagger.params.period.value < 0) {
+    if (_.isUndefined(req.swagger.params.period.value) || _.isNull(req.swagger.params.period.value) || req.swagger.params.period.value < 0) {
         return chainUtil.getCurrentPeriod();
     } else {
         return req.swagger.params.period.value;
@@ -43,7 +44,7 @@ function getState(req, res, next) {
 function getMatchingPrice(req, res, next) {
     try {
         var period = findPeriod(req);
-        var matchingPrice = blockchainInterface.getMatchingPrice(period);
+        var matchingPrice = chainApi.getMatchingPrice(period);
         res.statusCode = 200;
         res.end(JSON.stringify({ "period": period, "matchingPrice": matchingPrice }));
     } catch (error) {
@@ -55,8 +56,8 @@ function getMatchingPrice(req, res, next) {
 
 // function getBidOrders(req, res, next) {
 //     try {
-//         var period = blockchainInterface.getState()[1];
-//         var orders = blockchainInterface.getBidOrders();
+//         var period = chainApi.getState()[1];
+//         var orders = chainApi.getBidOrders();
 //         var bidOrders = [];
 //         for (var i = 0; i < orders[0].length; i++) {
 //             bidOrders.push({ "price": orders[0][i], "volume": orders[1][i] });
@@ -73,8 +74,8 @@ function getMatchingPrice(req, res, next) {
 
 // function getAskOrders(req, res, next) {
 //     try {
-//         var period = blockchainInterface.getState()[1];
-//         var orders = blockchainInterface.getAskOrders();
+//         var period = chainApi.getState()[1];
+//         var orders = chainApi.getAskOrders();
 //         var askOrders = [];
 //         for (var i = 0; i < orders[0].length; i++) {
 //             askOrders.push({ "price": orders[0][i], "volume": orders[1][i] });
@@ -92,7 +93,7 @@ function getMatchingPrice(req, res, next) {
 function getAskReservePrice(req, res, next) {
     try {
         var period = findPeriod(req);
-        var askReservePrice = blockchainInterface.getAskReservePrice(period);
+        var askReservePrice = chainApi.getAskReservePrice(period);
         res.statusCode = 200;
         res.end(JSON.stringify({ "period": period, "askReservePrice": askReservePrice }));
     } catch (error) {
@@ -105,7 +106,7 @@ function getAskReservePrice(req, res, next) {
 function getBidReservePrice(req, res, next) {
     try {
         var period = findPeriod(req);
-        var bidReservePrice = blockchainInterface.getBidReservePrice(period);
+        var bidReservePrice = chainApi.getBidReservePrice(period);
         res.statusCode = 200;
         res.end(JSON.stringify({ "period": period, "bidReservePrice": bidReservePrice }));
     } catch (error) {
@@ -118,7 +119,7 @@ function getBidReservePrice(req, res, next) {
 function getMatchedAskOrders(req, res, next) {
     try {
         var period = findPeriod(req);
-        var askOrders = blockchainInterface.getMatchedAskOrders(period);
+        var askOrders = chainApi.getMatchedAskOrders(period);
         res.statusCode = 200;
         res.end(JSON.stringify({ "period": period, "matchedAskOrders": askOrders }));
     } catch (error) {
@@ -131,7 +132,7 @@ function getMatchedAskOrders(req, res, next) {
 function getMatchedBidOrders(req, res, next) {
     try {
         var period = findPeriod(req);
-        var bidOrders = blockchainInterface.getMatchedBidOrders(period);
+        var bidOrders = chainApi.getMatchedBidOrders(period);
         res.statusCode = 200;
         res.end(JSON.stringify({ "period": period, "matchedBidOrders": bidOrders }));
     } catch (error) {
@@ -145,7 +146,7 @@ function getMatchedAskOrdersForUser(req, res, next) {
     try {
         var period = findPeriod(req);
         var address = req.swagger.params.address.value;
-        var matchedAskOrders = blockchainInterface.getMatchedAskOrdersForUser(period, address);
+        var matchedAskOrders = chainApi.getMatchedAskOrdersForUser(period, address);
         res.statusCode = 200;
         res.end(JSON.stringify({ "period": period, "matchedAskOrders": matchedAskOrders }));
     } catch (error) {
@@ -159,7 +160,7 @@ function getMatchedBidOrdersForUser(req, res, next) {
     try {
         var period = findPeriod(req);
         var address = req.swagger.params.address.value;
-        var matchedBidOrders = blockchainInterface.getMatchedBidOrdersForUser(period, address);
+        var matchedBidOrders = chainApi.getMatchedBidOrdersForUser(period, address);
         res.statusCode = 200;
         res.end(JSON.stringify({ "period": period, "matchedBidOrders": matchedBidOrders }));
     } catch (error) {
@@ -200,7 +201,7 @@ function getAllMatchingPrices(req, res, next) {
 function getBidOrders(req, res, next) {
     try {
         var period = req.swagger.params.period.value;
-        blockchainInterface.getBidOrders(period).then(function(bids) {
+        chainApi.getBidOrders(period).then(function(bids) {
             res.end(bids);
         }, function(reason) {
             res.statusCode = 500;
@@ -212,14 +213,10 @@ function getBidOrders(req, res, next) {
     }
 }
 
-
-
-
 function getAskOrders(req, res, next) {
-
     try {
         var period = req.swagger.params.period.value;
-        blockchainInterface.getAskOrders(period).then(function(bids) {
+        chainApi.getAskOrders(period).then(function(bids) {
             res.end(bids);
         }, function(reason) {
             res.statusCode = 500;
@@ -229,5 +226,4 @@ function getAskOrders(req, res, next) {
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
     }
-
 }
