@@ -10,6 +10,9 @@ var fs = require('fs');
 var serverPort = 8080;
 var express = require("express")
 
+const chainEventListener = require("./api/controllers/exchangeAPI/chainEventListener.js");
+const chainEndSettler = require("./api/controllers/exchangeAPI/chainEndSettler.js");
+
 // swaggerRouter configuration
 var options = {
     swaggerUi: '/swagger.json',
@@ -56,9 +59,11 @@ swaggerTools.initializeMiddleware(swaggerDoc, function(middleware) {
 
 io.on('connection', function(socket) {
     console.log('a user connected');
-
     socket.on('disconnect', function() {
         console.log('user disconnected');
         socket.disconnect(true);
     });
 });
+
+// start end settler
+chainEndSettler.start();

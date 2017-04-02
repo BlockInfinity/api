@@ -10,6 +10,14 @@ function getCurrentState() {
     return etherex.getCurrState().toNumber();
 }
 
+function setCurrentPeriod() {
+    return etherex.getCurrPeriod().toNumber();
+}
+
+function setCurrentState() {
+    return etherex.getCurrState().toNumber();
+}
+
 function getBalance(_addr) {
     if (!_addr) {
         throw new Error("Address must be provided")

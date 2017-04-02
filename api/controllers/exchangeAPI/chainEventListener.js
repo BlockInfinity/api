@@ -20,7 +20,7 @@ filter.watch(function(err, res) {
 // inserts the matching price into the database when the state changes to 1
 var StateChangeEvent = etherex.StateChangedEvent();
 StateChangeEvent.watch(function(err, res) {
-    return co(function() {
+    return co(function*() {
         if (!err) {
             if (!_.isUndefined(res)) {
                 state = res.args._state.toNumber();
@@ -50,7 +50,7 @@ StateChangeEvent.watch(function(err, res) {
 // as soon as order gets submitted, it is saved in the database
 var OrderEvent = etherex.OrderEvent();
 OrderEvent.watch(function(err, res) {
-    return co(function() {
+    return co(function*() {
         if (!err) {
             let _price = res.args._price.toNumber();
             let _volume = res.args._volume.toNumber();
