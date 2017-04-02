@@ -31,7 +31,15 @@ OrderEvent.watch(function(err, res) {
         let _type = hex2a(res.args._type);
 
         let post = { period: _period, price: _price, volume: _volume, type: _type };
-        let query = connection.query('insert ignore into orders set ?', post, function(err, res) {
+
+        let table;
+        if (state == 0) {
+            table = "orders";
+        } else {
+            table = "reserveOrders";
+        }
+
+        let query = connection.query('insert ignore into '+table+' set ?', post, function(err, res) {
             if (err) {
                 console.log("MySql error:", err);
             }

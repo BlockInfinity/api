@@ -39,14 +39,14 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
       x-swagger-router-controller: "settle_controller"
-  /trade/buy:
+  /trade/submitBidOrder:
     post:
       tags: 
         - trade      
       description: "Endpoint for placing bid for certain amount of electricity for a certain price. Requires an account's address and password alongside a volume estimate. Price could be optionally provided.
                     If the price argument is omited, the order will get matched at the lowest price after all the priced bids. Otherwise, if a price is given, the order will get matched only if an appropriate
                     match is found."
-      operationId: "submitBuyRequest"
+      operationId: "submitBidOrder"
       consumes:
         - application/json
       produces:
@@ -68,12 +68,13 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
       x-swagger-router-controller: "trade_controller"
-  /trade/sell:
+      
+  /trade/submitAskOrder:
     post:
       tags: 
         - trade  
       description: "Endpoint for placing ask orders for certain amount of electricity at a certain price. Account adress and password are required."
-      operationId: "submitSellRequest"
+      operationId: "submitAskOrder"
       parameters:
         - name: "sellRequest"
           in: "body"
@@ -91,6 +92,61 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
       x-swagger-router-controller: "trade_controller"
+
+  /trade/submitReserveBidOrder:
+    post:
+      tags: 
+        - trade      
+      description: "Endpoint for placing bid for certain amount of electricity for a certain price. Requires an account's address and password alongside a volume estimate. Price could be optionally provided.
+                    If the price argument is omited, the order will get matched at the lowest price after all the priced bids. Otherwise, if a price is given, the order will get matched only if an appropriate
+                    match is found."
+      operationId: "submitReserveBidOrder"
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "buyRequest"
+          in: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/buyRequest"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SuccessResponse"          
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      x-swagger-router-controller: "trade_controller"
+
+  /trade/submitReserveAskOrder:
+    post:
+      tags: 
+        - trade  
+      description: "Endpoint for placing ask orders for certain amount of electricity at a certain price. Account adress and password are required."
+      operationId: "submitReserveAskOrder"
+      parameters:
+        - name: "sellRequest"
+          in: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/sellRequest"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SuccessResponse"          
+        # responses may fall through to errors
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      x-swagger-router-controller: "trade_controller"
+
   /authority/register:
     post:
       tags: 
