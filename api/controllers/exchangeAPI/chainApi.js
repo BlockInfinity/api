@@ -30,7 +30,7 @@ if (!etherex) {
 
 function init() {
     try {
-        web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
+        web3.personal.unlockAccount(eth.accounts[0], "amalien", 2000000);
         etherex.registerCertificateAuthority(eth.accounts[0], { from: eth.accounts[0] });
 
         // checks every n seconds if a not yet settled period can
@@ -70,7 +70,7 @@ function register(_user_password, _type) {
                 console.log("in one", jsonObj.result);
 
                 var user_address = String(jsonObj.result);
-                web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
+                web3.personal.unlockAccount(eth.accounts[0], "amalien", 2000000);
                 etherex.registerCertificateAuthority(eth.accounts[0], { from: eth.accounts[0], gas: 20000000 });
 
                 switch (_type) {
@@ -128,8 +128,8 @@ function buy(_volume, _price, _addr, _password) {
     }
     console.log("Buy: Adresse: ", _addr, ", Passwort: ", _password, ", Volume: ", _volume, ", Price: ", _price);
     //Unlocking the account
-    web3.personal.unlockAccount(_addr, _password, 5);
-    let tx = etherex.submitBid(_price, _volume, { from: _addr, gas: 20000000 });
+    web3.personal.unlockAccount(_addr, _password, 2000000);
+    let tx = etherex.submitBid(_price, _volume, { from: _addr, gas: 2000000 });
     eth.awaitConsensus(tx, 20000000);
 }
 
@@ -153,7 +153,7 @@ function sell(_volume, _price, _addr, _password) {
     }
 
     //Unlocking the account
-    web3.personal.unlockAccount(_addr, _password, 1000);
+    web3.personal.unlockAccount(_addr, _password, 2000000);
 
     let tx = etherex.submitAsk(_volume, _price, { from: _addr, gas: 20000000 });
     eth.awaitConsensus(tx, 20000000);
@@ -183,7 +183,7 @@ function settle(_type, _volume, _period, _addr, _password) {
     }
 
     //Unlocking the account
-    web3.personal.unlockAccount(_addr, _password, 1000);
+    web3.personal.unlockAccount(_addr, _password, 2000000);
 
     let tx = etherex.settle(_type, _volume, _period, { from: _addr, gas: 20000000 });
     eth.awaitConsensus(tx, 800000);
