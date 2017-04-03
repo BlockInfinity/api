@@ -39,7 +39,7 @@ function getConnection() {
 
 function getAllMatchingPrices() {
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(err, connection) {
+        getConnection().then(function(connection) {
             connection.query("select * from matchingPrices", function(err, rows, fields) {
                 connection.release();
                 if (err) {
@@ -90,7 +90,7 @@ function getAllReserveBidPrices() {
 
 function getMatchingPrice(_period) {
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(err, connection) {
+        getConnection().then(function(connection) {
             connection.query("select * from matchingPrices where period = ?", _period, function(err, rows, fields) {
                 connection.release();
                 if (err) {
@@ -111,7 +111,7 @@ function getBidOrders(_period) {
     }
 
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(err, connection) {
+        getConnection().then(function(connection) {
             connection.query("select period, price, volume from orders where period = ? and type =  ?", [_period, "BID"], function(err, rows, fields) {
                 connection.release();
                 if (err) {
@@ -132,7 +132,7 @@ function getAskOrders(_period) {
     }
 
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(err, connection) {
+        getConnection().then(function(connection) {
             connection.query("select period, price, volume from orders where period = ? and type =  ?", [_period, "ASK"], function(err, rows, fields) {
                 connection.release();
                 if (err) {
@@ -153,7 +153,7 @@ function getReserveBidOrders(_period) {
     }
 
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(err, connection) {
+        getConnection().then(function(connection) {
             connection.query("select price,volume from reserveOrders where period = ? and type =  ?", [_period, "BID"], function(err, rows, fields) {
                 connection.release();
                 if (err) {
@@ -172,7 +172,7 @@ function insertMatchingPrices(_post) {
             return reject(new Error('missing post data'));
         }
 
-        getConnection().then(function(err, connection) {
+        getConnection().then(function(connection) {
             connection.query('insert ignore into matchingPrices set ?', _post, function(err, rows, fields) {
                 connection.release();
                 if (err) {
@@ -193,7 +193,7 @@ function getReserveAskOrders(_period) {
     }
 
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(err, connection) {
+        getConnection().then(function(connection) {
             connection.query("select price,volume from reserveOrders where period = ? and type =  ?", [_period, "ASK"], function(err, rows, fields) {
                 connection.release();
                 if (err) {
@@ -220,7 +220,7 @@ function insertOrder(_reserve, _post) {
             table = 'reserveOrders';
         }
 
-        getConnection().then(function(err, connection) {
+        getConnection().then(function(connection) {
             connection.query('insert ignore into ' + table + ' set ?', _post, function(err, rows, fields) {
                 connection.release();
                 if (err) {
@@ -240,7 +240,7 @@ function getReserveAskPrice(_period) {
         _period = chainUtil.getCurrentPeriod();
     }
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(err, connection) {
+        getConnection().then(function(connection) {
             connection.query("select price from reservePrices where period = ? and type =  ?", [_period, "ASK"], function(err, rows, fields) {
                 connection.release();
                 if (err) {
@@ -259,7 +259,7 @@ function getReserveBidPrice(_period) {
     }
 
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(err, connection) {
+        getConnection().then(function(connection) {
             connection.query("select price from reservePrices where period = ? and type =  ?", [_period, "BID"], function(err, rows, fields) {
                 connection.release();
                 if (err) {
@@ -278,7 +278,7 @@ function insertReservePrice(_post) {
     }
 
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(err, connection) {
+        getConnection().then(function(connection) {
             connection.query('insert ignore into reservePrices set ?', _post, function(err, rows, fields) {
                 connection.release();
                 if (err) {
@@ -311,7 +311,7 @@ function hasUserOrderInPeriod(_addr, _period, _reserve, _type) {
             table = 'reserveOrders';
         }
 
-        getConnection().then(function(err, connection) {
+        getConnection().then(function(connection) {
             connection.query('select orderID from ' + table + ' where account = ? and type =  ?', [_addr, _type], function(err, rows, fields) {
                 connection.release();
                 if (err) {
