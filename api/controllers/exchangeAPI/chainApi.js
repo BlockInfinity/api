@@ -348,15 +348,14 @@ function updateState() {
     while (again) {
         try {
             // insert order into bchain
+            console.log("updated state")
             etherex.testUpdateState({ from: eth.accounts[0], gas: 8000000 });
             again = false;
         } catch (err) {
-            console.log(err);
+            console.log("account gets unlocked");
             web3.personal.unlockAccount(eth.accounts[0], "amalien", 2000000);
         }
     }
-
-
 }
 
 module.exports = {

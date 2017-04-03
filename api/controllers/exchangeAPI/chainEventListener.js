@@ -1,4 +1,5 @@
 const web3 = require("./chainConnector.js");
+const chainApi = require("./chainApi.js");
 const eth = web3.eth;
 const etherex = web3.exchangeContract;
 const co = require('co');
@@ -11,13 +12,13 @@ const db = require('../db');
 let filter = eth.filter('latest');
 filter.watch(function(err, res) {
     if (!_.isUndefined(res)) {
+        chainApi.updateState();
         let startBlock = etherex.getStartBlock().toNumber();
         let minedBlocks = eth.blockNumber - startBlock;
         let toSend = { MinedBlocksInCurrPeriod: minedBlocks }
         io.emit('blockCreationEvent', JSON.stringify(toSend));
     }
 });
-
 
 // inserts the matching price into the database when the state changes to 1
 var StateChangeEvent = etherex.StateChangedEvent();
@@ -33,7 +34,7 @@ StateChangeEvent.watch(function(err, res) {
 
                 try {
                     yield db.insertMatchingPrices(post);
-                } catch(e) {
+                } catch (e) {
                     console.log(e);
                 }
 
@@ -52,7 +53,6 @@ StateChangeEvent.watch(function(err, res) {
 // insert the reserveprice into the database when reservepriceevent comes in
 var ReservePriceEvent = etherex.reservePriceEvent();
 ReservePriceEvent.watch(function(err, res) {
-    console.log("in reservePriceEvent");
     return co(function*() {
         if (!err) {
             let _price = res.args._price.toNumber();
@@ -60,7 +60,7 @@ ReservePriceEvent.watch(function(err, res) {
             let post = { period: chainUtil.getCurrentPeriod(), price: _price, type: _type };
             try {
                 yield db.insertReservePrice(post);
-            } catch(e) {
+            } catch (e) {
                 console.log(e);
             }
 

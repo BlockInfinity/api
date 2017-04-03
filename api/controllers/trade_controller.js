@@ -7,7 +7,7 @@ module.exports = {
     submitBidOrder: submitBidOrder,
     submitReserveAskOrder: submitReserveAskOrder,
     submitReserveBidOrder: submitReserveBidOrder,
-    updateState: updateState
+    // updateState: updateState
 }
 
 function submitAskOrder(req, res, next) {
@@ -113,7 +113,7 @@ function submitReserveBidOrder(req, res, next) {
     });
 }
 
-function updateState(req, res, next) {
-    chainApi.updateState();
-    res.end("State updated");
-}
+// function updateState(req, res, next) {
+//     chainApi.updateState();
+//     res.end("State updated");
+// }
