@@ -1,5 +1,4 @@
 const mysql = require("mysql");
-
 const _ = require("lodash");
 
 const chainUtil = require("./exchangeAPI/chainUtil.js");
@@ -8,37 +7,31 @@ var db_config = {
     host: "52.166.9.249",
     user: "dex",
     password: "amalien",
-    database: "apidb",
-    connectTimeout: 900000 // connect_timeout is set here and overwrites the configuration in my.cnf
+    database: "apidb"
 };
 
-global.db_connection = null;
-
+global.db_connection_pool = null;
 
 function getConnection() {
-
     return new Promise(function(resolve, reject) {
-        if (global.db_connection) {
-            return resolve(global.db_connection);
-        } else {
-            global.db_connection = mysql.createConnection(db_config); // Recreate the connection, since
-
-            global.db_connection.connect(function(err) {
+        if (global.db_connection_pool) {
+            global.db_connection_pool.getConnection(function(err, connection) {
                 if (err) {
                     console.log('error when connecting to db:', err);
-                    setTimeout(getConnection, 2000);
+                    setTimeout(getConnectionPool, 2000);
                 } else {
-                    return resolve(global.db_connection);
-                }
+                    return resolve(connection);
+                }    
             });
-
-            global.db_connection.on('error', function(err) {
-                console.log('db error', err);
-                if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-                    getConnection();
+        } else {
+            global.db_connection_pool = mysql.createPool(db_config);
+            global.db_connection_pool.getConnection(function(err, connection) {
+                if (err) {
+                    console.log('error when connecting to db:', err);
+                    setTimeout(getConnectionPool, 2000);
                 } else {
-                    return reject(err);
-                }
+                    return resolve(connection);
+                }    
             });
         }
     });
@@ -46,8 +39,9 @@ function getConnection() {
 
 function getAllMatchingPrices() {
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(connection) {
+        getConnection().then(function(err, connection) {
             connection.query("select * from matchingPrices", function(err, rows, fields) {
+                connection.release();
                 if (err) {
                     reject(err);
                 } else {
@@ -64,6 +58,7 @@ function getAllReserveAskPrices() {
     return new Promise(function(resolve, reject) {
         getConnection().then(function(connection) {
             connection.query("select period,price from reservePrices where type = 'ASK'", function(err, rows, fields) {
+                connection.release();
                 if (err) {
                     reject(err);
                 } else {
@@ -80,6 +75,7 @@ function getAllReserveBidPrices() {
     return new Promise(function(resolve, reject) {
         getConnection().then(function(connection) {
             connection.query("select period,price from reservePrices where type = 'BID'", function(err, rows, fields) {
+                connection.release();
                 if (err) {
                     reject(err);
                 } else {
@@ -92,16 +88,14 @@ function getAllReserveBidPrices() {
     });
 }
 
-
 function getMatchingPrice(_period) {
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(connection) {
+        getConnection().then(function(err, connection) {
             connection.query("select * from matchingPrices where period = ?", _period, function(err, rows, fields) {
+                connection.release();
                 if (err) {
                     reject(err);
                 } else {
-
-                    console.log(typeof(rows[0].price).toString())
                     resolve(rows[0].price.toString());
                 }
             });
@@ -112,14 +106,14 @@ function getMatchingPrice(_period) {
 }
 
 function getBidOrders(_period) {
-
     if (_.isUndefined(_period)) {
         _period = chainUtil.getCurrentPeriod();
     }
 
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(connection) {
+        getConnection().then(function(err, connection) {
             connection.query("select period, price, volume from orders where period = ? and type =  ?", [_period, "BID"], function(err, rows, fields) {
+                connection.release();
                 if (err) {
                     reject(err);
                 } else {
@@ -133,14 +127,14 @@ function getBidOrders(_period) {
 }
 
 function getAskOrders(_period) {
-
     if (_.isUndefined(_period)) {
         _period = chainUtil.getCurrentPeriod();
     }
 
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(connection) {
+        getConnection().then(function(err, connection) {
             connection.query("select period, price, volume from orders where period = ? and type =  ?", [_period, "ASK"], function(err, rows, fields) {
+                connection.release();
                 if (err) {
                     reject(err);
                 } else {
@@ -153,15 +147,15 @@ function getAskOrders(_period) {
     });
 }
 
-
 function getReserveBidOrders(_period) {
-    if (typeof _period === "undefined") {
+    if (_.isUndefined(_period)) {
         _period = chainUtil.getCurrentPeriod();
     }
 
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(connection) {
+        getConnection().then(function(err, connection) {
             connection.query("select price,volume from reserveOrders where period = ? and type =  ?", [_period, "BID"], function(err, rows, fields) {
+                connection.release();
                 if (err) {
                     reject(err);
                 } else {
@@ -172,15 +166,15 @@ function getReserveBidOrders(_period) {
     })
 }
 
-
 function insertMatchingPrices(_post) {
     return new Promise(function(resolve, reject) {
         if (!_post) {
             return reject(new Error('missing post data'));
         }
 
-        getConnection().then(function(connection) {
+        getConnection().then(function(err, connection) {
             connection.query('insert ignore into matchingPrices set ?', _post, function(err, rows, fields) {
+                connection.release();
                 if (err) {
                     reject(err);
                 } else {
@@ -194,13 +188,14 @@ function insertMatchingPrices(_post) {
 }
 
 function getReserveAskOrders(_period) {
-    if (typeof _period === "undefined") {
+    if (_.isUndefined(_period)) {
         _period = chainUtil.getCurrentPeriod();
     }
 
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(connection) {
+        getConnection().then(function(err, connection) {
             connection.query("select price,volume from reserveOrders where period = ? and type =  ?", [_period, "ASK"], function(err, rows, fields) {
+                connection.release();
                 if (err) {
                     reject(err);
                 } else {
@@ -210,9 +205,6 @@ function getReserveAskOrders(_period) {
         });
     })
 }
-
-
-
 
 function insertOrder(_reserve, _post) {
     return new Promise(function(resolve, reject) {
@@ -228,8 +220,9 @@ function insertOrder(_reserve, _post) {
             table = 'reserveOrders';
         }
 
-        getConnection().then(function(connection) {
+        getConnection().then(function(err, connection) {
             connection.query('insert ignore into ' + table + ' set ?', _post, function(err, rows, fields) {
+                connection.release();
                 if (err) {
                     reject(err);
                 } else {
@@ -243,12 +236,13 @@ function insertOrder(_reserve, _post) {
 }
 
 function getReserveAskPrice(_period) {
-    if (typeof _period === "undefined") {
+    if (_.isUndefined(_period)) {
         _period = chainUtil.getCurrentPeriod();
     }
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(connection) {
+        getConnection().then(function(err, connection) {
             connection.query("select price from reservePrices where period = ? and type =  ?", [_period, "ASK"], function(err, rows, fields) {
+                connection.release();
                 if (err) {
                     reject(err);
                 } else {
@@ -260,14 +254,14 @@ function getReserveAskPrice(_period) {
 }
 
 function getReserveBidPrice(_period) {
-    if (typeof _period === "undefined") {
+    if (_.isUndefined(_period)) {
         _period = chainUtil.getCurrentPeriod();
     }
 
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(connection) {
-
+        getConnection().then(function(err, connection) {
             connection.query("select price from reservePrices where period = ? and type =  ?", [_period, "BID"], function(err, rows, fields) {
+                connection.release();
                 if (err) {
                     reject(err);
                 } else {
@@ -284,8 +278,9 @@ function insertReservePrice(_post) {
     }
 
     return new Promise(function(resolve, reject) {
-        getConnection().then(function(connection) {
+        getConnection().then(function(err, connection) {
             connection.query('insert ignore into reservePrices set ?', _post, function(err, rows, fields) {
+                connection.release();
                 if (err) {
                     reject(err);
                 } else {
@@ -316,12 +311,13 @@ function hasUserOrderInPeriod(_addr, _period, _reserve, _type) {
             table = 'reserveOrders';
         }
 
-        getConnection().then(function(connection) {
+        getConnection().then(function(err, connection) {
             connection.query('select orderID from ' + table + ' where account = ? and type =  ?', [_addr, _type], function(err, rows, fields) {
+                connection.release();
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(rows && rows.length === 1 ? true : false);
+                    resolve(rows && rows.length === 1 ? rows[0] : null);
                 }
             });
         }, function(err) {

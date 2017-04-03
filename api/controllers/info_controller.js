@@ -47,7 +47,6 @@ function getMatchingPrice(req, res, next) {
 
         db.getMatchingPrice(period).then(function(price) {
             res.statusCode = 200;
-            console.log("2", price);
             res.end(JSON.stringify({ "period": period, "price": price }));
         }, function(reason) {
             res.statusCode = 500;
@@ -217,7 +216,6 @@ function getAllReserveAskPrices(req, res, next) {
     }
 }
 
-
 function getAllReserveBidPrices(req, res, next) {
     try {
         db.getAllReserveBidPrices().then(function(prices) {
@@ -231,8 +229,6 @@ function getAllReserveBidPrices(req, res, next) {
         res.end('DB error ' + error.message);
     }
 }
-
-
 
 function getBidOrders(req, res, next) {
     try {
@@ -264,7 +260,6 @@ function getAskOrders(req, res, next) {
     }
 }
 
-
 function getReserveAskOrders(req, res, next) {
     try {
         var period = findPeriod(req);
@@ -279,7 +274,6 @@ function getReserveAskOrders(req, res, next) {
         res.end('Database error' + error.message);
     }
 }
-
 
 function getReserveBidOrders(req, res, next) {
     try {
@@ -297,7 +291,6 @@ function getReserveBidOrders(req, res, next) {
     }
 }
 
-
 function getReserveAskPrice(req, res, next) {
     try {
         var period = findPeriod(req);
@@ -312,7 +305,6 @@ function getReserveAskPrice(req, res, next) {
         res.end('db error ' + error.message);
     }
 }
-
 
 function getReserveBidPrice(req, res, next) {
     try {
