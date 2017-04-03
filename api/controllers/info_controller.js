@@ -15,7 +15,9 @@ module.exports = {
     getReserveAskOrders: getReserveAskOrders,
     getReserveBidOrders: getReserveBidOrders,
     getReserveAskPrice: getReserveAskPrice,
-    getReserveBidPrice: getReserveBidPrice
+    getReserveBidPrice: getReserveBidPrice,
+    getAllReserveBidPrices: getAllReserveBidPrices,
+    getAllReserveAskPrices: getAllReserveAskPrices
 }
 
 function findPeriod(req) {
@@ -43,9 +45,10 @@ function getMatchingPrice(req, res, next) {
     try {
         var period = findPeriod(req);
 
-        db.getMatchingPrice(period).then(function(prices) {
+        db.getMatchingPrice(period).then(function(price) {
             res.statusCode = 200;
-            res.end(JSON.stringify({ "period": period, "matchingPrice": matchingPrice }));
+            console.log("2", price);
+            res.end(JSON.stringify({ "period": period, "price": price }));
         }, function(reason) {
             res.statusCode = 500;
             res.end('db error', reason);
@@ -54,7 +57,6 @@ function getMatchingPrice(req, res, next) {
         res.statusCode = 500;
         res.end('Blockchain error ' + error.message);
     }
-    res.end();
 }
 
 // function getBidOrders(req, res, next) {
@@ -200,6 +202,37 @@ function getAllMatchingPrices(req, res, next) {
         res.end('Blockchain error ' + error.message);
     }
 }
+
+function getAllReserveAskPrices(req, res, next) {
+    try {
+        db.getAllReserveAskPrices().then(function(prices) {
+            res.end(prices);
+        }, function(reason) {
+            res.statusCode = 500;
+            res.end('DB error', reason);
+        });
+    } catch (error) {
+        res.statusCode = 500;
+        res.end('DB error ' + error.message);
+    }
+}
+
+
+function getAllReserveBidPrices(req, res, next) {
+    try {
+        db.getAllReserveBidPrices().then(function(prices) {
+            res.end(prices);
+        }, function(reason) {
+            res.statusCode = 500;
+            res.end('DB error', reason);
+        });
+    } catch (error) {
+        res.statusCode = 500;
+        res.end('DB error ' + error.message);
+    }
+}
+
+
 
 function getBidOrders(req, res, next) {
     try {

@@ -464,6 +464,38 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
       x-swagger-router-controller: "info_controller"
+  /info/getAllReserveBidPrices:
+    get:
+      tags:
+        - info
+      description: "Get all reserve prices"
+      operationId: "getAllReserveBidPrices"
+      responses:
+        200:
+          description: "Returns reserve prices as json array"
+          schema:
+            $ref: "#/definitions/getAllMatchingPricesResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      x-swagger-router-controller: "info_controller"
+  /info/getAllReserveAskPrices:
+    get:
+      tags:
+        - info
+      description: "Get all reserve prices"
+      operationId: "getAllReserveAskPrices"
+      responses:
+        200:
+          description: "Returns reserve prices as json array"
+          schema:
+            $ref: "#/definitions/getAllMatchingPricesResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      x-swagger-router-controller: "info_controller"
 
   /info/state:
     get:

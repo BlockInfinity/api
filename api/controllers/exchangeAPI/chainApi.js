@@ -109,7 +109,6 @@ function buy(_volume, _price, _addr, _password, _reserve) {
             throw new Error("User already submitted bid order in current period")
         }
 
-        console.log("Buy: Adresse: ", _addr, ", Passwort: ", _password, ", Volume: ", _volume, ", Price: ", _price);
 
         // insert order into db
         yield db.insertOrder(_reserve, { period: chainUtil.getCurrentPeriod(), price: _price, volume: _volume, type: 'BID' });

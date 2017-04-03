@@ -15,7 +15,6 @@ function register(req, res, next) {
             if (user_type !== "consumer" && user_type !== "producer") {
                 throw new Error("Unsuported account type! Please choose one of 'consumer' or 'producer'.");
             }
-            console.log("before");
             chainApi.register(req.swagger.params.registerRequest.value.password, user_type).then(function(user_address) {
                 res.statusCode = 200;
                 res.end(JSON.stringify({ "userAddress": user_address }));
