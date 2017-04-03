@@ -43,7 +43,8 @@ function getMatchingPrice(req, res, next) {
     try {
         var period = findPeriod(req);
 
-        db.getMatchingPrice(period).then(function(prices) {
+        db.getMatchingPrice(period).then(function(price) {
+            console.log(price);
             res.statusCode = 200;
             res.end(JSON.stringify({ "period": period, "matchingPrice": matchingPrice }));
         }, function(reason) {
