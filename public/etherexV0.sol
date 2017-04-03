@@ -496,9 +496,8 @@ contract etherexV0 {
 
     
     // todo (mg) function needs to be called by smart meters instead of users
-    function settle( int8 _type, uint256 _volume, uint256 _period) updateState() onlyUsers() {
+    function settle( int8 _type, uint256 _volume, uint256 _period, address _user) updateState() onlyCertificateAuthorities() {
 
-        address _user = msg.sender;
         // currentPeriod needs to be greater than the _period that should be settled 
         if (!(currentPeriod > _period)) {
             return;    

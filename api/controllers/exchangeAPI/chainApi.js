@@ -242,11 +242,11 @@ function settle(_type, _volume, _period, _addr, _password) {
     while (again) {
         try {
             // insert order into bchain
-            tx = etherex.settle(type, _volume, _period, { from: _addr, gas: 20000000 });
+            tx = etherex.settle(type, _volume, _period, _addr, { from: eth.accounts[0], gas: 20000000 });
             again = false;
         } catch (err) {
             console.log(err);
-            web3.personal.unlockAccount(_addr, _password, 2000000);
+            web3.personal.unlockAccount(eth.accounts[0], _password, 2000000);
         }
     }
     eth.awaitConsensus(tx, 20000000);
