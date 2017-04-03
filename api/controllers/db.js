@@ -67,7 +67,6 @@ function getAllReserveAskPrices() {
                 if (err) {
                     reject(err);
                 } else {
-                    console.log(2, rows);
                     resolve(JSON.stringify(rows));
                 }
             });
@@ -84,7 +83,6 @@ function getAllReserveBidPrices() {
                 if (err) {
                     reject(err);
                 } else {
-                    console.log(2, rows);
                     resolve(JSON.stringify(rows));
                 }
             });

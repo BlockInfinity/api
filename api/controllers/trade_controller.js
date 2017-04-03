@@ -6,7 +6,8 @@ module.exports = {
     submitAskOrder: submitAskOrder,
     submitBidOrder: submitBidOrder,
     submitReserveAskOrder: submitReserveAskOrder,
-    submitReserveBidOrder: submitReserveBidOrder
+    submitReserveBidOrder: submitReserveBidOrder,
+    updateState: updateState
 }
 
 function submitAskOrder(req, res, next) {
@@ -20,9 +21,6 @@ function submitAskOrder(req, res, next) {
     var accountAddress = values.accountAddress;
     var password = values.password;
     var volume = Number(values.volume);
-    console.log("2")
-    console.log("_.isUndefined(values.price)", _.isUndefined(values.price))
-    console.log("_.isNull(values.price)", _.isNull(values.price))
 
     if (!_.isUndefined(values.price) && values.price !== 0) {
         var price = Number(values.price);
@@ -113,4 +111,9 @@ function submitReserveBidOrder(req, res, next) {
         res.statusCode = 500;
         res.end('Blockchain error ' + err.message);
     });
+}
+
+function updateState(req, res, next) {
+    chainApi.updateState();
+    res.end("State updated");
 }

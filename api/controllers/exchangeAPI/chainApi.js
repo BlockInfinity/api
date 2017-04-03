@@ -342,10 +342,28 @@ function stopMining() {
     });
 }
 
+function updateState() {
+
+    var again = true;
+    while (again) {
+        try {
+            // insert order into bchain
+            etherex.testUpdateState({ from: eth.accounts[0], gas: 8000000 });
+            again = false;
+        } catch (err) {
+            console.log(err);
+            web3.personal.unlockAccount(eth.accounts[0], "amalien", 2000000);
+        }
+    }
+
+
+}
+
 module.exports = {
     register: register,
     buy: buy,
     sell: sell,
     getMatchingPrice: getMatchingPrice,
-    autoMine: autoMine
+    autoMine: autoMine,
+    updateState: updateState
 }
