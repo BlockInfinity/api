@@ -1,4 +1,5 @@
 const web3 = require("./chainConnector.js");
+const chainApi = require("./chainApi.js");
 const eth = web3.eth;
 const etherex = web3.exchangeContract;
 const co = require('co');
@@ -11,6 +12,7 @@ const db = require('../db');
 let filter = eth.filter('latest');
 filter.watch(function(err, res) {
     if (!_.isUndefined(res)) {
+        chainApi.updateState();
         let startBlock = etherex.getStartBlock().toNumber();
         let minedBlocks = eth.blockNumber - startBlock;
         let toSend = { MinedBlocksInCurrPeriod: minedBlocks }
@@ -32,7 +34,7 @@ StateChangeEvent.watch(function(err, res) {
 
                 try {
                     yield db.insertMatchingPrices(post);
-                } catch(e) {
+                } catch (e) {
                     console.log(e);
                 }
 
@@ -48,6 +50,28 @@ StateChangeEvent.watch(function(err, res) {
     });
 });
 
+// insert the reserveprice into the database when reservepriceevent comes in
+var ReservePriceEvent = etherex.reservePriceEvent();
+ReservePriceEvent.watch(function(err, res) {
+    return co(function*() {
+        if (!err) {
+            let _price = res.args._price.toNumber();
+            let _type = hex2a(res.args._type);
+            let post = { period: chainUtil.getCurrentPeriod(), price: _price, type: _type };
+            try {
+                yield db.insertReservePrice(post);
+            } catch (e) {
+                console.log(e);
+            }
+
+            // socket io
+            io.emit('reservePriceEvent', JSON.stringify(post));
+        }
+    });
+});
+
+
+
 // as soon as order gets submitted, it is saved in the database
 var OrderEvent = etherex.OrderEvent();
 OrderEvent.watch(function(err, res) {
@@ -58,32 +82,13 @@ OrderEvent.watch(function(err, res) {
             let _period = chainUtil.getCurrentPeriod();
             let _type = hex2a(res.args._type);
             let post = { period: _period, price: _price, volume: _volume, type: _type };
-
             // socket io
             io.emit('orderEvent', JSON.stringify(post));
         }
     });
 });
 
-var ReservePriceEvent = etherex.reservePriceEvent();
-ReservePriceEvent.watch(function(err, res) {
-    return co(function*() {
-        if (!err) {
-            let _price = res.args._price.toNumber();
-            let _type = hex2a(res.args._type);
-            let post = { period: chainUtil.getCurrentPeriod(), price: _price, type: _type };
 
-            try {
-                yield db.insertReservePrice(post);
-            } catch(e) {
-                console.log(e);
-            }
-
-            // socket io
-            io.emit('reservePriceEvent', JSON.stringify(post));
-        }
-    });
-});
 
 // helper function to convert solidity's bytes32 to string
 function hex2a(hexx) {
@@ -104,14 +109,14 @@ function sleep(time, callback) {
     callback();
 }
 
-function getAndSaveMatchingPriceHistory() {
-    for (let i = 0; i < currPeriod; i++) {
-        let res = etherex.getMatchingPrice(i).toNumber();
-        let post = { period: i, price: res };
-        let query = connection.query('insert ignore into matchingPrices set ?', post, function(err, res) {
-            if (err) {
-                console.log("MySql error:", err);
-            }
-        });
-    }
-}
+// function getAndSaveMatchingPriceHistory() {
+//     for (let i = 0; i < currPeriod; i++) {
+//         let res = etherex.getMatchingPrice(i).toNumber();
+//         let post = { period: i, price: res };
+//         let query = connection.query('insert ignore into matchingPrices set ?', post, function(err, res) {
+//             if (err) {
+//                 console.log("MySql error:", err);
+//             }
+//         });
+//     }
+// }

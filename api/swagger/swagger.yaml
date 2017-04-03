@@ -146,7 +146,27 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
       x-swagger-router-controller: "trade_controller"
-
+  # /trade/updateState:
+  #   post:
+  #     tags: 
+  #       - trade      
+  #     description: "updates state"
+  #     operationId: "updateState"
+  #     consumes:
+  #       - application/json
+  #     produces:
+  #       - application/json
+  #     responses:
+  #       "200":
+  #         description: Success
+  #         schema:
+  #           $ref: "#/definitions/SuccessResponse"    
+  #       # responses may fall through to errors
+  #       default:
+  #         description: Error
+  #         schema:
+  #           $ref: "#/definitions/ErrorResponse"
+  #     x-swagger-router-controller: "trade_controller"
   /authority/register:
     post:
       tags: 
@@ -457,6 +477,38 @@ paths:
       responses:
         200:
           description: "Returns matching prices as json array"
+          schema:
+            $ref: "#/definitions/getAllMatchingPricesResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      x-swagger-router-controller: "info_controller"
+  /info/allReserveBidPrices:
+    get:
+      tags:
+        - info
+      description: "Get all reserve prices"
+      operationId: "getAllReserveBidPrices"
+      responses:
+        200:
+          description: "Returns reserve prices as json array"
+          schema:
+            $ref: "#/definitions/getAllMatchingPricesResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      x-swagger-router-controller: "info_controller"
+  /info/allReserveAskPrices:
+    get:
+      tags:
+        - info
+      description: "Get all reserve prices"
+      operationId: "getAllReserveAskPrices"
+      responses:
+        200:
+          description: "Returns reserve prices as json array"
           schema:
             $ref: "#/definitions/getAllMatchingPricesResponse"
         default:

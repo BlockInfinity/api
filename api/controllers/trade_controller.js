@@ -1,16 +1,16 @@
-
 const chainApi = require("./exchangeAPI/chainApi.js");
 const chainUtil = require("./exchangeAPI/chainUtil.js");
 const _ = require("lodash");
 
 module.exports = {
-    submiAskOrder: submiAskOrder,
+    submitAskOrder: submitAskOrder,
     submitBidOrder: submitBidOrder,
     submitReserveAskOrder: submitReserveAskOrder,
-    submitReserveBidOrder: submitReserveBidOrder
+    submitReserveBidOrder: submitReserveBidOrder,
+    // updateState: updateState
 }
 
-function submiAskOrder(req, res, next) {
+function submitAskOrder(req, res, next) {
     if (chainUtil.getCurrentState() === 1) {
         res.statusCode = 400;
         res.end('Invalid state. Only reserve orders can be submitted.');
@@ -21,7 +21,8 @@ function submiAskOrder(req, res, next) {
     var accountAddress = values.accountAddress;
     var password = values.password;
     var volume = Number(values.volume);
-    if (!_.isUndefined(values.price) && _.isNull(values.price)) {
+
+    if (!_.isUndefined(values.price) && values.price !== 0) {
         var price = Number(values.price);
     } else {
         res.statusCode = 500;
@@ -33,7 +34,7 @@ function submiAskOrder(req, res, next) {
         res.end();
     }, function(err) {
         res.statusCode = 500;
-        res.end('Blockchain error ' + error.message);
+        res.end('Blockchain error ' + err.message);
     });
 }
 
@@ -52,7 +53,6 @@ function submitBidOrder(req, res, next) {
     } else {
         var price = Number.MAX_VALUE;
     }
-    console.log("before buy");
     chainApi.buy(volume, price, accountAddress, password, false).then(function() {
         res.statusCode = 200;
         res.end();
@@ -72,7 +72,7 @@ function submitReserveAskOrder(req, res, next) {
     var accountAddress = values.accountAddress;
     var password = values.password;
     var volume = Number(values.volume);
-    if (!_.isUndefined(values.price) && _.isNull(values.price)) {
+    if (!_.isUndefined(values.price) && values.price !== 0) {
         var price = Number(values.price);
     } else {
         res.statusCode = 500;
@@ -112,3 +112,8 @@ function submitReserveBidOrder(req, res, next) {
         res.end('Blockchain error ' + err.message);
     });
 }
+
+// function updateState(req, res, next) {
+//     chainApi.updateState();
+//     res.end("State updated");
+// }

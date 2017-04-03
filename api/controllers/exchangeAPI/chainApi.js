@@ -20,6 +20,38 @@ if (!etherex) {
     console.log("Exchange contract with address", etherex.address, "loaded!");
 }
 
+
+
+// ######################################################################
+// ######################## tracking out of gas errors ##################
+// ######################################################################
+
+Object.getPrototypeOf(web3.eth).getTransactionReceiptAsync = function(txhash) {
+    return new Promise(function(resolve, reject) {
+        let receipt = eth.getTransactionReceipt(txhash);
+        resolve(receipt);
+    });
+}
+
+Object.getPrototypeOf(web3.eth).awaitConsensus = function(txhash, gasSent) {
+
+    let filter = eth.filter('latest');
+
+    filter.watch(function(err, res) {
+        eth.getTransactionReceiptAsync(txhash).then(function(receipt) {
+            if (receipt && receipt.transactionHash === txhash) {
+                filter.stopWatching();
+                // note corner case of gasUsed == gasSent.  It could
+                // mean used EXACTLY that amount of gas and succeeded.
+                // this is a limitation of ethereum.  Hopefully they fix it
+                if (receipt.gasUsed >= gasSent) {
+                    console.log("ran out of gas, transaction likely failed!");
+                }
+            }
+        });
+    });
+}
+
 // ######################################################################
 // ######################## functions that change the state #############
 // ######################################################################
@@ -109,7 +141,6 @@ function buy(_volume, _price, _addr, _password, _reserve) {
             throw new Error("User already submitted bid order in current period")
         }
 
-        console.log("Buy: Adresse: ", _addr, ", Passwort: ", _password, ", Volume: ", _volume, ", Price: ", _price);
 
         // insert order into db
         yield db.insertOrder(_reserve, { period: chainUtil.getCurrentPeriod(), price: _price, volume: _volume, type: 'BID' });
@@ -177,11 +208,16 @@ function sell(_volume, _price, _addr, _password, _reserve) {
 
 // todo (mg) statt periode soll Zeit rein kommen und von zeit soll auf die periode geschlossen werden können
 // statt _addr muss es eine entsprechende certID geben, was nur die enbw als Daten-Einspeise-Entität bekommt
+
+
+settle("consumer", 40, 41, "0xf15dd7a0b509a69338bb09057d8b418dd7507b1e", "amalien");
+
 function settle(_type, _volume, _period, _addr, _password) {
     if (!_type || !(_type === 'consumer' || _type === 'producer')) {
         throw new Error("Type must be either consumer or provider")
     }
-    if (!_volume || volume <= 0) {
+    console.log(4, _volume);
+    if (!_volume || _volume <= 0) {
         throw new Error("Volume must be provided and greater than 0")
     }
     if (_period < 0) {
@@ -193,23 +229,27 @@ function settle(_type, _volume, _period, _addr, _password) {
     if (!_password) {
         throw new Error("Password must be provided")
     }
-    // check user has not already settled in period
-    if (etherex.hasUserAlreadySettledInPeriod(_addr, _period)) {
-        throw new Error("User has already settled in period " + _period)
+
+    let tx;
+    let type;
+    if (_type === 'consumer') {
+        type = 2;
+    } else {
+        type = 1;
     }
 
     var again = true;
     while (again) {
         try {
             // insert order into bchain
-            let tx = etherex.settle(_type, _volume, _period, { from: _addr, gas: 20000000 });
+            tx = etherex.settle(type, _volume, _period, { from: _addr, gas: 20000000 });
             again = false;
         } catch (err) {
             console.log(err);
-            web3.personal.unlockAccount(_addr, "amalien", 2000000);
+            web3.personal.unlockAccount(_addr, _password, 2000000);
         }
     }
-    eth.awaitConsensus(tx, 800000);
+    eth.awaitConsensus(tx, 20000000);
 }
 
 // ######################################################################
@@ -275,35 +315,6 @@ function getMatchedAskOrdersForUser(_period, _addr) {
 }
 
 
-// ######################################################################
-// ######################## tracking out of gas errors ##################
-// ######################################################################
-
-Object.getPrototypeOf(web3.eth).getTransactionReceiptAsync = function(txhash) {
-    return new Promise(function(resolve, reject) {
-        let receipt = eth.getTransactionReceipt(txhash);
-        resolve(receipt);
-    });
-}
-
-Object.getPrototypeOf(web3.eth).awaitConsensus = function(txhash, gasSent) {
-
-    let filter = eth.filter('latest');
-
-    filter.watch(function(err, res) {
-        eth.getTransactionReceiptAsync(txhash).then(function(receipt) {
-            if (receipt && receipt.transactionHash === txhash) {
-                filter.stopWatching();
-                // note corner case of gasUsed == gasSent.  It could
-                // mean used EXACTLY that amount of gas and succeeded.
-                // this is a limitation of ethereum.  Hopefully they fix it
-                if (receipt.gasUsed >= gasSent) {
-                    console.log("ran out of gas, transaction likely failed!");
-                }
-            }
-        });
-    });
-}
 
 // ######################################################################
 // ########################Automatic Mining #############################
@@ -343,10 +354,28 @@ function stopMining() {
     });
 }
 
+function updateState() {
+
+    var again = true;
+    while (again) {
+        try {
+            // insert order into bchain
+            etherex.testUpdateState({ from: eth.accounts[0], gas: 8000000 });
+            again = false;
+        } catch (err) {
+            console.log("accounts gets unlocked");
+            web3.personal.unlockAccount(eth.accounts[0], "amalien", 2000000);
+        }
+    }
+}
+
 module.exports = {
     register: register,
     buy: buy,
     sell: sell,
     getMatchingPrice: getMatchingPrice,
-    autoMine: autoMine
+    autoMine: autoMine,
+    updateState: updateState,
+    settle: settle
+
 }

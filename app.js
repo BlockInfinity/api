@@ -66,4 +66,4 @@ io.on('connection', function(socket) {
 });
 
 // start end settler
-chainEndSettler.start();
+// chainEndSettler.start();

@@ -54,6 +54,40 @@ function getAllMatchingPrices() {
     });
 }
 
+function getAllReserveAskPrices() {
+    return new Promise(function(resolve, reject) {
+        getConnection().then(function(connection) {
+            connection.query("select period,price from reservePrices where type = 'ASK'", function(err, rows, fields) {
+                connection.release();
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(JSON.stringify(rows));
+                }
+            });
+        }, function(err) {
+            reject(err);
+        });
+    });
+}
+
+function getAllReserveBidPrices() {
+    return new Promise(function(resolve, reject) {
+        getConnection().then(function(connection) {
+            connection.query("select period,price from reservePrices where type = 'BID'", function(err, rows, fields) {
+                connection.release();
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(JSON.stringify(rows));
+                }
+            });
+        }, function(err) {
+            reject(err);
+        });
+    });
+}
+
 function getMatchingPrice(_period) {
     return new Promise(function(resolve, reject) {
         getConnection().then(function(err, connection) {
@@ -62,7 +96,7 @@ function getMatchingPrice(_period) {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(rows && rows.length === 1 ? true : false);
+                    resolve(rows[0].price.toString());
                 }
             });
         }, function(err) {
@@ -294,6 +328,7 @@ function hasUserOrderInPeriod(_addr, _period, _reserve, _type) {
 
 module.exports = {
     getAllMatchingPrices: getAllMatchingPrices,
+    getMatchingPrice: getMatchingPrice,
     getBidOrders: getBidOrders,
     getAskOrders: getAskOrders,
     insertMatchingPrices: insertMatchingPrices,
@@ -303,5 +338,7 @@ module.exports = {
     getReserveAskPrice: getReserveAskPrice,
     insertReservePrice: insertReservePrice,
     getReserveBidOrders: getReserveBidOrders,
-    getReserveAskOrders: getReserveAskOrders
+    getReserveAskOrders: getReserveAskOrders,
+    getAllReserveAskPrices: getAllReserveAskPrices,
+    getAllReserveBidPrices: getAllReserveBidPrices
 }
