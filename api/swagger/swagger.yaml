@@ -464,7 +464,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
       x-swagger-router-controller: "info_controller"
-  /info/getAllReserveBidPrices:
+  /info/allReserveBidPrices:
     get:
       tags:
         - info
@@ -480,7 +480,7 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
       x-swagger-router-controller: "info_controller"
-  /info/getAllReserveAskPrices:
+  /info/allReserveAskPrices:
     get:
       tags:
         - info
