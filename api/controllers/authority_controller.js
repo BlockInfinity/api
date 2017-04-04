@@ -12,7 +12,8 @@ function register(req, res, next) {
             throw new Error("You need to specify the type of an account to be registered! Possible options are 'consumer' and 'producer'!")
         } else {
             var user_type = req.swagger.params.registerRequest.value.type.toLowerCase();
-            if (user_type !== "consumer" && user_type !== "producer") {
+            console.log(user_type);
+            if (user_type !== "consumer" && user_type !== "producer" && user_type !== "reserveproducer" && user_type !== "reserveconsumer") {
                 throw new Error("Unsuported account type! Please choose one of 'consumer' or 'producer'.");
             }
             chainApi.register(req.swagger.params.registerRequest.value.password, user_type).then(function(user_address) {
@@ -20,7 +21,7 @@ function register(req, res, next) {
                 res.end(JSON.stringify({ "userAddress": user_address }));
             }, function(reason) {
                 res.statusCode = 500;
-                res.end('Blockchain error: No address received from register function!');
+                res.end("Blockchain error");
             });        
         }
        

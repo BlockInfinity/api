@@ -225,8 +225,32 @@ contract etherexV0 {
         return matchingPrices[_period];
     }
 
+    function isMatchedForBidReserve(address _user,uint256 _period) constant returns (bool){
+        if (matchedBidReserveOrders[_period][_user] != 0){
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-      
+    function isMatchedForAskReserve(address _user,uint256 _period) constant returns (bool){
+        if (matchedAskReserveOrders[_period][_user] != 0){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    function getSumOfColleteral() constant returns(int256) {
+        int256 sum = 0;
+        for (uint256 i=0; i<numUsers; i++) {
+            sum += colleteral[i];
+        }
+        return sum;
+    }
+
+
     // ###################################################################################################################
     // ########################## user interface  #########################################################################
     // ###################################################################################################################
@@ -494,7 +518,7 @@ contract etherexV0 {
         return true;     
     }
 
-    
+    event SettleEvent(int8 _type);
     // todo (mg) function needs to be called by smart meters instead of users
     function settle( int8 _type, uint256 _volume, uint256 _period, address _user) updateState() onlyCertificateAuthorities() {
 
@@ -623,6 +647,7 @@ contract etherexV0 {
             }
         }
     
+
         // set user as settled for currentPeriod
         settleMapping[_period].alreadySettled[_user] = true;
 
@@ -630,10 +655,11 @@ contract etherexV0 {
         if (settleMapping[_period].settleCounter == numUsers) {
             endSettle(_period);
         }  
+        SettleEvent(_type);
     }
 
   
-   
+   event EndSettleEvent();
 
     function endSettle(uint256 _period) internal {
         int256 diff = int256(settleMapping[_period].excess) - int256(settleMapping[_period].lack);
@@ -689,6 +715,8 @@ contract etherexV0 {
         for (uint256 l=0; l<numUsers; l++) {  
             colleteral[l] += shareOfEachUser;     
         }
+
+        EndSettleEvent();
     }
 
 

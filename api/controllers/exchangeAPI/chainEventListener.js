@@ -7,6 +7,7 @@ const chainUtil = require("./chainUtil.js");
 const io = global.io;
 const _ = require("lodash");
 const db = require('../db');
+const chainEndSettler = require('./chainEndSettler');
 
 // catch blockcreation events and broadcast them to all clients
 let filter = eth.filter('latest');
@@ -41,10 +42,11 @@ StateChangeEvent.watch(function(err, res) {
                 // socket io
                 io.emit('matchingEvent', JSON.stringify(post));
             } else {
-                let post = { period: chainUtil.getCurrentPeriod() };
-
+                let _period = chainUtil.getCurrentPeriod();
+                let post = { period: _period };
                 // socket io
                 io.emit('newPeriodEvent', JSON.stringify(post));
+                chainEndSettler.settleAll(_period - 1);
             }
         }
     });
@@ -69,6 +71,39 @@ ReservePriceEvent.watch(function(err, res) {
         }
     });
 });
+
+// insert the reserveprice into the database when reservepriceevent comes in
+var EndSettleEvent = etherex.EndSettleEvent();
+EndSettleEvent.watch(function(err, res) {
+    console.log("EndSettleEvent");
+    return co(function*() {
+        if (!err) {
+            // socket io
+            io.emit('EndSettleEvent', "EndSettle executed");
+        }
+    });
+});
+
+// insert the reserveprice into the database when reservepriceevent comes in
+var SettleEvent = etherex.SettleEvent();
+SettleEvent.watch(function(err, res) {
+    console.log("SettleEvent");
+    return co(function*() {
+        if (!err) {
+            let _type = res.args._type.toNumber();
+            let post;
+            if (_type == 1) {
+                post = "producer";
+            } else {
+                post = "consumer";
+            }
+            // socket io
+            io.emit('SettleEvent', "Settle executed for " + post);
+        }
+    });
+});
+
+
 
 
 
@@ -102,12 +137,12 @@ function hex2a(hexx) {
     return str;
 }
 
-function sleep(time, callback) {
-    var stop = new Date().getTime();
-    while (new Date().getTime() < stop + time) {;
-    }
-    callback();
-}
+// function sleep(time, callback) {
+//     var stop = new Date().getTime();
+//     while (new Date().getTime() < stop + time) {;
+//     }
+//     callback();
+// }
 
 // function getAndSaveMatchingPriceHistory() {
 //     for (let i = 0; i < currPeriod; i++) {

@@ -2,51 +2,134 @@ const web3 = require("./chainConnector.js");
 const eth = web3.eth;
 const etherex = web3.exchangeContract;
 const chainUtil = require("./chainUtil.js");
+const chainApi = require("./chainApi.js");
+const co = require('co');
+const db = require('../db');
+const _ = require("lodash");
 
-const END_SETTLE_CHECK_IN_SECONDS = 10;
+module.exports = {
+    settleAll: settleAll,
+}
 
-function start() {
-    try {
-        // clear interval if one is currently active
-        if (global.endSettlerInterval) {
-            clearInterval(global.endSettlerInterval);
+var consumers;
+var producers;
+var resereveProducers;
+var reserveConsumers;
+
+// loadUsers();
+
+// function loadUsers() {
+
+//     return co(function*() {
+
+//         consumers = yield db.getAllConsumers();
+//         producers = yield db.getAllProducers();
+//         reserveConsumers = yield db.getAllReserveConsumers();
+//         reserveProducers = yield db.getAllReserveProducers();
+
+//         consumers = JSON.parse(consumers);
+//         producers = JSON.parse(producers);
+//         reserveConsumers = JSON.parse(reserveConsumers);
+//         reserveProducers = JSON.parse(reserveProducers);
+
+//     })
+
+//     console.log(1);
+
+// }
+
+
+// function settle(_type, _volume, _period, _addr) {
+// settleAll(10);
+
+
+
+settleAll(4);
+
+function settleAll(_period) {
+    global.j = 0;
+
+    return co(function*() {
+
+        consumers = yield db.getAllConsumers();
+        producers = yield db.getAllProducers();
+        reserveConsumers = yield db.getAllReserveConsumers();
+        reserveProducers = yield db.getAllReserveProducers();
+
+        consumers = JSON.parse(consumers);
+        producers = JSON.parse(producers);
+        reserveConsumers = JSON.parse(reserveConsumers);
+        reserveProducers = JSON.parse(reserveProducers);
+
+
+        console.log(consumers);
+
+        var smVolume;
+        var collateral;
+        var bidReservePrice;
+        var askReservePrice;
+
+        var sumConsumed = 0;
+        var sumProduced = 0;
+
+        console.log("consumers.length", consumers.length)
+        console.log("producers.length", producers.length)
+        console.log("reserveConsumers.length", reserveConsumers.length)
+        console.log("reserveProducers.length", reserveProducers.length)
+
+
+        // settle for all consumers 
+        for (var i = 0; i < consumers.length; i++) {
+            smVolume = Math.round(Math.random() * 1000);
+            chainApi.settle("consumer", smVolume, _period, consumers[i].address);
+            sumConsumed += smVolume;
         }
-        // checks every n seconds if a not yet settled period can
-        // end settled because all users with orders in that period
-        // have called the settle method
-        global.endSettlerInterval = setInterval(function() {
-            var again = true;
-            while (again) {
-                try {
-                    var currentPeriod = chainUtil.getCurrentPeriod();
-                    for (var p = 0; p < currentPeriod; p++) {
-                        if (etherex.haveAllUsersSettled(p) && !etherex.isPeriodSettled(p)) {
-                            etherex.endSettle(p, { from: eth.accounts[0], gas: 20000000 });
-                        }
+
+
+
+        // settle for all producers 
+        for (var i = 0; i < producers.length; i++) {
+            smVolume = Math.round(Math.random() * 1000);
+            chainApi.settle("producer", smVolume, _period, producers[i].address);
+            sumProduced += smVolume;
+        }
+
+        // // one reserve order user regulates the lack or excess 
+
+        console.log("CsumProduced", sumProduced);
+        console.log("sumConsumed", sumConsumed);
+
+        if (sumProduced != sumConsumed) {
+            if (sumProduced > sumConsumed) {
+                var diff = sumProduced - sumConsumed;
+                for (var i = 0; i < reserveConsumers.length; i++) {
+                    if (chainApi.isMatchedForBidReserve(reserveConsumers[i].address, _period)) {
+                        chainApi.settle("consumer", diff, _period, reserveConsumers[i].address);
+                        console.log("reserve consumer settled");
+                        break;
                     }
-                    again = false;
-                } catch(e) {
-                    web3.personal.unlockAccount(eth.accounts[0], "amalien", 1000);
+                }
+            } else {
+                var diff = sumConsumed - sumProduced;
+                for (var i = 0; i < reserveProducers.length; i++) {
+                    if (chainApi.isMatchedForAskReserve(reserveProducers[i].address, _period)) {
+                        chainApi.settle("producer", diff, _period, reserveProducers[i].address);
+                        console.log("reserve Producer settled");
+                        break;
+                    }
                 }
             }
-        }, END_SETTLE_CHECK_IN_SECONDS * 1000);
-    } catch (err) {
-        console.log(err.message);
-    }
-}
-
-function stop() {
-    try {
-        // clear interval if one is currently active
-        if (global.endSettlerInterval) {
-            clearInterval(global.endSettlerInterval);
         }
-    } catch (err) {
-        console.log(err.message);
-    }
-}
+        // // überigen reserve Leute müssen settle aufrufen
 
-module.exports = {                                                                                                                                      
-    start: start,
-    stop: stop
+        for (var i = 0; i < reserveProducers.length; i++) {
+            chainApi.settle("producer", 0, _period, reserveProducers[i].address);
+        }
+        for (var i = 0; i < reserveConsumers.length; i++) {
+            chainApi.settle("consumer", 0, _period, reserveConsumers[i].address);
+        }
+
+
+    })
+
 }

@@ -13,10 +13,6 @@ function settle(req, res, next) {
         var type = req.swagger.params.settleRequest.value.type;
         var period = req.swagger.params.settleRequest.value.period;
        
-        console.log(1, volume);
-
-        console.log(1, typeof volume);
-
         chainApi.settle(type, volume, period, accountAddress, password);
         res.statusCode = 200;
     } catch (error) {
