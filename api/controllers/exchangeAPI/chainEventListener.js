@@ -7,6 +7,7 @@ const chainUtil = require("./chainUtil.js");
 const io = global.io;
 const _ = require("lodash");
 const db = require('../db');
+const chainEndSettler = require('./chainEndSettler');
 
 // catch blockcreation events and broadcast them to all clients
 let filter = eth.filter('latest');
@@ -41,10 +42,11 @@ StateChangeEvent.watch(function(err, res) {
                 // socket io
                 io.emit('matchingEvent', JSON.stringify(post));
             } else {
-                let post = { period: chainUtil.getCurrentPeriod() };
-
+                let _period = chainUtil.getCurrentPeriod();
+                let post = { period: _period };
                 // socket io
                 io.emit('newPeriodEvent', JSON.stringify(post));
+                chainEndSettler.settleAll(_period-1);
             }
         }
     });
@@ -102,12 +104,12 @@ function hex2a(hexx) {
     return str;
 }
 
-function sleep(time, callback) {
-    var stop = new Date().getTime();
-    while (new Date().getTime() < stop + time) {;
-    }
-    callback();
-}
+// function sleep(time, callback) {
+//     var stop = new Date().getTime();
+//     while (new Date().getTime() < stop + time) {;
+//     }
+//     callback();
+// }
 
 // function getAndSaveMatchingPriceHistory() {
 //     for (let i = 0; i < currPeriod; i++) {

@@ -21,7 +21,7 @@ function getConnection() {
                     setTimeout(getConnectionPool, 2000);
                 } else {
                     return resolve(connection);
-                }    
+                }
             });
         } else {
             global.db_connection_pool = mysql.createPool(db_config);
@@ -31,7 +31,7 @@ function getConnection() {
                     setTimeout(getConnectionPool, 2000);
                 } else {
                     return resolve(connection);
-                }    
+                }
             });
         }
     });
@@ -53,6 +53,75 @@ function getAllMatchingPrices() {
         });
     });
 }
+
+function getAllConsumers() {
+    return new Promise(function(resolve, reject) {
+        getConnection().then(function(connection) {
+            connection.query("select address from users where type = ?",'consumer', function(err, rows, fields) {
+                connection.release();
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(JSON.stringify(rows));
+                }
+            });
+        }, function(err) {
+            reject(err);
+        });
+    });
+}
+
+function getAllProducers() {
+    return new Promise(function(resolve, reject) {
+        getConnection().then(function(connection) {
+            connection.query("select address from users where type = ?", 'producer', function(err, rows, fields) {
+                connection.release();
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(JSON.stringify(rows));
+                }
+            });
+        }, function(err) {
+            reject(err);
+        });
+    });
+}
+
+function getAllReserveConsumers() {
+    return new Promise(function(resolve, reject) {
+        getConnection().then(function(connection) {
+            connection.query("select address from users where type = ?", 'reserveConsumer', function(err, rows, fields) {
+                connection.release();
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(JSON.stringify(rows));
+                }
+            });
+        }, function(err) {
+            reject(err);
+        });
+    });
+}
+
+function getAllReserveProducers() {
+    return new Promise(function(resolve, reject) {
+        getConnection().then(function(connection) {
+            connection.query("select address from users where type = ?", 'reserveProducer', function(err, rows, fields) {
+                connection.release();
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(JSON.stringify(rows));
+                }
+            });
+        }, function(err) {
+            reject(err);
+        });
+    });
+}
+
 
 function getAllReserveAskPrices() {
     return new Promise(function(resolve, reject) {
@@ -186,6 +255,28 @@ function insertMatchingPrices(_post) {
         })
     })
 }
+
+function insertUser(_post) {
+    return new Promise(function(resolve, reject) {
+        if (!_post) {
+            return reject(new Error('missing post data'));
+        }
+
+        getConnection().then(function(connection) {
+            connection.query('insert ignore into users set ?', _post, function(err, rows, fields) {
+                connection.release();
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(JSON.stringify(rows));
+                }
+            });
+        }, function(err) {
+            reject(err);
+        })
+    })
+}
+
 
 function getReserveAskOrders(_period) {
     if (_.isUndefined(_period)) {
@@ -340,5 +431,10 @@ module.exports = {
     getReserveBidOrders: getReserveBidOrders,
     getReserveAskOrders: getReserveAskOrders,
     getAllReserveAskPrices: getAllReserveAskPrices,
-    getAllReserveBidPrices: getAllReserveBidPrices
+    getAllReserveBidPrices: getAllReserveBidPrices,
+    insertUser: insertUser,
+    getAllConsumers: getAllConsumers,
+    getAllProducers: getAllProducers,
+    getAllReserveConsumers: getAllReserveConsumers,
+    getAllReserveProducers: getAllReserveProducers,
 }

@@ -225,8 +225,23 @@ contract etherexV0 {
         return matchingPrices[_period];
     }
 
+    function isMatchedForBidReserve(address _user,uint256 _period) constant returns (bool){
+        if (matchedBidReserveOrders[_period][_user] != 0){
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-      
+    function isMatchedForAskReserve(address _user,uint256 _period) constant returns (bool){
+        if (matchedAskReserveOrders[_period][_user] != 0){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
     // ###################################################################################################################
     // ########################## user interface  #########################################################################
     // ###################################################################################################################
