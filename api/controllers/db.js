@@ -18,7 +18,7 @@ function getConnection() {
             global.db_connection_pool.getConnection(function(err, connection) {
                 if (err) {
                     console.log('error when connecting to db:', err);
-                    setTimeout(getConnectionPool, 2000);
+                    setTimeout(getConnection, 2000);
                 } else {
                     return resolve(connection);
                 }    
@@ -28,7 +28,7 @@ function getConnection() {
             global.db_connection_pool.getConnection(function(err, connection) {
                 if (err) {
                     console.log('error when connecting to db:', err);
-                    setTimeout(getConnectionPool, 2000);
+                    setTimeout(getConnection, 2000);
                 } else {
                     return resolve(connection);
                 }    
