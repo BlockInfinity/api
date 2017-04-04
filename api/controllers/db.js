@@ -91,7 +91,7 @@ function getAllProducers() {
 function getAllReserveConsumers() {
     return new Promise(function(resolve, reject) {
         getConnection().then(function(connection) {
-            connection.query("select address from users where type = ?", 'reserveConsumer', function(err, rows, fields) {
+            connection.query("select address from users where type = ?", 'reserveconsumer', function(err, rows, fields) {
                 connection.release();
                 if (err) {
                     reject(err);
@@ -108,7 +108,7 @@ function getAllReserveConsumers() {
 function getAllReserveProducers() {
     return new Promise(function(resolve, reject) {
         getConnection().then(function(connection) {
-            connection.query("select address from users where type = ?", 'reserveProducer', function(err, rows, fields) {
+            connection.query("select address from users where type = ?", 'reserveproducer', function(err, rows, fields) {
                 connection.release();
                 if (err) {
                     reject(err);

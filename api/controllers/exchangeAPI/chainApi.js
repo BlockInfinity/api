@@ -59,9 +59,10 @@ Object.getPrototypeOf(web3.eth).awaitConsensus = function(txhash, gasSent) {
 
 function register(_user_password, _type) {
     return new Promise(function(resolve, reject) {
-        if (!_type || !(_type === 'consumer' || _type === 'producer' || _type === 'reserveProducer' || _type === 'reserveConsumer')) {
+        if (!_type || !(_type === 'consumer' || _type === 'producer' || _type === 'reserveproducer' || _type === 'reserveconsumer')) {
             return reject('invalid arguments');
         }
+        console.log(2);
 
         client.call({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [_user_password], "id": 74 },
             function(err, jsonObj) {
@@ -69,8 +70,9 @@ function register(_user_password, _type) {
                     console.log("Couldn't create an user account!");
                     reject(err);
                 } else {
-                    console.log("in one", jsonObj.result);
 
+                    console.log(3);
+                    console.log(4,_type);
                     var user_address = String(jsonObj.result);
 
                     var again = true;
@@ -80,7 +82,7 @@ function register(_user_password, _type) {
                             etherex.registerCertificateAuthority(eth.accounts[0], { from: eth.accounts[0], gas: 20000000 });
                             again = false;
                         } catch (err) {
-                            console.log(err);
+                            console.log("accounts gets unlocked");
                             web3.personal.unlockAccount(eth.accounts[0], "amalien", 2000000);
                         }
                     }
@@ -94,11 +96,11 @@ function register(_user_password, _type) {
                             var tx = etherex.registerProducer(user_address, { from: eth.accounts[0], gas: 20000000 });
                             eth.awaitConsensus(tx, 800000);
                             break;
-                        case "reserveConsumer":
+                        case "reserveconsumer":
                             var tx = etherex.registerConsumer(user_address, { from: eth.accounts[0], gas: 20000000 });
                             eth.awaitConsensus(tx, 800000);
                             break;
-                        case "reserveProducer":
+                        case "reserveproducer":
                             var tx = etherex.registerProducer(user_address, { from: eth.accounts[0], gas: 20000000 });
                             eth.awaitConsensus(tx, 800000);
                             break;
@@ -163,7 +165,7 @@ function buy(_volume, _price, _addr, _password, _reserve) {
                 tx = etherex.submitBid(_price, _volume, { from: _addr, gas: 2000000 });
                 again = false;
             } catch (err) {
-                console.log(err);
+                console.log("accounts gets unlocked");
                 web3.personal.unlockAccount(_addr, _password, 2000000);
             }
         }
@@ -209,7 +211,7 @@ function sell(_volume, _price, _addr, _password, _reserve) {
                 tx = etherex.submitAsk(_price, _volume, { from: _addr, gas: 2000000 });
                 again = false;
             } catch (err) {
-                console.log(err);
+                console.log("accounts gets unlocked");
                 web3.personal.unlockAccount(_addr, _password, 2000000);
             }
         }
@@ -222,15 +224,13 @@ function sell(_volume, _price, _addr, _password, _reserve) {
 
 
 // settle("consumer", 40, 41, "0xf15dd7a0b509a69338bb09057d8b418dd7507b1e");
+global.j = 0;
 
 function settle(_type, _volume, _period, _addr) {
     if (!_type || !(_type === 'consumer' || _type === 'producer')) {
         throw new Error("Type must be either consumer or provider")
     }
-    console.log(4, _volume);
-    if (!_volume || _volume <= 0) {
-        throw new Error("Volume must be provided and greater than 0")
-    }
+
     if (_period < 0) {
         throw new Error("Period must be greater or equal to 0")
     }
@@ -259,6 +259,8 @@ function settle(_type, _volume, _period, _addr) {
         }
     }
     eth.awaitConsensus(tx, 20000000);
+
+    console.log(global.j++, "mal gesettled");
 }
 
 // ######################################################################

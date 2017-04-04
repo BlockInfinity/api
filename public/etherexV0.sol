@@ -509,7 +509,7 @@ contract etherexV0 {
         return true;     
     }
 
-    
+    event SettleEvent(int8 _type);
     // todo (mg) function needs to be called by smart meters instead of users
     function settle( int8 _type, uint256 _volume, uint256 _period, address _user) updateState() onlyCertificateAuthorities() {
 
@@ -638,6 +638,7 @@ contract etherexV0 {
             }
         }
     
+
         // set user as settled for currentPeriod
         settleMapping[_period].alreadySettled[_user] = true;
 
@@ -645,10 +646,11 @@ contract etherexV0 {
         if (settleMapping[_period].settleCounter == numUsers) {
             endSettle(_period);
         }  
+        SettleEvent(_type);
     }
 
   
-   
+   event EndSettleEvent();
 
     function endSettle(uint256 _period) internal {
         int256 diff = int256(settleMapping[_period].excess) - int256(settleMapping[_period].lack);
@@ -704,6 +706,8 @@ contract etherexV0 {
         for (uint256 l=0; l<numUsers; l++) {  
             colleteral[l] += shareOfEachUser;     
         }
+
+        EndSettleEvent();
     }
 
 

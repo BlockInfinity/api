@@ -46,7 +46,7 @@ StateChangeEvent.watch(function(err, res) {
                 let post = { period: _period };
                 // socket io
                 io.emit('newPeriodEvent', JSON.stringify(post));
-                chainEndSettler.settleAll(_period-1);
+                chainEndSettler.settleAll(_period - 1);
             }
         }
     });
@@ -71,6 +71,39 @@ ReservePriceEvent.watch(function(err, res) {
         }
     });
 });
+
+// insert the reserveprice into the database when reservepriceevent comes in
+var EndSettleEvent = etherex.EndSettleEvent();
+EndSettleEvent.watch(function(err, res) {
+    console.log("EndSettleEvent");
+    return co(function*() {
+        if (!err) {
+            // socket io
+            io.emit('EndSettleEvent', "EndSettle executed");
+        }
+    });
+});
+
+// insert the reserveprice into the database when reservepriceevent comes in
+var SettleEvent = etherex.SettleEvent();
+SettleEvent.watch(function(err, res) {
+    console.log("SettleEvent");
+    return co(function*() {
+        if (!err) {
+            let _type = res.args._type.toNumber();
+            let post;
+            if (_type == 1) {
+                post = "producer";
+            } else {
+                post = "consumer";
+            }
+            // socket io
+            io.emit('SettleEvent', "Settle executed for " + post);
+        }
+    });
+});
+
+
 
 
 
