@@ -13,13 +13,15 @@ const chainEndSettler = require('./chainEndSettler');
 let filter = eth.filter('latest');
 filter.watch(function(err, res) {
     if (!_.isUndefined(res)) {
-        chainApi.updateState();
+        // chainApi.updateState();
         let startBlock = etherex.getStartBlock().toNumber();
         let minedBlocks = eth.blockNumber - startBlock;
         let toSend = { MinedBlocksInCurrPeriod: minedBlocks }
         io.emit('blockCreationEvent', JSON.stringify(toSend));
     }
 });
+
+setInterval(chainApi.updateState,10000);
 
 // inserts the matching price into the database when the state changes to 1
 var StateChangeEvent = etherex.StateChangedEvent();
@@ -75,16 +77,16 @@ ReservePriceEvent.watch(function(err, res) {
 // insert the reserveprice into the database when reservepriceevent comes in
 var EndSettleEvent = etherex.EndSettleEvent();
 EndSettleEvent.watch(function(err, res) {
- console.log("EndSettleEvent")
+    console.log("EndSettleEvent")
     return co(function*() {
         if (!err) {
 
             let _period = res.args._period.toNumber();
             let _diff = res.args.diff.toNumber();
 
-            let post = { period: _period, diff: _diff};
+            let post = { period: _period, diff: _diff };
 
-            console.log("EndSettleEvent",post);
+            console.log("EndSettleEvent", post);
             // socket io
             io.emit('EndSettleEvent', JSON.stringify(post));
         }
@@ -94,11 +96,12 @@ EndSettleEvent.watch(function(err, res) {
 // insert the reserveprice into the database when reservepriceevent comes in
 var SettleEvent = etherex.SettleEvent();
 SettleEvent.watch(function(err, res) {
- 
+
     return co(function*() {
         if (!err) {
             let _type = res.args._type.toNumber();
-            let _volume = res.args._volume.toNumber();
+            let _usedVolume = res.args._usedVolume.toNumber();
+            let _orderedVolume = res.args._orderedVolume.toNumber();
             let _user = res.args._user;
 
             if (_type == 1) {
@@ -107,9 +110,9 @@ SettleEvent.watch(function(err, res) {
                 _type = "consumer";
             }
 
-            let post = { type: _type, volume: _volume, user: _user};
+            let post = { type: _type, usedVolume: _usedVolume, orderedVolume: _orderedVolume, user: _user };
 
-            console.log("SettleEvent",post);
+            console.log("SettleEvent", post);
 
             // socket io
             io.emit('SettleEvent', JSON.stringify(post));
