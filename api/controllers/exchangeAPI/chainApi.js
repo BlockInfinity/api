@@ -378,11 +378,15 @@ function updateState() {
 }
 
 function isMatchedForBidReserve(_user, _period) {
-    return etherex.isMatchedForBidReserve(_user, _period);
+    let result = etherex.isMatchedForBidReserve(_user, _period);
+    console.log(2, result);
+    return result;
 }
 
 function isMatchedForAskReserve(_user, _period) {
-    return etherex.isMatchedForAskReserve(_user, _period);
+    let result = etherex.isMatchedForAskReserve(_user, _period);
+    console.log(3, result);
+    return result;
 }
 
 module.exports = {
