@@ -165,7 +165,11 @@ function getMatchingPrice(_period) {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(rows[0].price.toString());
+                    if (rows && rows.length === 1 && !_.isUndefined(rows[0].price)) {
+                        resolve(rows[0].price.toString());
+                    } else {
+                        resolve(null);
+                    }
                 }
             });
         }, function(err) {
@@ -408,7 +412,11 @@ function hasUserOrderInPeriod(_addr, _period, _reserve, _type) {
                 if (err) {
                     reject(err);
                 } else {
-                    resolve(rows && rows.length === 1 ? rows[0] : null);
+                    if (rows && rows.length === 1) {
+                        resolve(true);
+                    } else {
+                        resolve(false);
+                    }
                 }
             });
         }, function(err) {
