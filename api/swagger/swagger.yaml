@@ -75,6 +75,10 @@ paths:
         - trade  
       description: "Endpoint for placing ask orders for certain amount of electricity at a certain price. Account adress and password are required."
       operationId: "submitAskOrder"
+      consumes:
+        - application/json
+      produces:
+        - application/json
       parameters:
         - name: "sellRequest"
           in: "body"
@@ -129,6 +133,10 @@ paths:
         - trade  
       description: "Endpoint for placing ask orders for certain amount of electricity at a certain price. Account adress and password are required."
       operationId: "submitReserveAskOrder"
+      consumes:
+        - application/json
+      produces:
+        - application/json
       parameters:
         - name: "sellRequest"
           in: "body"
@@ -173,6 +181,10 @@ paths:
         - authority    
       description: "Registers a new user account, given a password and an user type. Returns the address of the newly created account. May only be invoked by users of 'Authority' status."
       operationId: "register"
+      consumes:
+        - application/json
+      produces:
+        - application/json
       parameters:
         - name: "registerRequest"
           in: "body"
@@ -196,8 +208,6 @@ paths:
         - info 
       description: "Get the balance of the user's account."
       operationId: "getBalance"
-      consumes:
-        - "application/json"
       produces:
         - "application/json"
       parameters:
@@ -222,6 +232,8 @@ paths:
         - info 
       description: "Get all ask orders for the last period."
       operationId: "getAskOrders"
+      produces:
+        - application/json
       parameters:
         - name: "period"
           in: "query"
@@ -244,6 +256,8 @@ paths:
         - info     
       description: "Get all bid orders for the last period."
       operationId: "getBidOrders"
+      produces:
+        - application/json
       parameters:
         - name: "period"
           in: "query"
@@ -266,6 +280,8 @@ paths:
         - info 
       description: "Get all ask orders for the last period."
       operationId: "getReserveAskOrders"
+      produces:
+        - application/json
       parameters:
         - name: "period"
           in: "query"
@@ -288,6 +304,8 @@ paths:
         - info 
       description: "Get all ask orders for the last period."
       operationId: "getReserveBidOrders"
+      produces:
+        - application/json
       parameters:
         - name: "period"
           in: "query"
@@ -452,6 +470,8 @@ paths:
         - info
       description: "Get matching price for specific period. If no period is specified will return for the last period."
       operationId: "getMatchingPrice"
+      produces:
+        - application/json
       parameters:
       - name: "period"
         in: "query"
@@ -474,6 +494,8 @@ paths:
         - info
       description: "Get all matching prices"
       operationId: "getAllMatchingPrices"
+      produces:
+        - application/json
       responses:
         200:
           description: "Returns matching prices as json array"
@@ -490,6 +512,8 @@ paths:
         - info
       description: "Get all reserve prices"
       operationId: "getAllReserveBidPrices"
+      produces:
+        - application/json
       responses:
         200:
           description: "Returns reserve prices as json array"
@@ -506,6 +530,8 @@ paths:
         - info
       description: "Get all reserve prices"
       operationId: "getAllReserveAskPrices"
+      produces:
+        - application/json
       responses:
         200:
           description: "Returns reserve prices as json array"
@@ -516,13 +542,14 @@ paths:
           schema:
             $ref: "#/definitions/ErrorResponse"
       x-swagger-router-controller: "info_controller"
-
   /info/state:
     get:
       tags: 
         - info
       description: "Get the current state"
       operationId: "getState"
+      produces:
+        - application/json
       responses:
         200:
           description: "Returns the current state and period."
