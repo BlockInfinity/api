@@ -34,25 +34,33 @@ $(function() {
     var socket = io();
     window.socket = socket;
     socket.on('blockCreationEvent', function(msg) {
-        $('#messages').append($('<li>').text("currentState: "+currentState));
-        $('#messages').append($('<li>').text("blockCreationEvent: "+msg));
+        $('#messages').append($('<li>').text("currentState: " + currentState));
+        $('#messages').append($('<li>').text("blockCreationEvent: " + msg));
     });
     socket.on('orderEvent', function(msg) {
-        $('#messages').append($('<li>').text("orderEvent: "+msg));
+        $('#messages').append($('<li>').text("orderEvent: " + msg));
     });
     socket.on('matchingEvent', function(msg) {
         currentState = 1;
-        $('#messages').append($('<li>').text("matchingEvent: "+msg));
+        $('#messages').append($('<li>').text("matchingEvent: " + msg));
     });
     socket.on('newPeriodEvent', function(msg) {
         currentState = 0;
-        $('#messages').append($('<li>').text("newPeriodEvent: "+msg));
+        $('#messages').append($('<li>').text("newPeriodEvent: " + msg));
     });
     socket.on('reservePriceEvent', function(msg) {
-        $('#messages').append($('<li>').text("reservePriceEvent: "+msg));
+        $('#messages').append($('<li>').text("reservePriceEvent: " + msg));
     });
 
-    
+    socket.on('EndSettleEvent', function(msg) {
+        $('#messages').append($('<li>').text("EndSettleEvent: " + msg));
+    });
+
+    socket.on('SettleEvent', function(msg) {
+        $('#messages').append($('<li>').text("SettleEvent: " + msg));
+    });
+
+
 });
 </script>
 
