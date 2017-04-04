@@ -518,7 +518,7 @@ contract etherexV0 {
         return true;     
     }
 
-    event SettleEvent(int8 _type, uint256 _volume, address _user);
+    event SettleEvent(int8 _type, uint256 _usedVolume, uint256 _orderedVolume, address _user);
     // todo (mg) function needs to be called by smart meters instead of users
     function settle( int8 _type, uint256 _volume, uint256 _period, address _user) updateState() onlyCertificateAuthorities() {
 
@@ -534,8 +534,6 @@ contract etherexV0 {
 
         // increment settle counter
         settleMapping[_period].settleCounter += 1;
-
-
 
         // for debug purposes not defined here
         uint256 ordered = 0;
@@ -554,6 +552,9 @@ contract etherexV0 {
             // case 2: normal ask order guy
             } else if (matchedAskOrders[_period][_user] != 0) {
                 offered = matchedAskOrders[_period][_user];
+
+                SettleEvent(_type, _volume, offered , _user);
+
                  // _user hat zu wenig Strom eingespeist
                 if (_volume < offered) {
                       // für den eingespeisten Strom bekommt er den matching preis bezahlt
@@ -608,6 +609,9 @@ contract etherexV0 {
             // case 2: normal bid order guy 
             } else if (matchedBidOrders[_period][_user] != 0) {
                 ordered = matchedBidOrders[_period][_user];
+
+                SettleEvent(_type, _volume, ordered , _user);
+
                 // user hat zu viel Strom verbraucht
                 if (_volume > ordered) {
                     // das Ordervolumen kann noch zum matching price bezahlt werden
@@ -647,7 +651,6 @@ contract etherexV0 {
             }
         }
     
-
         // set user as settled for currentPeriod
         settleMapping[_period].alreadySettled[_user] = true;
 
@@ -655,11 +658,11 @@ contract etherexV0 {
         if (settleMapping[_period].settleCounter == numUsers) {
             endSettle(_period);
         }  
-        SettleEvent(_type, _volume, _user);
+        
     }
 
   
-   event EndSettleEvent(uint256 _period, int256 diff);
+   event EndSettleEvent(uint256 _period);
 
     function endSettle(uint256 _period) internal {
         int256 diff = int256(settleMapping[_period].excess) - int256(settleMapping[_period].lack);
@@ -716,7 +719,7 @@ contract etherexV0 {
             colleteral[l] += shareOfEachUser;     
         }
 
-        EndSettleEvent(_period, diff);
+        EndSettleEvent(_period);
     }
 
 

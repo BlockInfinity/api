@@ -34,7 +34,6 @@ var reserveConsumers;
 
 //     })
 
-//     console.log(1);
 
 // }
 
@@ -44,7 +43,7 @@ var reserveConsumers;
 
 
 
-settleAll(4);
+// settleAll(4);
 
 function settleAll(_period) {
     global.j = 0;
