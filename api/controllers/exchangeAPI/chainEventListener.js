@@ -112,7 +112,7 @@ SettleEvent.watch(function(err, res) {
             console.log("SettleEvent",post);
 
             // socket io
-            io.emit('SettleEvent', JSON.stringify(post)));
+            io.emit('SettleEvent', JSON.stringify(post));
         }
     });
 });
