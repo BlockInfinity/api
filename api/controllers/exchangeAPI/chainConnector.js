@@ -8,7 +8,7 @@ try {
     web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'));
     web3.eth.defaulAccount = web3.eth.accounts[0];
 
-    var contractAddress = '0x8916d85d377fd0484b57bfa1ee375900d7ca72f7';
+    var contractAddress = '0x70ab358570adbd34a89f735eec517ab3c4a70c12';
     var compiled;
     var abi;
 
