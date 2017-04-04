@@ -13,13 +13,15 @@ const chainEndSettler = require('./chainEndSettler');
 let filter = eth.filter('latest');
 filter.watch(function(err, res) {
     if (!_.isUndefined(res)) {
-        chainApi.updateState();
+        // chainApi.updateState();
         let startBlock = etherex.getStartBlock().toNumber();
         let minedBlocks = eth.blockNumber - startBlock;
         let toSend = { MinedBlocksInCurrPeriod: minedBlocks }
         io.emit('blockCreationEvent', JSON.stringify(toSend));
     }
 });
+
+setInterval(chainApi.updateState,10000);
 
 // inserts the matching price into the database when the state changes to 1
 var StateChangeEvent = etherex.StateChangedEvent();
