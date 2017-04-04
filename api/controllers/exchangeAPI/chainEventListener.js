@@ -21,7 +21,7 @@ filter.watch(function(err, res) {
     }
 });
 
-setInterval(chainApi.updateState,10000);
+//setInterval(chainApi.updateState,10000);
 
 // inserts the matching price into the database when the state changes to 1
 var StateChangeEvent = etherex.StateChangedEvent();
