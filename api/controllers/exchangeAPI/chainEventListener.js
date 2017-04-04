@@ -86,7 +86,7 @@ EndSettleEvent.watch(function(err, res) {
 
             console.log("EndSettleEvent",post);
             // socket io
-            io.emit('EndSettleEvent', post);
+            io.emit('EndSettleEvent', JSON.stringify(post));
         }
     });
 });
@@ -112,7 +112,7 @@ SettleEvent.watch(function(err, res) {
             console.log("SettleEvent",post);
 
             // socket io
-            io.emit('SettleEvent', post);
+            io.emit('SettleEvent', JSON.stringify(post));
         }
     });
 });
