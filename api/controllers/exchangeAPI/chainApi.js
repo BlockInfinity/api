@@ -62,7 +62,6 @@ function register(_user_password, _type) {
         if (!_type || !(_type === 'consumer' || _type === 'producer' || _type === 'reserveproducer' || _type === 'reserveconsumer')) {
             return reject('invalid arguments');
         }
-        console.log(2);
 
         client.call({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [_user_password], "id": 74 },
             function(err, jsonObj) {
@@ -71,8 +70,6 @@ function register(_user_password, _type) {
                     reject(err);
                 } else {
 
-                    console.log(3);
-                    console.log(4,_type);
                     var user_address = String(jsonObj.result);
 
                     var again = true;
@@ -82,7 +79,7 @@ function register(_user_password, _type) {
                             etherex.registerCertificateAuthority(eth.accounts[0], { from: eth.accounts[0], gas: 20000000 });
                             again = false;
                         } catch (err) {
-                            console.log("accounts gets unlocked");
+                            console.log("account gets unlocked");
                             web3.personal.unlockAccount(eth.accounts[0], "amalien", 2000000);
                         }
                     }
@@ -165,7 +162,7 @@ function buy(_volume, _price, _addr, _password, _reserve) {
                 tx = etherex.submitBid(_price, _volume, { from: _addr, gas: 2000000 });
                 again = false;
             } catch (err) {
-                console.log("accounts gets unlocked");
+                console.log("account gets unlocked");
                 web3.personal.unlockAccount(_addr, _password, 2000000);
             }
         }
@@ -211,7 +208,7 @@ function sell(_volume, _price, _addr, _password, _reserve) {
                 tx = etherex.submitAsk(_price, _volume, { from: _addr, gas: 2000000 });
                 again = false;
             } catch (err) {
-                console.log("accounts gets unlocked");
+                console.log("account gets unlocked");
                 web3.personal.unlockAccount(_addr, _password, 2000000);
             }
         }
@@ -374,7 +371,7 @@ function updateState() {
             etherex.testUpdateState({ from: eth.accounts[0], gas: 8000000 });
             again = false;
         } catch (err) {
-            console.log("accounts gets unlocked");
+            console.log("account gets unlocked");
             web3.personal.unlockAccount(eth.accounts[0], "amalien", 2000000);
         }
     }
