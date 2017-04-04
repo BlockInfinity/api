@@ -75,11 +75,18 @@ ReservePriceEvent.watch(function(err, res) {
 // insert the reserveprice into the database when reservepriceevent comes in
 var EndSettleEvent = etherex.EndSettleEvent();
 EndSettleEvent.watch(function(err, res) {
-    console.log("EndSettleEvent");
+ console.log("EndSettleEvent")
     return co(function*() {
         if (!err) {
+
+            let _period = res.args._period.toNumber();
+            let _diff = res.args.diff.toNumber();
+
+            let post = { period: _period, diff: _diff};
+
+            console.log("EndSettleEvent",post);
             // socket io
-            io.emit('EndSettleEvent', "EndSettle executed");
+            io.emit('EndSettleEvent', post);
         }
     });
 });
@@ -87,18 +94,25 @@ EndSettleEvent.watch(function(err, res) {
 // insert the reserveprice into the database when reservepriceevent comes in
 var SettleEvent = etherex.SettleEvent();
 SettleEvent.watch(function(err, res) {
-    console.log("SettleEvent");
+ 
     return co(function*() {
         if (!err) {
             let _type = res.args._type.toNumber();
-            let post;
+            let _volume = res.args._volume.toNumber();
+            let _user = res.args._user;
+
             if (_type == 1) {
-                post = "producer";
+                _type = "producer";
             } else {
-                post = "consumer";
+                _type = "consumer";
             }
+
+            let post = { type: _type, volume: _volume, user: _user};
+
+            console.log("SettleEvent",post);
+
             // socket io
-            io.emit('SettleEvent', "Settle executed for " + post);
+            io.emit('SettleEvent', post);
         }
     });
 });
