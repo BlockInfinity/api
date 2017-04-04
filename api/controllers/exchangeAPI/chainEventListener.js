@@ -82,9 +82,9 @@ EndSettleEvent.watch(function(err, res) {
         if (!err) {
 
             let _period = res.args._period.toNumber();
-            let _diff = res.args.diff.toNumber();
+          
 
-            let post = { period: _period, diff: _diff };
+            let post = { period: _period};
 
             console.log("EndSettleEvent", post);
             // socket io
@@ -96,7 +96,7 @@ EndSettleEvent.watch(function(err, res) {
 // insert the reserveprice into the database when reservepriceevent comes in
 var SettleEvent = etherex.SettleEvent();
 SettleEvent.watch(function(err, res) {
-
+    console.log("SettleEvent");
     return co(function*() {
         if (!err) {
             let _type = res.args._type.toNumber();

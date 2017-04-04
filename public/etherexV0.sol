@@ -553,7 +553,7 @@ contract etherexV0 {
             } else if (matchedAskOrders[_period][_user] != 0) {
                 offered = matchedAskOrders[_period][_user];
 
-                SettleEvent(_type, _volume, offered , _user);
+                
 
                  // _user hat zu wenig Strom eingespeist
                 if (_volume < offered) {
@@ -593,6 +593,7 @@ contract etherexV0 {
                 // volumen was von den normalen _usern erzeugt wurde
                 settleMapping[_period].sumProduced += _volume;
             }
+            SettleEvent(_type, _volume, offered , _user);
         }
     
         // consumer
@@ -610,7 +611,7 @@ contract etherexV0 {
             } else if (matchedBidOrders[_period][_user] != 0) {
                 ordered = matchedBidOrders[_period][_user];
 
-                SettleEvent(_type, _volume, ordered , _user);
+                
 
                 // user hat zu viel Strom verbraucht
                 if (_volume > ordered) {
@@ -649,6 +650,8 @@ contract etherexV0 {
                 // volumen was die normalen usern verbraucht haben
                 settleMapping[_period].sumConsumed += _volume;
             }
+
+            SettleEvent(_type, _volume, ordered , _user);
         }
     
         // set user as settled for currentPeriod
