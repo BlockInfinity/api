@@ -58,6 +58,8 @@ StateChangeEvent.watch(function(err, res) {
                 io.emit('matchingEvent', JSON.stringify(post));
             } else {
                 global.currentState = 0;
+                global.currentPeriod++;
+                
                 let _period = global.currentPeriod;
                 let post = { period: _period };
                 // socket io
