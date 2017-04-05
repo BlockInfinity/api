@@ -346,104 +346,6 @@ paths:
         500:
           description: "Server error"
       x-swagger-router-controller: "info_controller"
-  # /info/matchedAskOrders:
-  #   get:
-  #     tags: 
-  #       - info     
-  #     description: "Get all matched ask orders for the last period."
-  #     operationId: "getMatchedAskOrders"
-  #     parameters:
-  #       - name: "period"
-  #         in: "query"
-  #         description: "Period"
-  #         required: false
-  #         type: "number"
-  #     responses:
-  #       200:
-  #         description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
-  #         schema:
-  #           $ref: "#/definitions/askQuotes"              
-  #       404:
-  #         description: "Operation not found"
-  #       500:
-  #         description: "Server error"
-  #     x-swagger-router-controller: "info_controller"
-  # /info/matchedBidOrders:
-  #   get:
-  #     tags: 
-  #       - info     
-  #     description: "Get all matched bid orders for the last period."
-  #     operationId: "getMatchedBidOrders"
-  #     parameters:
-  #       - name: "period"
-  #         in: "query"
-  #         description: "Period"
-  #         required: false
-  #         type: "number"
-  #     responses:
-  #       200:
-  #         description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
-  #         schema:
-  #           $ref: "#/definitions/askQuotes"              
-  #       404:
-  #         description: "Operation not found"
-  #       500:
-  #         description: "Server error"
-  #     x-swagger-router-controller: "info_controller"
-  # /info/matchedAskOrdersForUser:
-  #   get:
-  #     tags: 
-  #       - info     
-  #     description: "Get all matched ask orders for the last period for given user."
-  #     operationId: "getMatchedAskOrdersForUser"
-  #     parameters:
-  #       - name: "period"
-  #         in: "query"
-  #         description: "Period"
-  #         required: false
-  #         type: "number"
-  #       - name: "userAddress"
-  #         in: "query"
-  #         description: "The address of the account, whose balance will be returned."
-  #         type: "string"
-  #         required: true
-  #     responses:
-  #       200:
-  #         description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
-  #         schema:
-  #           $ref: "#/definitions/askQuotes"              
-  #       404:
-  #         description: "Operation not found"
-  #       500:
-  #         description: "Server error"
-  #     x-swagger-router-controller: "info_controller"
-  # /info/matchedBidOrdersForUser:
-  #   get:
-  #     tags: 
-  #       - info     
-  #     description: "Get all matched bid orders for the last period for given user."
-  #     operationId: "getMatchedBidOrdersForUser"
-  #     parameters:
-  #       - name: "period"
-  #         in: "query"
-  #         description: "Period"
-  #         required: false
-  #         type: "number"
-  #       - name: "userAddress"
-  #         in: "query"
-  #         description: "The address of the account, whose balance will be returned."
-  #         type: "string"
-  #         required: true
-  #     responses:
-  #       200:
-  #         description: "Returns orders as JSON object wrapped in JSON array. Also provides period."
-  #         schema:
-  #           $ref: "#/definitions/askQuotes"              
-  #       404:
-  #         description: "Operation not found"
-  #       500:
-  #         description: "Server error"
-  #     x-swagger-router-controller: "info_controller"
   /info/reserveAskPrice:
     get:
       tags: 
@@ -525,6 +427,78 @@ paths:
           description: "Returns matching prices as json array"
           schema:
             $ref: "#/definitions/getAllMatchingPricesResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      x-swagger-router-controller: "info_controller"
+  /info/allConsumers:
+    get:
+      tags:
+        - info
+      description: "Get all consumers"
+      operationId: "getAllConsumers"
+      produces:
+        - application/json
+      responses:
+        200:
+          description: "Returns consumer array"
+          schema:
+            $ref: "#/definitions/allAddressesResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      x-swagger-router-controller: "info_controller"
+  /info/getAllProducers:
+    get:
+      tags:
+        - info
+      description: "Get all producers"
+      operationId: "getAllProducers"
+      produces:
+        - application/json
+      responses:
+        200:
+          description: "Returns producers array"
+          schema:
+            $ref: "#/definitions/allAddressesResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      x-swagger-router-controller: "info_controller"
+  /info/getAllReserveConsumers:
+    get:
+      tags:
+        - info
+      description: "Get all reserve consumers"
+      operationId: "getAllReserveConsumers"
+      produces:
+        - application/json
+      responses:
+        200:
+          description: "Returns reserve consumer array"
+          schema:
+            $ref: "#/definitions/allAddressesResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      x-swagger-router-controller: "info_controller"
+  /info/getAllReserveProducers:
+    get:
+      tags:
+        - info
+      description: "Get all reserve producers"
+      operationId: "getAllReserveProducers"
+      produces:
+        - application/json
+      responses:
+        200:
+          description: "Returns reserve producer array"
+          schema:
+            $ref: "#/definitions/allAddressesResponse"
         default:
           description: Error
           schema:
@@ -780,6 +754,14 @@ definitions:
     properties:
       MinedBlocksInCurrPeriod:
         type: number
+  allAddressesResponse:
+    type: array
+    items:
+      $ref: "#/definitions/addressEntry"
+  addressEntry:
+    properties:
+      userAddress: 
+        type: string
       
         
         

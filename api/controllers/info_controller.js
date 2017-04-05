@@ -18,7 +18,11 @@ module.exports = {
     getReserveBidPrice: getReserveBidPrice,
     getAllReserveBidPrices: getAllReserveBidPrices,
     getAllReserveAskPrices: getAllReserveAskPrices,
-    getCollateral: getCollateral
+    getCollateral: getCollateral,
+    getAllConsumers: getAllConsumers,
+    getAllProducers: getAllProducers,
+    getAllReserveConsumers: getAllReserveConsumers,
+    getAllReserveProducers: getAllReserveProducers,
 }
 
 function findPeriod(req) {
@@ -75,8 +79,6 @@ function getCollateral(req, res, next) {
 
 }
 
-
-
 function getBalance(req, res, next) {
     try {
         var address = req.swagger.params.userAddress.value;
@@ -104,6 +106,67 @@ function getAllMatchingPrices(req, res, next) {
         res.end('Blockchain error ' + error.message);
     }
 }
+
+function getAllConsumers(req, res, next) {
+    try {
+        db.getAllConsumers().then(function(result) {
+            res.end(result);
+        }, function(reason) {
+            res.statusCode = 500;
+            res.end('Blockchain error: No address received from register function!', reason);
+        });
+    } catch (error) {
+        res.statusCode = 500;
+        res.end('Blockchain error ' + error.message);
+    }
+}
+
+
+function getAllProducers(req, res, next) {
+    try {
+        db.getAllProducers().then(function(result) {
+            res.end(result);
+        }, function(reason) {
+            res.statusCode = 500;
+            res.end('Blockchain error: No address received from register function!', reason);
+        });
+    } catch (error) {
+        res.statusCode = 500;
+        res.end('Blockchain error ' + error.message);
+    }
+}
+
+
+function getAllReserveConsumers(req, res, next) {
+    try {
+        db.getAllReserveConsumers().then(function(result) {
+            res.end(result);
+        }, function(reason) {
+            res.statusCode = 500;
+            res.end('Blockchain error: No address received from register function!', reason);
+        });
+    } catch (error) {
+        res.statusCode = 500;
+        res.end('Blockchain error ' + error.message);
+    }
+}
+
+
+function getAllReserveProducers(req, res, next) {
+    try {
+        db.getAllReserveProducers().then(function(result) {
+            res.end(result);
+        }, function(reason) {
+            res.statusCode = 500;
+            res.end('Blockchain error: No address received from register function!', reason);
+        });
+    } catch (error) {
+        res.statusCode = 500;
+        res.end('Blockchain error ' + error.message);
+    }
+}
+
+
 
 function getAllReserveAskPrices(req, res, next) {
     try {
