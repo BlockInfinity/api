@@ -609,6 +609,30 @@ paths:
           schema:
             $ref: "#/definitions/blockCreationEvent"
     x-swagger-router-controller: "info_controller"
+  /sockets/SettleEvent:
+    get:
+      tags:
+        - sockets
+      description: "socket.on('SettleEvent', callback) // see socket.io"
+      operationId: "getLastBlock"
+      responses: 
+        200:
+          description: "Rerturns the information about the individual user that has settled"
+          schema:
+            $ref: "#/definitions/SettleEventResponse"
+    x-swagger-router-controller: "info_controller"
+  /sockets/EndSettleEvent:
+    get:
+      tags:
+        - sockets
+      description: "socket.on('EndSettleEvent', callback) // see socket.io"
+      operationId: "getLastBlock"
+      responses: 
+        200:
+          description: "Rerturns the settled period"
+          schema:
+            $ref: "#/definitions/EndSettleEventResponse"
+    x-swagger-router-controller: "info_controller"
     
 definitions:
   ErrorResponse:
@@ -621,6 +645,20 @@ definitions:
     properties:
       succeded:
         type: boolean
+  SettleEventResponse:
+    properties:
+      type:
+        type: string
+      useVolume:
+        type: number
+      orderedVolume:
+        type: number
+      address:
+        type: string
+  EndSettleEventResponse:
+    properties:
+      period:
+        type: number
   buyRequest:
     required:
       - accountAddress
