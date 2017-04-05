@@ -11,7 +11,7 @@ module.exports = {
 }
 
 function submitAskOrder(req, res, next) {
-    if (chainUtil.getCurrentState() === 1) {
+    if (global.currentState === 1) {
         res.statusCode = 400;
         res.end('Invalid state. Only reserve orders can be submitted.');
         return;
@@ -39,7 +39,7 @@ function submitAskOrder(req, res, next) {
 }
 
 function submitBidOrder(req, res, next) {
-    if (chainUtil.getCurrentState() === 1) {
+    if (global.currentState === 1) {
         res.statusCode = 400;
         res.end('Invalid state. Only reserve orders can be submitted.');
     }
@@ -63,7 +63,7 @@ function submitBidOrder(req, res, next) {
 }
 
 function submitReserveAskOrder(req, res, next) {
-    if (chainUtil.getCurrentState() === 0) {
+    if (global.currentState === 0) {
         res.statusCode = 400;
         res.end('Invalid state. Only normal orders can be submitted.');
     }
@@ -89,7 +89,7 @@ function submitReserveAskOrder(req, res, next) {
 }
 
 function submitReserveBidOrder(req, res, next) {
-    if (chainUtil.getCurrentState() === 0) {
+    if (global.currentState === 0) {
         res.statusCode = 400;
         res.end('Invalid state. Only normal orders can be submitted.');
     }

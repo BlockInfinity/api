@@ -9,6 +9,18 @@ const _ = require("lodash");
 const db = require('../db');
 const chainEndSettler = require('./chainEndSettler');
 
+global.currentState = getCurrentState();
+
+global.currentPeriod = getCurrentPeriod();
+
+function getCurrentState() {
+    return etherex.getCurrState().toNumber();
+}
+
+function getCurrentPeriod() {
+    return etherex.getCurrPeriod().toNumber();
+}
+
 // catch blockcreation events and broadcast them to all clients
 let filter = eth.filter('latest');
 filter.watch(function(err, res) {
@@ -32,8 +44,9 @@ StateChangeEvent.watch(function(err, res) {
                 state = res.args._state.toNumber();
             }
             if (state === 1) {
-                let matchingPrice = etherex.getMatchingPrice(chainUtil.getCurrentPeriod()).toNumber();
-                let post = { period: chainUtil.getCurrentPeriod(), price: matchingPrice };
+                global.currentState = 1;
+                let matchingPrice = etherex.getMatchingPrice(global.currentPeriod).toNumber();
+                let post = { period: global.currentPeriod, price: matchingPrice };
 
                 try {
                     yield db.insertMatchingPrices(post);
@@ -44,7 +57,8 @@ StateChangeEvent.watch(function(err, res) {
                 // socket io
                 io.emit('matchingEvent', JSON.stringify(post));
             } else {
-                let _period = chainUtil.getCurrentPeriod();
+                global.currentState = 0;
+                let _period = global.currentPeriod;
                 let post = { period: _period };
                 // socket io
                 io.emit('newPeriodEvent', JSON.stringify(post));
@@ -61,7 +75,7 @@ ReservePriceEvent.watch(function(err, res) {
         if (!err) {
             let _price = res.args._price.toNumber();
             let _type = hex2a(res.args._type);
-            let post = { period: chainUtil.getCurrentPeriod(), price: _price, type: _type };
+            let post = { period: global.currentPeriod, price: _price, type: _type };
             try {
                 yield db.insertReservePrice(post);
             } catch (e) {
@@ -82,9 +96,9 @@ EndSettleEvent.watch(function(err, res) {
         if (!err) {
 
             let _period = res.args._period.toNumber();
-          
 
-            let post = { period: _period};
+
+            let post = { period: _period };
 
             console.log("EndSettleEvent", post);
             // socket io
@@ -131,7 +145,7 @@ OrderEvent.watch(function(err, res) {
         if (!err) {
             let _price = res.args._price.toNumber();
             let _volume = res.args._volume.toNumber();
-            let _period = chainUtil.getCurrentPeriod();
+            let _period = global.currentPeriod;
             let _type = hex2a(res.args._type);
             let post = { period: _period, price: _price, volume: _volume, type: _type };
             // socket io

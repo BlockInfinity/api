@@ -181,7 +181,7 @@ function getMatchingPrice(_period) {
 
 function getBidOrders(_period) {
     if (_.isUndefined(_period)) {
-        _period = chainUtil.getCurrentPeriod();
+        _period = global.currentPeriod;
     }
 
     return new Promise(function(resolve, reject) {
@@ -202,7 +202,7 @@ function getBidOrders(_period) {
 
 function getAskOrders(_period) {
     if (_.isUndefined(_period)) {
-        _period = chainUtil.getCurrentPeriod();
+        _period = global.currentPeriod;
     }
 
     return new Promise(function(resolve, reject) {
@@ -223,7 +223,7 @@ function getAskOrders(_period) {
 
 function getReserveBidOrders(_period) {
     if (_.isUndefined(_period)) {
-        _period = chainUtil.getCurrentPeriod();
+        _period = global.currentPeriod;
     }
 
     return new Promise(function(resolve, reject) {
@@ -285,7 +285,7 @@ function insertUser(_post) {
 
 function getReserveAskOrders(_period) {
     if (_.isUndefined(_period)) {
-        _period = chainUtil.getCurrentPeriod();
+        _period = global.currentPeriod;
     }
 
     return new Promise(function(resolve, reject) {
@@ -333,7 +333,7 @@ function insertOrder(_reserve, _post) {
 
 function getReserveAskPrice(_period) {
     if (_.isUndefined(_period)) {
-        _period = chainUtil.getCurrentPeriod();
+        _period = global.currentPeriod;
     }
     return new Promise(function(resolve, reject) {
         getConnection().then(function(connection) {
@@ -351,7 +351,7 @@ function getReserveAskPrice(_period) {
 
 function getReserveBidPrice(_period) {
     if (_.isUndefined(_period)) {
-        _period = chainUtil.getCurrentPeriod();
+        _period = global.currentPeriod;
     }
 
     return new Promise(function(resolve, reject) {

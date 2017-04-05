@@ -22,7 +22,7 @@ module.exports = {
 
 function findPeriod(req) {
     if (_.isUndefined(req.swagger.params.period.value) || _.isNull(req.swagger.params.period.value) || req.swagger.params.period.value < 0) {
-        return chainUtil.getCurrentPeriod();
+        return global.currentPeriod;
     } else {
         return req.swagger.params.period.value;
     }
@@ -30,8 +30,8 @@ function findPeriod(req) {
 
 function getState(req, res, next) {
     try {
-        var currentState = chainUtil.getCurrentState();
-        var currentPeriod = chainUtil.getCurrentPeriod();
+        var currentState = global.currentState;
+        var currentPeriod = global.currentPeriod;
         res.statusCode = 200;
         res.end(JSON.stringify({ "state": currentState, "period": currentPeriod }));
     } catch (error) {

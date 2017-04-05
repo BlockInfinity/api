@@ -146,14 +146,14 @@ function buy(_volume, _price, _addr, _password, _reserve) {
         // if (etherex.hasUserBidOrderInPeriod(_addr)) {
         //     throw new Error("User already submitted buy order in current period")
         // }
-        let hasUserBidOrderInPeriod = yield db.hasUserOrderInPeriod(_addr, chainUtil.getCurrentPeriod(), _reserve, 'BID');
+        let hasUserBidOrderInPeriod = yield db.hasUserOrderInPeriod(_addr, global.currentPeriod, _reserve, 'BID');
         if (hasUserBidOrderInPeriod) {
             throw new Error("User already submitted bid order in current period")
         }
 
 
         // insert order into db
-        yield db.insertOrder(_reserve, { period: chainUtil.getCurrentPeriod(), price: _price, volume: _volume, type: 'BID' });
+        yield db.insertOrder(_reserve, { period: global.currentPeriod, price: _price, volume: _volume, type: 'BID' });
         var again = true;
         let tx;
         while (again) {
@@ -192,13 +192,13 @@ function sell(_volume, _price, _addr, _password, _reserve) {
         // if (etherex.hasUserAskOrderInPeriod(_addr)) {
         //     throw new Error("User already submitted sell order in current period")
         // }
-        let hasUserAskOrderInPeriod = yield db.hasUserOrderInPeriod(_addr, chainUtil.getCurrentPeriod(), _reserve, 'ASK');
+        let hasUserAskOrderInPeriod = yield db.hasUserOrderInPeriod(_addr, global.currentPeriod, _reserve, 'ASK');
         if (hasUserAskOrderInPeriod) {
             throw new Error("User already submitted sell order in current period")
         }
 
         // insert order into db
-        yield db.insertOrder(_reserve, { period: chainUtil.getCurrentPeriod(), price: _price, volume: _volume, type: 'ASK' });
+        yield db.insertOrder(_reserve, { period: global.currentPeriod, price: _price, volume: _volume, type: 'ASK' });
 
         var again = true;
         let tx;
