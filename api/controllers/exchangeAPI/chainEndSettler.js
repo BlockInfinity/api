@@ -44,7 +44,7 @@ var reserveConsumers;
 
 
 // settleAll(4);
-
+// reserve consumer settled wird nicht aufgerufen
 function settleAll(_period) {
     global.j = 0;
 
