@@ -345,11 +345,11 @@ contract etherexV0 {
         // no orders submitted at all or at least one ask and bid missing
         // return if no orders or no match possible since minAsk greater than maxBid
         if (orders.length == 1) {
-            matchingPrices[currentPeriod] = 2**128-1;
+            matchingPrices[currentPeriod] = 0;
             return true;
         }
         if (minAsk == 0 || maxBid == 0 || (orders[minAsk].price > orders[maxBid].price)) {
-            matchingPrices[currentPeriod] = 2**128-1;
+            matchingPrices[currentPeriod] = 0;
             return true;
         }
 
@@ -442,7 +442,7 @@ contract etherexV0 {
     // determines price till volume of MIN_RESERVE_ASK_VOLUME is accumulated  
     function determineReserveBidPrice() internal returns(bool) {
         if (maxBid == 0) {
-            bidReservePrices[currentPeriod] = 2**128-1;
+            bidReservePrices[currentPeriod] = 0;
             return false;
         }
         uint256 cumBidReserveVol = 0;
@@ -482,7 +482,7 @@ contract etherexV0 {
     // determines price till volume of MIN_RESERVE_BID_VOLUME is accumulated  
     function determineReserveAskPrice() internal returns(bool) {
         if (minAsk == 0) {
-            askReservePrices[currentPeriod] = 2**128-1;
+            askReservePrices[currentPeriod] = 0;
             return false;
         }
         uint256 cumAskReserveVol = 0;

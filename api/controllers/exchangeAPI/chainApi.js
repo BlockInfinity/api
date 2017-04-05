@@ -389,6 +389,13 @@ function isMatchedForAskReserve(_user, _period) {
     return result;
 }
 
+function getCollateral(_user) {
+    let res = etherex.getCollateral(_user);
+    console.log("3",res);
+    return res;
+}
+
+
 module.exports = {
     register: register,
     buy: buy,
@@ -398,5 +405,6 @@ module.exports = {
     updateState: updateState,
     settle: settle,
     isMatchedForBidReserve: isMatchedForBidReserve,
-    isMatchedForAskReserve: isMatchedForAskReserve
+    isMatchedForAskReserve: isMatchedForAskReserve,
+    getCollateral: getCollateral
 }

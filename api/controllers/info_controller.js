@@ -17,7 +17,8 @@ module.exports = {
     getReserveAskPrice: getReserveAskPrice,
     getReserveBidPrice: getReserveBidPrice,
     getAllReserveBidPrices: getAllReserveBidPrices,
-    getAllReserveAskPrices: getAllReserveAskPrices
+    getAllReserveAskPrices: getAllReserveAskPrices,
+    getCollateral: getCollateral
 }
 
 function findPeriod(req) {
@@ -58,121 +59,23 @@ function getMatchingPrice(req, res, next) {
     }
 }
 
-// function getBidOrders(req, res, next) {
-//     try {
-//         var period = chainApi.getState()[1];
-//         var orders = chainApi.getBidOrders();
-//         var bidOrders = [];
-//         for (var i = 0; i < orders[0].length; i++) {
-//             bidOrders.push({ "price": orders[0][i], "volume": orders[1][i] });
-//         }
-//         res.statusCode = 200;
-//         res.end(JSON.stringify({ "period": period, "bidOrders": bidOrders }));
+function getCollateral(req, res, next) {
 
-//     } catch (error) {
-//         res.statusCode = 500;
-//         res.end('Blockchain error ' + error.message);
-//     }
-//     res.end();
-// }
+    try {
 
-// function getAskOrders(req, res, next) {
-//     try {
-//         var period = chainApi.getState()[1];
-//         var orders = chainApi.getAskOrders();
-//         var askOrders = [];
-//         for (var i = 0; i < orders[0].length; i++) {
-//             askOrders.push({ "price": orders[0][i], "volume": orders[1][i] });
-//         }
-//         res.statusCode = 200;
-//         res.end(JSON.stringify({ "period": period, "askOrders": askOrders }));
+        var address = req.swagger.params.userAddress.value;
+        var collateral = chainApi.getCollateral(address);
+        res.statusCode = 200;
+        res.end(JSON.stringify({ "collateral": collateral }));
 
-//     } catch (error) {
-//         res.statusCode = 500;
-//         res.end('Blockchain error ' + error.message);
-//     }
-//     res.end();
-// }
+    } catch (error) {
+        res.statusCode = 500;
+        res.end('Blockchain error ' + error.message);
+    }
 
-// function getAskReservePrice(req, res, next) {
-//     try {
-//         var period = findPeriod(req);
-//         var askReservePrice = chainApi.getAskReservePrice(period);
-//         res.statusCode = 200;
-//         res.end(JSON.stringify({ "period": period, "askReservePrice": askReservePrice }));
-//     } catch (error) {
-//         res.statusCode = 500;
-//         res.end('Blockchain error ' + error.message);
-//     }
-//     res.end();
-// }
+}
 
-// function getBidReservePrice(req, res, next) {
-//     try {
-//         var period = findPeriod(req);
-//         var bidReservePrice = chainApi.getBidReservePrice(period);
-//         res.statusCode = 200;
-//         res.end(JSON.stringify({ "period": period, "bidReservePrice": bidReservePrice }));
-//     } catch (error) {
-//         res.statusCode = 500;
-//         res.end('Blockchain error ' + error.message);
-//     }
-//     res.end();
-// }
 
-// function getMatchedAskOrders(req, res, next) {
-//     try {
-//         var period = findPeriod(req);
-//         var askOrders = chainApi.getMatchedAskOrders(period);
-//         res.statusCode = 200;
-//         res.end(JSON.stringify({ "period": period, "matchedAskOrders": askOrders }));
-//     } catch (error) {
-//         res.statusCode = 500;
-//         res.end('Blockchain error ' + error.message);
-//     }
-//     res.end();
-// }
-
-// function getMatchedBidOrders(req, res, next) {
-//     try {
-//         var period = findPeriod(req);
-//         var bidOrders = chainApi.getMatchedBidOrders(period);
-//         res.statusCode = 200;
-//         res.end(JSON.stringify({ "period": period, "matchedBidOrders": bidOrders }));
-//     } catch (error) {
-//         res.statusCode = 500;
-//         res.end('Blockchain error ' + error.message);
-//     }
-//     res.end();
-// }
-
-// function getMatchedAskOrdersForUser(req, res, next) {
-//     try {
-//         var period = findPeriod(req);
-//         var address = req.swagger.params.address.value;
-//         var matchedAskOrders = chainApi.getMatchedAskOrdersForUser(period, address);
-//         res.statusCode = 200;
-//         res.end(JSON.stringify({ "period": period, "matchedAskOrders": matchedAskOrders }));
-//     } catch (error) {
-//         res.statusCode = 500;
-//         res.end('Blockchain error ' + error.message);
-//     }
-//     res.end();
-// }
-
-// function getMatchedBidOrdersForUser(req, res, next) {
-//     try {
-//         var period = findPeriod(req);
-//         var address = req.swagger.params.address.value;
-//         var matchedBidOrders = chainApi.getMatchedBidOrdersForUser(period, address);
-//         res.statusCode = 200;
-//         res.end(JSON.stringify({ "period": period, "matchedBidOrders": matchedBidOrders }));
-//     } catch (error) {
-//         res.statusCode = 500;
-//         res.end('Blockchain error ' + error.message);
-//     }
-//     res.end();
-// }
 
 function getBalance(req, res, next) {
     try {
