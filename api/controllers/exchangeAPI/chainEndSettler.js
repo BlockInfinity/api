@@ -79,7 +79,7 @@ function settleAll(_period) {
 
         // settle for all consumers 
         for (var i = 0; i < consumers.length; i++) {
-            smVolume = Math.round(Math.random() * 1000);
+            smVolume = Math.round(Math.random() * 100);
             chainApi.settle("consumer", smVolume, _period, consumers[i].address);
             sumConsumed += smVolume;
         }
@@ -88,7 +88,7 @@ function settleAll(_period) {
 
         // settle for all producers 
         for (var i = 0; i < producers.length; i++) {
-            smVolume = Math.round(Math.random() * 1000);
+            smVolume = Math.round(Math.random() * 100);
             chainApi.settle("producer", smVolume, _period, producers[i].address);
             sumProduced += smVolume;
         }
