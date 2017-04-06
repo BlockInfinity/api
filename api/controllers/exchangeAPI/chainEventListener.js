@@ -96,9 +96,7 @@ EndSettleEvent.watch(function(err, res) {
     console.log("EndSettleEvent")
     return co(function*() {
         if (!err) {
-
             let _period = res.args._period.toNumber();
-
 
             let post = { period: _period };
 
@@ -120,13 +118,13 @@ SettleEvent.watch(function(err, res) {
             let _orderedVolume = res.args._orderedVolume.toNumber();
             let _user = res.args._user;
 
-            if (_type == 1) {
+            if (_type === 1) {
                 _type = "producer";
             } else {
                 _type = "consumer";
             }
 
-            let post = { type: _type, usedVolume: _usedVolume, orderedVolume: _orderedVolume, user: _user };
+            let post = { type: _type, period: global.currentPeriod, usedVolume: _usedVolume, orderedVolume: _orderedVolume, user: _user };
 
             console.log("SettleEvent", post);
 
@@ -135,10 +133,6 @@ SettleEvent.watch(function(err, res) {
         }
     });
 });
-
-
-
-
 
 // as soon as order gets submitted, it is saved in the database
 var OrderEvent = etherex.OrderEvent();
@@ -156,8 +150,6 @@ OrderEvent.watch(function(err, res) {
     });
 });
 
-
-
 // helper function to convert solidity's bytes32 to string
 function hex2a(hexx) {
     var hex = hexx.toString(); //force conversion
@@ -169,22 +161,3 @@ function hex2a(hexx) {
     }
     return str;
 }
-
-// function sleep(time, callback) {
-//     var stop = new Date().getTime();
-//     while (new Date().getTime() < stop + time) {;
-//     }
-//     callback();
-// }
-
-// function getAndSaveMatchingPriceHistory() {
-//     for (let i = 0; i < currPeriod; i++) {
-//         let res = etherex.getMatchingPrice(i).toNumber();
-//         let post = { period: i, price: res };
-//         let query = connection.query('insert ignore into matchingPrices set ?', post, function(err, res) {
-//             if (err) {
-//                 console.log("MySql error:", err);
-//             }
-//         });
-//     }
-// }
