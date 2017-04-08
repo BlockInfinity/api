@@ -5,7 +5,7 @@ const chainUtil = require("./exchangeAPI/chainUtil.js");
 
 var db_config = {
     connectionLimit : 10,
-    host: "52.166.9.249",
+    host: "52.232.76.241",
     user: "dex",
     password: "amalien",
     database: "apidb"
