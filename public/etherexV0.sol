@@ -437,7 +437,7 @@ contract etherexV0 {
         return true;
     }
     
-    event reservePriceEvent(bytes32 _type, int256 _price);
+    event ReservePriceEvent(bytes32 _type, int256 _price);
 
     // determines price till volume of MIN_RESERVE_ASK_VOLUME is accumulated  
     function determineReserveBidPrice() internal returns(bool) {
@@ -475,7 +475,7 @@ contract etherexV0 {
             }
         }
         bidReservePrices[currentPeriod] = reserveBidPrice;
-        reservePriceEvent("Bid",reserveBidPrice);
+        ReservePriceEvent("BID",reserveBidPrice);
         return true;
     }
 
@@ -514,7 +514,7 @@ contract etherexV0 {
             }        
         }
         askReservePrices[currentPeriod] = reserveAskPrice; 
-        reservePriceEvent("Ask",reserveAskPrice);
+        ReservePriceEvent("ASK",reserveAskPrice);
         return true;     
     }
 

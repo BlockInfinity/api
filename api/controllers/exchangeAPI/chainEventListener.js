@@ -29,7 +29,7 @@ filter.watch(function(err, res) {
         let startBlock = etherex.getStartBlock().toNumber();
         let minedBlocks = eth.blockNumber - startBlock;
         let toSend = { MinedBlocksInCurrPeriod: minedBlocks }
-        io.emit('blockCreationEvent', JSON.stringify(toSend));
+        io.emit('BlockCreationEvent', JSON.stringify(toSend));
     }
 });
 
@@ -55,7 +55,7 @@ StateChangeEvent.watch(function(err, res) {
                 }
 
                 // socket io
-                io.emit('matchingEvent', JSON.stringify(post));
+                io.emit('MatchingEvent', JSON.stringify(post));
             } else {
                 global.currentState = 0;
                 global.currentPeriod++;
@@ -63,7 +63,7 @@ StateChangeEvent.watch(function(err, res) {
                 let _period = global.currentPeriod;
                 let post = { period: _period };
                 // socket io
-                io.emit('newPeriodEvent', JSON.stringify(post));
+                io.emit('NewPeriodEvent', JSON.stringify(post));
                 chainEndSettler.settleAll(_period - 1);
             }
         }
@@ -71,7 +71,7 @@ StateChangeEvent.watch(function(err, res) {
 });
 
 // insert the reserveprice into the database when reservepriceevent comes in
-var ReservePriceEvent = etherex.reservePriceEvent();
+var ReservePriceEvent = etherex.ReservePriceEvent();
 ReservePriceEvent.watch(function(err, res) {
     return co(function*() {
         if (!err) {
@@ -85,7 +85,7 @@ ReservePriceEvent.watch(function(err, res) {
             }
 
             // socket io
-            io.emit('reservePriceEvent', JSON.stringify(post));
+            io.emit('ReservePriceEvent', JSON.stringify(post));
         }
     });
 });
@@ -145,7 +145,7 @@ OrderEvent.watch(function(err, res) {
             let _type = hex2a(res.args._type);
             let post = { period: _period, price: _price, volume: _volume, type: _type };
             // socket io
-            io.emit('orderEvent', JSON.stringify(post));
+            io.emit('OrderEvent', JSON.stringify(post));
         }
     });
 });
